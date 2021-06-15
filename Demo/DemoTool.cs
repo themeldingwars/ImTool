@@ -57,6 +57,8 @@ namespace Demo
         {
             ImGui.ShowDemoWindow();
             ImGui.ShowMetricsWindow();
+            
+            ExtraWidgetsTests.Draw();
         }
     }
 }

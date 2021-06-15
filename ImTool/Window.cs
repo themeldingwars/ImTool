@@ -775,7 +775,7 @@ namespace ImTool
                 {
                     ImGui.SetNextWindowSize(contentBounds.Size);
                     ImGui.SetNextWindowPos(contentBounds.Position);
-                    ImGui.Begin(tab.Name + "Window", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDocking);
+                    ImGui.Begin(tab.Name + "Window", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoBringToFrontOnFocus);
                     TabStyleOverrides(false);
                     tab.SubmitContent();
                     ImGui.End();
