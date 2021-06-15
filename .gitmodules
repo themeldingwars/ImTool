@@ -1,0 +1,6 @@
+[submodule "ImTool/Lib/ImGui.Net"]
+	path = ImTool/Lib/ImGui.Net
+	url = https://github.com/mellinoe/ImGui.NET.git
+[submodule "ImTool/Lib/Veldrid"]
+	path = ImTool/Lib/Veldrid
+	url = https://github.com/mellinoe/Veldrid.git

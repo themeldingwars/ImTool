@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <VersionSuffix>1.0.0.$([System.DateTime]::UtcNow.ToString(hhss))</VersionSuffix>
+        <Version Condition=" '$(VersionSuffix)' != '' ">$(VersionSuffix)</Version>
+        <Deterministic>false</Deterministic>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ImTool\ImTool.csproj" />
+    </ItemGroup>
+
+</Project>
