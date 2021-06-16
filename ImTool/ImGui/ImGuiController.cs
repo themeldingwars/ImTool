@@ -7,10 +7,13 @@ using Veldrid;
 using System.Runtime.CompilerServices;
 using Veldrid.Sdl2;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
+using System.Threading;
 using imnodesNET;
 using ImPlotNET;
 using ImTool;
+using K4os.Hash.xxHash;
 
 namespace ImGuiNET
 {
@@ -465,13 +468,13 @@ namespace ImGuiNET
         /// or index data has increased beyond the capacity of the existing buffers.
         /// A <see cref="CommandList"/> is needed to submit drawing and resource update commands.
         /// </summary>
-        public void Render(GraphicsDevice gd, CommandList cl)
+        public void Render(GraphicsDevice gd, CommandList cl, bool configPowerSaving)
         {
             if (_frameBegun)
             {
                 _frameBegun = false;
                 ImGui.Render();
-                RenderImDrawData(ImGui.GetDrawData(), gd, cl);
+                RenderImDrawData(ImGui.GetDrawData(), gd, cl, gd.MainSwapchain.Framebuffer, configPowerSaving);
 
                 // Update and Render additional Platform Windows
                 if ((ImGui.GetIO().ConfigFlags & ImGuiConfigFlags.ViewportsEnable) != 0)
@@ -482,13 +485,33 @@ namespace ImGuiNET
                     {
                         ImGuiViewportPtr vp = platformIO.Viewports[i];
                         VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
-                        cl.SetFramebuffer(window.Swapchain.Framebuffer);
-                        RenderImDrawData(vp.DrawData, gd, cl);
+                        RenderImDrawData(vp.DrawData, gd, cl, window.Swapchain.Framebuffer, configPowerSaving);
                     }
                 }
             }
         }
 
+        public void Swap(GraphicsDevice gd, bool configPowerSaving)
+        {
+            FramebufferHash fbHash;
+            if (!configPowerSaving || FramebufferHashes.TryGetValue(gd.MainSwapchain.Framebuffer, out fbHash) && fbHash.Changed)
+            {
+                gd.SwapBuffers();
+            }
+            
+            ImGuiPlatformIOPtr platformIO = ImGui.GetPlatformIO();
+            for (int i = 1; i < platformIO.Viewports.Size; i++)
+            {
+                ImGuiViewportPtr vp = platformIO.Viewports[i];
+                VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
+
+                if (!configPowerSaving || FramebufferHashes.TryGetValue(window.Swapchain.Framebuffer, out fbHash) && fbHash.Changed)
+                {
+                    gd.SwapBuffers(window.Swapchain);
+                }
+            }
+            
+        }
         public void SwapExtraWindows(GraphicsDevice gd)
         {
             ImGuiPlatformIOPtr platformIO = ImGui.GetPlatformIO();
@@ -689,8 +712,20 @@ namespace ImGuiNET
             io.KeyMap[(int)ImGuiKey.Space] = (int)Key.Space;
         }
 
-        private void RenderImDrawData(ImDrawDataPtr draw_data, GraphicsDevice gd, CommandList cl)
+        public class FramebufferHash
         {
+            public uint Hash;
+            public bool Changed;
+        }
+        
+        public Dictionary<Framebuffer, FramebufferHash> FramebufferHashes = new();
+        
+        private void RenderImDrawData(ImDrawDataPtr draw_data, GraphicsDevice gd, CommandList cl, Framebuffer fb,
+            bool configPowerSaving)
+        {
+            
+            cl.SetFramebuffer(fb);
+
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;
 
@@ -699,6 +734,43 @@ namespace ImGuiNET
                 return;
             }
 
+            if (configPowerSaving)
+            {
+                uint hash = 0;
+                unsafe
+                {
+                    for (int i = 0; i < draw_data.CmdListsCount; i++)
+                    {
+                        ImDrawListPtr cmd_list = draw_data.CmdListsRange[i];
+                        ReadOnlySpan<byte> vBytes = new ReadOnlySpan<byte>(cmd_list.VtxBuffer.Data.ToPointer(),
+                            cmd_list.VtxBuffer.Size * Unsafe.SizeOf<ImDrawVert>());
+                        ReadOnlySpan<byte> iBytes = new ReadOnlySpan<byte>(cmd_list.IdxBuffer.Data.ToPointer(),
+                            cmd_list.VtxBuffer.Size * sizeof(ushort));
+                        unchecked
+                        {
+                            hash += XXH32.DigestOf(vBytes);
+                            hash += XXH32.DigestOf(iBytes);
+                        }
+                    }
+                }
+                
+                FramebufferHash fbHash;
+                if (!FramebufferHashes.TryGetValue(fb, out fbHash))
+                {
+                    fbHash = new FramebufferHash();
+                    FramebufferHashes.Add(fb, fbHash);
+                }
+                
+                if (hash == fbHash.Hash)
+                {
+                    fbHash.Changed = false;
+                    return;
+                }
+
+                fbHash.Hash = hash;
+                fbHash.Changed = true;
+            }
+            
             uint totalVBSize = (uint)(draw_data.TotalVtxCount * Unsafe.SizeOf<ImDrawVert>());
             if (totalVBSize > _vertexBuffer.SizeInBytes)
             {
@@ -712,12 +784,13 @@ namespace ImGuiNET
                 gd.DisposeWhenIdle(_indexBuffer);
                 _indexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)(totalIBSize * 1.5f), BufferUsage.IndexBuffer | BufferUsage.Dynamic));
             }
+            
 
             Vector2 pos = draw_data.DisplayPos;
             for (int i = 0; i < draw_data.CmdListsCount; i++)
             {
                 ImDrawListPtr cmd_list = draw_data.CmdListsRange[i];
-
+                
                 cl.UpdateBuffer(
                     _vertexBuffer,
                     vertexOffsetInVertices * (uint)Unsafe.SizeOf<ImDrawVert>(),
@@ -744,6 +817,8 @@ namespace ImGuiNET
                 -1.0f,
                 1.0f);
 
+
+            
             cl.UpdateBuffer(_projMatrixBuffer, 0, ref mvp);
 
             cl.SetVertexBuffer(0, _vertexBuffer);

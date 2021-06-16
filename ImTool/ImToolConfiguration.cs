@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Veldrid;
 
 namespace ImTool
 {
@@ -12,5 +13,9 @@ namespace ImTool
         public Vector2 MinimumWindowSize = new Vector2(800, 600);
         public Rect NormalWindowBounds = new Rect(50, 50, 1280, 720);
         public int BorderSize = 1;
+        public bool VSync = false;
+        public int FpsLimit = 144;
+        public GraphicsBackend GraphicsBackend = GraphicsBackend.Vulkan;
+        public bool PowerSaving = true;
     }
 }

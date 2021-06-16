@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using imnodesNET;
 using ImPlotNET;
@@ -24,6 +26,9 @@ namespace ImTool
         private GraphicsDevice graphicsDevice;
         private CommandList commandList;
         private ImGuiController controller;
+        
+        private bool vsync;
+        private bool restartGD;
 
         private int titlebarHeight = 28;
         private int windowBtnWidth = 30;
@@ -77,13 +82,8 @@ namespace ImTool
             mouseDownOnEdge = Rect.Edge.None;
 
             windowButtonSize = new Vector2(windowBtnWidth, titlebarHeight - borderThickness - 2);
-
-            SDL_WindowFlags flags = SDL_WindowFlags.OpenGL | SDL_WindowFlags.Shown  | SDL_WindowFlags.Borderless;
-
-            window = new Sdl2Window(config.Title, config.NormalWindowBounds.X, config.NormalWindowBounds.Y, config.NormalWindowBounds.Width, config.NormalWindowBounds.Height, flags, false);
-            graphicsDevice = VeldridStartup.CreateGraphicsDevice(window, new GraphicsDeviceOptions(false, null, true));
-            commandList = graphicsDevice.ResourceFactory.CreateCommandList();
-            controller = new ImGuiController(graphicsDevice, window, graphicsDevice.MainSwapchain.Framebuffer.OutputDescription, window.Width, window.Height);
+            
+            SetupGD();
             
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
             
@@ -92,8 +92,36 @@ namespace ImTool
             ThemeManager<T>.ReloadThemes();
             ThemeManager<T>.SetTheme(config.Theme);
         }
+
+        private void SetupGD()
+        {
+            if(controller != null)
+                controller.Dispose();
+            
+            if(commandList != null)
+                commandList.Dispose();
+            
+            if(graphicsDevice != null)
+                graphicsDevice.Dispose();
+
+            if (window != null)
+            {
+                window.Close();
+                window = null;
+            }
+            
+            
+            SDL_WindowFlags flags =  SDL_WindowFlags.Shown  | SDL_WindowFlags.Borderless | (config.GraphicsBackend == GraphicsBackend.OpenGL || config.GraphicsBackend == GraphicsBackend.OpenGLES ? SDL_WindowFlags.OpenGL : 0);
+            window = new Sdl2Window(config.Title, config.NormalWindowBounds.X, config.NormalWindowBounds.Y, config.NormalWindowBounds.Width, config.NormalWindowBounds.Height, flags, false);
+            graphicsDevice = VeldridStartup.CreateGraphicsDevice(window, new GraphicsDeviceOptions(false, null, config.VSync), config.GraphicsBackend);
+            commandList = graphicsDevice.ResourceFactory.CreateCommandList();
+            controller = new ImGuiController(graphicsDevice, window, graphicsDevice.MainSwapchain.Framebuffer.OutputDescription, window.Width, window.Height);
+        }
+        
         private void Run()
         {
+            vsync = config.VSync;
+
             long previousFrameTicks = 0;
             Stopwatch sw = new Stopwatch();        
             sw.Start();
@@ -102,12 +130,31 @@ namespace ImTool
             Draw();
             UpdateWindowState();
 
+            
+
             while (window.Exists)
             {
                 long currentFrameTicks = sw.ElapsedTicks;
                 float deltaSeconds = (currentFrameTicks - previousFrameTicks) / (float)Stopwatch.Frequency;
 
+
+                if (!vsync)
+                {
+                    float targetDelta = 1000f / config.FpsLimit;
+                    float deltaMs = deltaSeconds * 1000;
+
+                    if (deltaMs < targetDelta)
+                    {
+                        Thread.Sleep((int)(targetDelta-deltaMs));
+                        currentFrameTicks = sw.ElapsedTicks;
+                        deltaSeconds = (currentFrameTicks - previousFrameTicks) / (float)Stopwatch.Frequency;
+                    }
+                }
+                
+                
                 previousFrameTicks = currentFrameTicks;
+                
+                
                 InputSnapshot snapshot = null;
                 Sdl2Events.ProcessEvents();
                 snapshot = window.PumpEvents();
@@ -122,6 +169,19 @@ namespace ImTool
                 }
 
                 Draw();
+
+                if (restartGD)
+                {
+                    config.WindowState = WindowState;
+                    config.NormalWindowBounds = new Rect(window.X, window.Y, window.Width, window.Height);
+                    config.Monitor = currentMonitor;
+                    
+                    restartGD = false;
+                    SetupGD();
+                    
+                    ThemeManager<T>.SetTheme(config.Theme);
+      
+                }
             }
         }
 
@@ -158,15 +218,15 @@ namespace ImTool
             return instance;
         }
 
+        private Stopwatch sw = Stopwatch.StartNew();
+
         private void Draw()
         {
             commandList.Begin();
-            commandList.SetFramebuffer(graphicsDevice.MainSwapchain.Framebuffer);
-            controller.Render(graphicsDevice, commandList);
+            controller.Render(graphicsDevice, commandList, config.PowerSaving);
             commandList.End();
             graphicsDevice.SubmitCommands(commandList);
-            graphicsDevice.SwapBuffers();
-            controller.SwapExtraWindows(graphicsDevice);         
+            controller.Swap(graphicsDevice, config.PowerSaving);
         }
 
         private void UpdateWindow()
@@ -192,6 +252,12 @@ namespace ImTool
                         }
                     }
                 }
+            }
+
+            if (vsync != config.VSync)
+            {
+                config.VSync = vsync;
+                graphicsDevice.SyncToVerticalBlank = vsync;
             }
 
             bool resized = windowBounds.Width != window.Width || windowBounds.Height != window.Height;
@@ -235,7 +301,6 @@ namespace ImTool
                 currentMonitor = old;
             }
         }
-
         
         private void HandleMousePointer()
         {
@@ -273,8 +338,6 @@ namespace ImTool
                     break;
             }
         }
-
-
         private void HandleWindowResizing()
         {
             if(WindowState != WindowState.Normal || mouseDownOnTitlebar)
@@ -371,7 +434,6 @@ namespace ImTool
                 }
             }
         }
-
         private void HandleWindowDragging()
         {
             if(mouseDownOnEdge != Rect.Edge.None)
@@ -470,7 +532,6 @@ namespace ImTool
                 }
             }
         }
-
         private void UpdateWindowState()
         {
             if(config.WindowState != WindowState.Normal)
@@ -491,8 +552,7 @@ namespace ImTool
             window.Height = bounds.Height;
             window.Width = bounds.Width;
         }
-
-
+        
         private Rect GetDockingBounds(int monitor, WindowState windowState)
         {
             Rect rect = new Rect();
@@ -716,6 +776,7 @@ namespace ImTool
 
         private void SubmitSettingPopup()
         {
+            ImTool.Widgets.RenderTitle("ImTool Settings");
             if (ImGui.BeginCombo("Theme", ThemeManager<T>.Current.Name))
             {
                 foreach (string theme in ThemeManager<T>.Themes.Keys)
@@ -728,6 +789,26 @@ namespace ImTool
                 ImGui.EndCombo();
             }
 
+            ImGui.SliderInt("Target FPS", ref config.FpsLimit, 20, 200);
+            if (ImGui.BeginCombo("Graphics backend", config.GraphicsBackend.ToString()))
+            {
+                foreach (GraphicsBackend backend in Enum.GetValues<GraphicsBackend>())
+                {
+                    if (ImGui.Selectable(backend.ToString(), config.GraphicsBackend == backend))
+                    {
+                        config.GraphicsBackend = backend;
+                        restartGD = true;
+                    }
+                }
+                ImGui.EndCombo();
+            }
+            ImGui.Checkbox("Enable VSync  ", ref vsync);
+            ImGui.SameLine();
+            ImGui.Checkbox("Experimental power saving", ref config.PowerSaving);
+            
+            ImGui.Separator();
+            ImGui.NewLine();
+            
             if (ImGui.Button("Check for updates :) "))
             {
                 
