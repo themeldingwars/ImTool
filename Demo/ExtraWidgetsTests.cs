@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using ImGuiNET;
 using ImTool;
 
@@ -18,65 +19,147 @@ namespace Demo
 
         public static string FileDialogResult = "";
 
-        public static bool ShowPopup = true;
+        public static  HexView                  HexViewWidget;
+        private static HexView.HighlightSection SelectedHexHighlight;
 
         public static void Draw()
         {
             //ImGui.SetNextWindowSize(new Vector2(400, 500));
-            ImGui.Begin("Arkiis extensions test :>");
+            if (ImGui.Begin("Extensions test :>")) {
 
-            ImGui.Text("Floats");
-            Widgets.FloatLabel(ref TestFloat, "Test");
-            ImGui.SameLine();
-            Widgets.FloatLabel(ref TestFloat2, "Test 2");
+                ImGui.Text("Floats");
+                Widgets.FloatLabel(ref TestFloat, "Test");
+                ImGui.SameLine();
+                Widgets.FloatLabel(ref TestFloat2, "Test 2");
 
-            ImGui.Text("Vector3");
-            Widgets.Vector3(ref Vec3Test, nameof(Vec3Test));
+                ImGui.Text("Vector3");
+                Widgets.Vector3(ref Vec3Test, nameof(Vec3Test));
 
-            ImGui.Text("Floats");
-            Widgets.Vector2(ref Vec2Test, nameof(Vec2Test));
+                ImGui.Text("Floats");
+                Widgets.Vector2(ref Vec2Test, nameof(Vec2Test));
 
-            ImGui.Text("Vector4");
-            Widgets.Vector4(ref Vec4Test, nameof(Vec4Test));
+                ImGui.Text("Vector4");
+                Widgets.Vector4(ref Vec4Test, nameof(Vec4Test));
 
-            ImGui.Text("Quaternion");
-            Widgets.Quaternion(ref QuatTest, nameof(QuatTest));
+                ImGui.Text("Quaternion");
+                Widgets.Quaternion(ref QuatTest, nameof(QuatTest));
 
-            ImGui.Text("Matrix3x2");
-            Widgets.Matrix3x2(ref Matrix3x2Test, nameof(Matrix3x2Test));
+                ImGui.Text("Matrix3x2");
+                Widgets.Matrix3x2(ref Matrix3x2Test, nameof(Matrix3x2Test));
 
-            ImGui.Text("Matrix4x4");
-            Widgets.Matrix4x4(ref Matrix4x4Test, nameof(Matrix4x4Test));
+                ImGui.Text("Matrix4x4");
+                Widgets.Matrix4x4(ref Matrix4x4Test, nameof(Matrix4x4Test));
 
-            ImGui.Text("File Browser");
+                ImGui.Text("File Browser");
 
-            if (ImGui.Button("Open File")) {
-                FileBrowser.OpenFile((fielPath) => { FileDialogResult = fielPath; });
+                if (ImGui.Button("Open File")) {
+                    FileBrowser.OpenFile((fielPath) => { FileDialogResult = fielPath; });
+                }
+
+                ImGui.SameLine();
+
+                if (ImGui.Button("Open Files")) {
+                    FileBrowser.OpenFiles((fielPaths) => { FileDialogResult = string.Join(", ", fielPaths); });
+                }
+
+                ImGui.SameLine();
+
+                if (ImGui.Button("Select Dir")) {
+                    FileBrowser.SelectDir((fielPath) => { FileDialogResult = fielPath; });
+                }
+
+                ImGui.SameLine();
+
+                if (ImGui.Button("Save File")) {
+                    FileBrowser.SaveFile((fielPath) => { FileDialogResult = fielPath; });
+                }
+
+                ImGui.Text($"Dialog result: {FileDialogResult}");
+
+                FileBrowser.Draw();
+
+                ImGui.End();
             }
 
-            ImGui.SameLine();
+            DrawHexView();
+        }
 
-            if (ImGui.Button("Open Files")) {
-                FileBrowser.OpenFiles((fielPaths) => { FileDialogResult = string.Join(", ", fielPaths); });
+        public static void SetupHexView()
+        {
+            HexViewWidget = new HexView();
+            var bytesData = new byte[512];
+            new Random().NextBytes(bytesData);
+            HexViewWidget.SetData(bytesData, new HexView.HighlightSection[]
+            {
+                new HexView.HighlightSection
+                {
+                    Color     = ImToolColors.RGBAToBGR(ImGui.ColorConvertU32ToFloat4(0x542265FF)),
+                    HoverName = "Test hover section 1",
+                    Length    = 4,
+                    Offset    = 0
+                },
+                
+                new HexView.HighlightSection
+                {
+                    Color     = ImToolColors.RGBAToBGR(ImGui.ColorConvertU32ToFloat4(0x416c1fFF)),
+                    HoverName = "Test hover section 2",
+                    Length    = 20,
+                    Offset    = 4
+                },
+                
+                new HexView.HighlightSection
+                {
+                    Color     = ImToolColors.RGBAToBGR(ImGui.ColorConvertU32ToFloat4(0x553accFF)),
+                    HoverName = "Test hover section 3",
+                    Length    = 8,
+                    Offset    = 24
+                },
+                
+                new HexView.HighlightSection
+                {
+                    Color     = ImToolColors.RGBAToBGR(ImGui.ColorConvertU32ToFloat4(0x746015FF)),
+                    HoverName = "Test hover section 4",
+                    Length    = 100,
+                    Offset    = 32
+                }
+            });
+
+            HexViewWidget.OnHighlightSectionHover += section => SelectedHexHighlight = section;
+        }
+        
+        public static void DrawHexView()
+        {
+            if (ImGui.Begin("Hex View")) {
+                if (ImGui.BeginTable("Hex controls", 2)) {
+                    ImGui.TableNextColumn();
+                    ImGui.Checkbox("Side Parsed Values", ref HexViewWidget.ShowSideParsedValues);
+                    
+                    ImGui.TableNextColumn();
+                    ImGui.Checkbox("Side Parsed Values in tool tip", ref HexViewWidget.ShowParsedValuesInTT);
+                    
+                    ImGui.EndTable();
+                }
+                
+                HexViewWidget.Draw();
+
+                for (int i = 0; i < HexViewWidget.HighlightsArr.Length; i++) {
+                    if (ImGui.Button($"Select Highlight {i}")) {
+                        HexViewWidget.SetHighlightAsSelected(i);
+                    }
+
+                    if ((i % 3) != 1) {
+                        ImGui.SameLine();
+                    }
+                }
+                
+                if (ImGui.Button($"Clear selected highlights")) {
+                    HexViewWidget.ClearSelectedHighlights();
+                }
+                
+                ImGui.Text($"Hovered highlight: {SelectedHexHighlight.HoverName}");
+                
+                ImGui.End();
             }
-
-            ImGui.SameLine();
-
-            if (ImGui.Button("Select Dir")) {
-                FileBrowser.SelectDir((fielPath) => { FileDialogResult = fielPath; });
-            }
-
-            ImGui.SameLine();
-
-            if (ImGui.Button("Save File")) {
-                FileBrowser.SaveFile((fielPath) => { FileDialogResult = fielPath; });
-            }
-
-            ImGui.Text($"Dialog result: {FileDialogResult}");
-
-            FileBrowser.Draw();
-
-            ImGui.End();
         }
     }
 }

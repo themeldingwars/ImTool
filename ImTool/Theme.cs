@@ -82,6 +82,8 @@ namespace ImTool
         [JsonIgnore]
         public ImGuiStyle Style;
 
+        public ImToolColors ImToolColors { get; set; }
+
         public Theme()
         {
             deValues = new Dictionary<string, object>();
@@ -104,6 +106,8 @@ namespace ImTool
             WindowBorderGradientEnd = template.WindowBorderGradientEnd;
             TitlebarBackgroundColor = template.TitlebarBackgroundColor;
             Initialized = true;
+
+            ImToolColors = new ImToolColors(isDarkSkin);
         }
 
         public object this[ImGuiStyleVar variable]

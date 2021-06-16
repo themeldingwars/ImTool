@@ -27,12 +27,14 @@ namespace Demo
             //      mutex check to ensure only a single instance of the tool is running
             //      routing cmd-line messages to a single instance tool
             //
-            
             return true;
         }
 
         protected override void Load()
         {
+            ExtraWidgetsTests.SetupHexView();
+            ThemeManager<DemoConfig>.OnThemeChanged += () => ExtraWidgetsTests.HexViewWidget.SetupSizes();
+            
             // tool window has been created at this point
             // its time to load your tabs now
             window.AddTab(new DemoTab());
