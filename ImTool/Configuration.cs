@@ -1,61 +1,50 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
+using System.Numerics;
 using Newtonsoft.Json;
+using Veldrid;
 
 namespace ImTool
 {
-    public class Configuration<T> : Serializer<Configuration<T>>
+    public class Configuration
     {
-        public static T Config;
-        private static string name;
-        private static string path;
-        static Configuration()
-        {
-            Directory.CreateDirectory("Config");
-            name = typeof(T).FullName;
-            path = Path.Join("Config", name+".json");
-            if (!Load())
-            {
-                Config = (T)Activator.CreateInstance(typeof(T));
-            }
-        }
-        private static bool Load()
-        {
-            if (File.Exists(path))
-            {
-                try
-                {
-                    object obj = DeserializeFromFile(path);
+        [JsonIgnore]
+        public string File;
+        
+        public string Title = "Pyre";
+        public string Theme = "CorporateGrey";
+        public WindowState WindowState = WindowState.Normal;
+        public WindowState PreviousWindowState = WindowState.Maximized;
+        public int Monitor = 0;
+        public Vector2 MinimumWindowSize = new Vector2(800, 600);
+        public Rect NormalWindowBounds = new Rect(50, 50, 1280, 720);
+        public int BorderSize = 1;
+        public bool VSync = false;
+        public int FpsLimit = 144;
+        public GraphicsBackend GraphicsBackend = GraphicsBackend.Vulkan;
+        public bool PowerSaving = true;
 
-                    if(obj != null)
-                    {
-                        Config = (T)obj;
-                        return true;
-                    }
-                    return false;
-                }
-                catch (Exception ex)
-                {
-                    return false;
-                }
-            }
-            return false;
-        }
-
-        public void Reload()
+        public static T Load<T>() where T : Configuration
         {
-            // maybe do some checking if it failed
-            if (!Load())
+            string name = typeof(T).FullName;
+            string file = Path.Join("Config", name+".json");
+            
+            T instance = (T) Serializer<T>.DeserializeFromFile(file);
+            if (instance == null)
             {
-                Config = (T)Activator.CreateInstance(typeof(T));
+                instance = (T) Activator.CreateInstance(typeof(T));
             }
+
+            instance.File = file;
+            return instance;
         }
-        public void Save()
+    }
+
+    public static class ConfigurationExtensions
+    {
+        public static void Save<T>(this T instance) where T : Configuration
         {
-            SerializeToFile(Config, path);
+            Serializer<T>.SerializeToFile(instance, instance.File);
         }
     }
 }

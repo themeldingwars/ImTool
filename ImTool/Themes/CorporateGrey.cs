@@ -8,11 +8,11 @@ using System.Text;
 
 namespace ImTool
 {
-    public static class CorporateGrey<T> where T : ImToolConfiguration<T>
+    public static class CorporateGrey
     {
         public static void Generate()
         {
-            Theme<T> theme = new Theme<T>("CorporateGrey", "malamanteau", true);
+            Theme theme = new Theme("CorporateGrey", "malamanteau", true);
 
             theme.TitlebarBackgroundColor = new Vector4(1f, 0.15f, 0.15f, 0.15f);
             theme.WindowBorderGradientBegin = new Vector4(Color.DarkMagenta.A / 255f, Color.DarkMagenta.R / 255f, Color.DarkMagenta.G / 255f, Color.DarkMagenta.B / 255f);
@@ -86,7 +86,7 @@ namespace ImTool
             theme[ImGuiCol.TabUnfocusedActive] = new Vector4(0.33f, 0.33f, 0.33f, 1.00f);
             //theme[ImGuiCol.DockingPreview] = new Vector4(0.85f, 0.85f, 0.85f, 0.28f);
 
-            File.WriteAllText("Themes\\CorporateGrey.json", Theme<T>.Serialize(theme));
+            File.WriteAllText("Themes\\CorporateGrey.json", Theme.Serialize(theme));
             
         }
     }

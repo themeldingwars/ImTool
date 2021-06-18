@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 namespace ImTool
 {
 
-    public class Theme<T> : Serializer<Theme<T>> where T : ImToolConfiguration<T>
+    public class Theme : Serializer<Theme>
     {   
         [JsonIgnore]
         public bool Initialized;
@@ -42,7 +42,7 @@ namespace ImTool
                 {
                     Dictionary<string, object> variables = new Dictionary<string, object>();
 
-                    foreach (var val in ThemeManager<T>.VariableFields)
+                    foreach (var val in ThemeManager.VariableFields)
                     {
                         variables.Add(val.Key.ToString(CultureInfo.InvariantCulture), this[val.Key]);
                     }
@@ -95,7 +95,7 @@ namespace ImTool
 
         public Theme(string name, string author, bool isDarkSkin = false)
         {
-            Theme<T> template = isDarkSkin ? ThemeManager<T>.ImGuiDark : ThemeManager<T>.ImGuiLight;
+            Theme template = isDarkSkin ? ThemeManager.ImGuiDark : ThemeManager.ImGuiLight;
 
             Name = name;
             Author = author;
@@ -115,12 +115,12 @@ namespace ImTool
             get
             {
                 TypedReference reference = __makeref(Style);
-                return ThemeManager<T>.VariableFields[variable.ToString()].GetValueDirect(reference);
+                return ThemeManager.VariableFields[variable.ToString()].GetValueDirect(reference);
             }
             set
             {
                 TypedReference reference = __makeref(Style);
-                ThemeManager<T>.VariableFields[variable.ToString()].SetValueDirect(reference, value);
+                ThemeManager.VariableFields[variable.ToString()].SetValueDirect(reference, value);
             }
         }
 
@@ -129,26 +129,26 @@ namespace ImTool
             get
             {
                 TypedReference reference = __makeref(Style);
-                if(ThemeManager<T>.VariableFields.ContainsKey(field))
+                if(ThemeManager.VariableFields.ContainsKey(field))
                 {
-                    return ThemeManager<T>.VariableFields[field].GetValueDirect(reference);
+                    return ThemeManager.VariableFields[field].GetValueDirect(reference);
                 }
                 else if(Enum.IsDefined(typeof(ImGuiCol), field))
                 {
-                    ThemeManager<T>.ColorFields[(ImGuiCol)Enum.Parse(typeof(ImGuiCol), field)].GetValueDirect(reference);
+                    ThemeManager.ColorFields[(ImGuiCol)Enum.Parse(typeof(ImGuiCol), field)].GetValueDirect(reference);
                 }
                 return null;
             }
             set
             {
                 TypedReference reference = __makeref(Style);
-                if (ThemeManager<T>.VariableFields.ContainsKey(field))
+                if (ThemeManager.VariableFields.ContainsKey(field))
                 {
-                    ThemeManager<T>.VariableFields[field].SetValueDirect(reference, value);
+                    ThemeManager.VariableFields[field].SetValueDirect(reference, value);
                 }
                 else if (Enum.IsDefined(typeof(ImGuiCol), field))
                 {
-                    ThemeManager<T>.ColorFields[(ImGuiCol)Enum.Parse(typeof(ImGuiCol), field)].SetValueDirect(reference, value);
+                    ThemeManager.ColorFields[(ImGuiCol)Enum.Parse(typeof(ImGuiCol), field)].SetValueDirect(reference, value);
                 }
             }
         }
@@ -158,12 +158,12 @@ namespace ImTool
             get
             {
                 TypedReference reference = __makeref(Style);
-                return ThemeManager<T>.ColorFields[color].GetValueDirect(reference);
+                return ThemeManager.ColorFields[color].GetValueDirect(reference);
             }
             set
             {
                 TypedReference reference = __makeref(Style);
-                ThemeManager<T>.ColorFields[color].SetValueDirect(reference, value);
+                ThemeManager.ColorFields[color].SetValueDirect(reference, value);
             }
         }
 
@@ -173,7 +173,7 @@ namespace ImTool
 
             Initialized = true;
 
-            foreach (var val in ThemeManager<T>.VariableFields)
+            foreach (var val in ThemeManager.VariableFields)
             {
                 if (deValues.ContainsKey(val.Key))
                 {
@@ -190,7 +190,7 @@ namespace ImTool
                 }
                 else
                 {
-                    this[val.Key] = IsDarkSkin ? ThemeManager<T>.ImGuiDark[val.Key] : ThemeManager<T>.ImGuiLight[val.Key];
+                    this[val.Key] = IsDarkSkin ? ThemeManager.ImGuiDark[val.Key] : ThemeManager.ImGuiLight[val.Key];
                 }
             }
 
@@ -204,7 +204,7 @@ namespace ImTool
                 }
                 else
                 {
-                    this[variable] = IsDarkSkin ? ThemeManager<T>.ImGuiDark[variable] : ThemeManager<T>.ImGuiLight[variable];
+                    this[variable] = IsDarkSkin ? ThemeManager.ImGuiDark[variable] : ThemeManager.ImGuiLight[variable];
                 }
             }
 

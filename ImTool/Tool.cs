@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace ImTool
 {
-    public abstract class Tool<TTool, TConfig> where TConfig : ImToolConfiguration<TConfig> where TTool : Tool<TTool, TConfig>
+    public abstract class Tool<TTool, TConfig> where TConfig : Configuration where TTool : Tool<TTool, TConfig>
     {
         protected TConfig config;
-        protected Window<TConfig> window;
+        protected Window window;
         protected Updater updater;
         
         public Tool()
         {
-            config =  (TConfig) Configuration<TConfig>.Config;
+            config = Configuration.Load<TConfig>();
             updater = new Updater();
             
             if(!Initialize(Environment.GetCommandLineArgs()))
@@ -24,7 +24,7 @@ namespace ImTool
             
             updater.CheckForUpdates();
             
-            window = Window<TConfig>.Create().Result;
+            window = Window.Create(config).Result;
             window.OnExit = () =>
             {
                 Unload();

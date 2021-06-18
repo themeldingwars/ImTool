@@ -11,18 +11,18 @@ using System.Text;
 
 namespace ImTool
 {
-    public static class ThemeManager<T> where T : ImToolConfiguration<T>
+    public static class ThemeManager
     {
-        private static T config;
+        private static Configuration config;
         
         public delegate void OnThemeChangedDelegate();
         public static OnThemeChangedDelegate OnThemeChanged;
 
-        public static readonly Theme<T> ImGuiLight = new Theme<T>();
-        public static readonly Theme<T> ImGuiDark = new Theme<T>();
+        public static readonly Theme ImGuiLight = new Theme();
+        public static readonly Theme ImGuiDark = new Theme();
 
-        public static Theme<T> Current { get; private set; }
-        public static Dictionary<string, Theme<T>> Themes { get; private set; }
+        public static Theme Current { get; private set; }
+        public static Dictionary<string, Theme> Themes { get; private set; }
         public static Dictionary<string, FieldInfo> VariableFields { get; private set; }
         public static Dictionary<ImGuiCol, FieldInfo> ColorFields { get; private set; }
         public static JsonSerializer JsonSerializer { get; private set; }
@@ -30,7 +30,7 @@ namespace ImTool
         private static bool initialized;
         private static string themesDirectory;
 
-        public static void Initialize(string themesDir = "Themes")
+        public static void Initialize(Configuration configuration, string themesDir = "Themes")
         {
             if (initialized)
             {
@@ -40,8 +40,8 @@ namespace ImTool
             Directory.CreateDirectory(themesDir);
             
             initialized = true;
-            
-            config = (T) Configuration<T>.Config;
+
+            config = configuration;
 
             VariableFields = new Dictionary<string, FieldInfo>();
             ColorFields = new Dictionary<ImGuiCol, FieldInfo>();
@@ -65,7 +65,7 @@ namespace ImTool
             }
 
             themesDirectory = themesDir;
-            Themes = new Dictionary<string, Theme<T>>();
+            Themes = new Dictionary<string, Theme>();
 
             ImGuiLight.Name = "ImGuiLight";
             ImGuiLight.Author = "ImGui";
@@ -169,7 +169,7 @@ namespace ImTool
             ApplyOverride(field, Current[field]);
         }
 
-        public static void Save(Theme<T> theme)
+        public static void Save(Theme theme)
         {
 
         }
@@ -186,11 +186,11 @@ namespace ImTool
         {
             Directory.CreateDirectory(themesDirectory);
             string[] themePaths = Directory.GetFiles(themesDirectory, "*.json");
-            List<Theme<T>> themes = new List<Theme<T>>();
+            List<Theme> themes = new List<Theme>();
 
             foreach (string themePath in themePaths)
             {
-                Theme<T> theme = (Theme<T>)Theme<T>.DeserializeFromFile(themePath);
+                Theme theme = (Theme)Theme.DeserializeFromFile(themePath);
                 if(theme != null && theme.Name != ImGuiLight.Name && theme.Name != ImGuiDark.Name)
                 {
                     if(Themes.ContainsKey(theme.Name))
