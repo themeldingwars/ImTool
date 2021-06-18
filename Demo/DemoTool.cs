@@ -62,5 +62,10 @@ namespace Demo
             
             ExtraWidgetsTests.Draw();
         }
+
+        public override void SubmitSettings(bool active)
+        {
+            ImGui.Text("Submitted from DemoTab.SubmitSettings();");
+        }
     }
 }

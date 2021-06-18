@@ -20,6 +20,7 @@ namespace ImTool
         public delegate void ExitDelegate();
         
         private List<Tab> tabs = new ();
+        private Tab activeTab;
         private bool disposed = false;
 
         private Sdl2Window window;
@@ -805,15 +806,19 @@ namespace ImTool
             ImGui.Checkbox("Enable VSync  ", ref vsync);
             ImGui.SameLine();
             ImGui.Checkbox("Experimental power saving", ref config.PowerSaving);
-            
             ImGui.Separator();
-            ImGui.NewLine();
-            
             if (ImGui.Button("Check for updates :) "))
             {
                 
             }
-                
+
+            ImGui.NewLine();
+            
+            Widgets.RenderTitle($"{config.Title} Settings");
+            foreach (Tab tab in tabs)
+            {
+                tab.SubmitSettings(tab == activeTab);
+            }
         }
         
         private unsafe void SubmitUI()
@@ -854,6 +859,9 @@ namespace ImTool
                 TabStyleOverrides(true);
                 if (ImGui.BeginTabItem(tab.Name))
                 {
+                    if (activeTab != tab)
+                        activeTab = tab;
+                    
                     ImGui.SetNextWindowSize(contentBounds.Size);
                     ImGui.SetNextWindowPos(contentBounds.Position);
                     ImGui.Begin(tab.Name + "Window", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoBringToFrontOnFocus);
