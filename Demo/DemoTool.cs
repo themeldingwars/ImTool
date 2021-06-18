@@ -5,13 +5,17 @@ using ImTool.SDL;
 
 namespace Demo
 {
-    public class DemoConfig : ImToolConfiguration<DemoConfig>
+    public class DemoConfig : Configuration
     {
-        // override the default window settings
-        public new string Title = "Demo";
-        
+
         // add new fields to the config, these will be serialized alongside the default fields
         public int AdditionalIntToBeSaved = 123;
+        
+        // override the default window settings
+        public DemoConfig()
+        {
+            Title = "Demo";
+        }
     }
     
     public class DemoTool : Tool<DemoTool, DemoConfig>
@@ -33,14 +37,12 @@ namespace Demo
         protected override void Load()
         {
             ExtraWidgetsTests.SetupHexView();
-            ThemeManager<DemoConfig>.OnThemeChanged += () => ExtraWidgetsTests.HexViewWidget.SetupSizes();
+            ThemeManager.OnThemeChanged += () => ExtraWidgetsTests.HexViewWidget.SetupSizes();
             
             // tool window has been created at this point
             // its time to load your tabs now
             window.AddTab(new DemoTab());
-            
             config.AdditionalIntToBeSaved = 1234123;
-            config.Save();
         }
 
         protected override void Unload()
@@ -65,7 +67,7 @@ namespace Demo
 
         public override void SubmitSettings(bool active)
         {
-            ImGui.Text("Submitted from DemoTab.SubmitSettings();");
+            ImGui.Text($"Submitted from DemoTab.SubmitSettings({active})");
         }
     }
 }

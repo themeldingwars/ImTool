@@ -14,9 +14,9 @@ using Veldrid.StartupUtilities;
 
 namespace ImTool
 {
-    public class Window<T> : IDisposable where T : ImToolConfiguration<T>
+    public class Window : IDisposable
     {
-        private T config;
+        private Configuration config;
         public delegate void ExitDelegate();
         
         private List<Tab> tabs = new ();
@@ -70,10 +70,10 @@ namespace ImTool
             }
         }
         
-        internal Window()
+        internal Window(Configuration config)
         {
-            config = (T) Configuration<T>.Config;;
-            ThemeManager<T>.OnThemeChanged += OnThemeChange;
+            this.config = config;
+            ThemeManager.OnThemeChanged += OnThemeChange;
             MonitorInfo.OnChange += OnMonitorInfoChange;
 
             windowBounds = new Rect();
@@ -88,10 +88,10 @@ namespace ImTool
             
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
             
-            ThemeManager<T>.Initialize();
-            CorporateGrey<T>.Generate();
-            ThemeManager<T>.ReloadThemes();
-            ThemeManager<T>.SetTheme(config.Theme);
+            ThemeManager.Initialize(config);
+            CorporateGrey.Generate();
+            ThemeManager.ReloadThemes();
+            ThemeManager.SetTheme(config.Theme);
         }
 
         private void SetupGD()
@@ -130,9 +130,7 @@ namespace ImTool
             UpdateWindowBorderThickness();
             Draw();
             UpdateWindowState();
-
             
-
             while (window.Exists)
             {
                 long currentFrameTicks = sw.ElapsedTicks;
@@ -180,22 +178,22 @@ namespace ImTool
                     restartGD = false;
                     SetupGD();
                     
-                    ThemeManager<T>.SetTheme(config.Theme);
+                    ThemeManager.SetTheme(config.Theme);
       
                 }
             }
         }
 
-        public static async Task<Window<T>> Create()
+        public static async Task<Window> Create(Configuration config)
         {
             Exception ex = null;
-            Window<T> instance = null;
+            Window instance = null;
             Task.Run(async ()=>
             {
                 await Task.Delay(16);
                 try
                 {
-                    instance = new Window<T>();
+                    instance = new Window(config);
                 }
                 catch (Exception e)
                 {
@@ -693,8 +691,8 @@ namespace ImTool
         }
         private void UpdateBorderColor()
         {
-            byte[] begin = NormalizedVector4ToBytes(ThemeManager<T>.Current.WindowBorderGradientBegin);
-            byte[] end = NormalizedVector4ToBytes(ThemeManager<T>.Current.WindowBorderGradientEnd);
+            byte[] begin = NormalizedVector4ToBytes(ThemeManager.Current.WindowBorderGradientBegin);
+            byte[] end = NormalizedVector4ToBytes(ThemeManager.Current.WindowBorderGradientEnd);
             byte[] middle = new byte[]
             {
                 (byte)((begin[0] + end[0])/2),
@@ -723,8 +721,8 @@ namespace ImTool
 
         private void SubmitWindowButtons()
         {
-            ThemeManager<T>.ApplyOverride(ImGuiStyleVar.FrameRounding, 0);
-            ThemeManager<T>.ApplyOverride(ImGuiCol.Button, new Vector4());
+            ThemeManager.ApplyOverride(ImGuiStyleVar.FrameRounding, 0);
+            ThemeManager.ApplyOverride(ImGuiCol.Button, new Vector4());
             ImGui.SetCursorPos(WindowButtonPosition(1));
 
             if (ImGui.Button("×", windowButtonSize))
@@ -758,8 +756,8 @@ namespace ImTool
             }
 
             
-            ThemeManager<T>.ResetOverride(ImGuiStyleVar.FrameRounding);
-            ThemeManager<T>.ResetOverride(ImGuiCol.Button);
+            ThemeManager.ResetOverride(ImGuiStyleVar.FrameRounding);
+            ThemeManager.ResetOverride(ImGuiCol.Button);
 
 
             if(ImGui.IsPopupOpen("imtool_setting_popup"))
@@ -778,13 +776,13 @@ namespace ImTool
         private void SubmitSettingPopup()
         {
             ImTool.Widgets.RenderTitle("ImTool Settings");
-            if (ImGui.BeginCombo("Theme", ThemeManager<T>.Current.Name))
+            if (ImGui.BeginCombo("Theme", ThemeManager.Current.Name))
             {
-                foreach (string theme in ThemeManager<T>.Themes.Keys)
+                foreach (string theme in ThemeManager.Themes.Keys)
                 {
-                    if (ImGui.Selectable(theme, ThemeManager<T>.Current.Name == theme))
+                    if (ImGui.Selectable(theme, ThemeManager.Current.Name == theme))
                     {
-                        ThemeManager<T>.SetTheme(theme);
+                        ThemeManager.SetTheme(theme);
                     }
                 }
                 ImGui.EndCombo();
@@ -890,36 +888,36 @@ namespace ImTool
         {
             if(apply)
             {
-                ThemeManager<T>.ApplyOverride(ImGuiStyleVar.WindowRounding, 0);
-                ThemeManager<T>.ApplyOverride(ImGuiStyleVar.WindowBorderSize, 0);
-                ThemeManager<T>.ApplyOverride(ImGuiStyleVar.WindowPadding, default(Vector2));
+                ThemeManager.ApplyOverride(ImGuiStyleVar.WindowRounding, 0);
+                ThemeManager.ApplyOverride(ImGuiStyleVar.WindowBorderSize, 0);
+                ThemeManager.ApplyOverride(ImGuiStyleVar.WindowPadding, default(Vector2));
             }
             else
             {
-                ThemeManager<T>.ResetOverride(ImGuiStyleVar.WindowPadding);
-                ThemeManager<T>.ResetOverride(ImGuiStyleVar.WindowRounding);
-                ThemeManager<T>.ResetOverride(ImGuiStyleVar.WindowBorderSize);
+                ThemeManager.ResetOverride(ImGuiStyleVar.WindowPadding);
+                ThemeManager.ResetOverride(ImGuiStyleVar.WindowRounding);
+                ThemeManager.ResetOverride(ImGuiStyleVar.WindowBorderSize);
             }
         }
         public static void TabStyleOverrides(bool apply)
         {
             if (apply)
             {
-                ThemeManager<T>.ApplyOverride(ImGuiStyleVar.WindowRounding, 0);
-                ThemeManager<T>.ApplyOverride(ImGuiStyleVar.WindowBorderSize, 0);
-                ThemeManager<T>.ApplyOverride(ImGuiStyleVar.TabRounding, 0);
-                ThemeManager<T>.ApplyOverride(ImGuiStyleVar.ItemInnerSpacing, new Vector2(1, 0));
-                ThemeManager<T>.ApplyOverride(ImGuiCol.TabActive, new Vector4(0.25f, 0.25f, 0.25f, 1.00f));
-                ThemeManager<T>.ApplyOverride(ImGuiCol.Tab, new Vector4(0.18f, 0.18f, 0.18f, 1.00f));
+                ThemeManager.ApplyOverride(ImGuiStyleVar.WindowRounding, 0);
+                ThemeManager.ApplyOverride(ImGuiStyleVar.WindowBorderSize, 0);
+                ThemeManager.ApplyOverride(ImGuiStyleVar.TabRounding, 0);
+                ThemeManager.ApplyOverride(ImGuiStyleVar.ItemInnerSpacing, new Vector2(1, 0));
+                ThemeManager.ApplyOverride(ImGuiCol.TabActive, new Vector4(0.25f, 0.25f, 0.25f, 1.00f));
+                ThemeManager.ApplyOverride(ImGuiCol.Tab, new Vector4(0.18f, 0.18f, 0.18f, 1.00f));
             }
             else
             {
-                ThemeManager<T>.ResetOverride(ImGuiStyleVar.WindowRounding);
-                ThemeManager<T>.ResetOverride(ImGuiStyleVar.WindowBorderSize);
-                ThemeManager<T>.ResetOverride(ImGuiStyleVar.TabRounding);
-                ThemeManager<T>.ResetOverride(ImGuiStyleVar.ItemInnerSpacing);
-                ThemeManager<T>.ResetOverride(ImGuiCol.TabActive);
-                ThemeManager<T>.ResetOverride(ImGuiCol.Tab);
+                ThemeManager.ResetOverride(ImGuiStyleVar.WindowRounding);
+                ThemeManager.ResetOverride(ImGuiStyleVar.WindowBorderSize);
+                ThemeManager.ResetOverride(ImGuiStyleVar.TabRounding);
+                ThemeManager.ResetOverride(ImGuiStyleVar.ItemInnerSpacing);
+                ThemeManager.ResetOverride(ImGuiCol.TabActive);
+                ThemeManager.ResetOverride(ImGuiCol.Tab);
             }
         }
         private void SubmitDemoTab()
@@ -960,7 +958,7 @@ namespace ImTool
         private void OnThemeChange()
         {
             UpdateBorderColor();
-            byte[] btbc = NormalizedVector4ToBytes(ThemeManager<T>.Current.TitlebarBackgroundColor);
+            byte[] btbc = NormalizedVector4ToBytes(ThemeManager.Current.TitlebarBackgroundColor);
             titlebarColor = BitConverter.ToUInt32(btbc);
         }
 

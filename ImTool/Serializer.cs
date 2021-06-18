@@ -8,7 +8,7 @@ using System.Text;
 namespace ImTool
 {
 
-    public class Serializer<T> where T : Serializer<T>
+    public class Serializer<T>
     {
         protected static JsonSerializer jsonSerializer;
         static Serializer()
