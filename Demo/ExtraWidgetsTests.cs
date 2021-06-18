@@ -22,6 +22,16 @@ namespace Demo
         public static  HexView                  HexViewWidget;
         private static HexView.HighlightSection SelectedHexHighlight;
 
+        public enum TestLogCategories
+        {
+            Test,
+            Test2,
+            Examples,
+            Nyaa
+        }
+
+        public static LogWindow<TestLogCategories> TestLogWindow = new LogWindow<TestLogCategories>("Test Log Window");
+
         public static void Draw()
         {
             //ImGui.SetNextWindowSize(new Vector2(400, 500));
@@ -82,6 +92,8 @@ namespace Demo
             }
 
             DrawHexView();
+            
+            TestLogWindow.DrawWindow();
         }
 
         public static void SetupHexView()
@@ -125,6 +137,15 @@ namespace Demo
             });
 
             HexViewWidget.OnHighlightSectionHover += section => SelectedHexHighlight = section;
+            
+            TestLogWindow.AddLogInfo(TestLogCategories.Test,"Test message 1 :>");
+            TestLogWindow.AddLogTrace(TestLogCategories.Nyaa,"Test message 2 :>");
+            TestLogWindow.AddLogWarn(TestLogCategories.Examples,"Test message 3 :>");
+            TestLogWindow.AddLogError(TestLogCategories.Test,"Test message 4 :>");
+
+            for (int i = 0; i < 500; i++) {
+                TestLogWindow.AddLogInfo(TestLogCategories.Test,$"Test message {i + 5} :>");
+            }
         }
         
         public static void DrawHexView()
