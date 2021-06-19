@@ -43,6 +43,11 @@ namespace Demo
             // its time to load your tabs now
             window.AddTab(new DemoTab());
             config.AdditionalIntToBeSaved = 1234123;
+            
+            window.AddWindowButton(new WindowButton("Test button", () =>
+            {
+                Console.WriteLine("Test window button clicked :>");
+            }));
         }
 
         protected override void Unload()

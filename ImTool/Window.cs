@@ -19,7 +19,8 @@ namespace ImTool
         private Configuration config;
         public delegate void ExitDelegate();
         
-        private List<Tab> tabs = new ();
+        private List<Tab> tabs = new();
+        private List<WindowButton> windowButtons = new();
         private Tab activeTab;
         private bool disposed = false;
 
@@ -755,11 +756,33 @@ namespace ImTool
                 ImGui.OpenPopup("imtool_setting_popup");
             }
 
+            if (windowButtons.Count > 0)
+            {
+                Vector2 pos = WindowButtonPosition(4);
+                Vector2 separatorTop = windowBounds.Position + pos + new Vector2(-2, 1);
+                Vector2 separatorBottom = separatorTop + new Vector2(0, windowButtonSize.Y - 2);
+                ImGui.GetWindowDrawList().AddLine(separatorTop, separatorBottom, 0x33000000, 1);
+                pos.X -= 3;
+                
+                foreach (WindowButton windowButton in windowButtons)
+                {
+                    Vector2 size = windowButtonSize;
+                    size.X = ImGui.CalcTextSize(windowButton.Text).X + 24;
+                    pos.X -= (size.X + 1);
+                
+                    ImGui.SetCursorPos(pos);
+                    if (ImGui.Button(windowButton.Text, size))
+                    {
+                        windowButton.OnClicked?.Invoke();
+                    }
+
+                    pos.X -= 1;
+                }
+            }
             
             ThemeManager.ResetOverride(ImGuiStyleVar.FrameRounding);
             ThemeManager.ResetOverride(ImGuiCol.Button);
-
-
+            
             if(ImGui.IsPopupOpen("imtool_setting_popup"))
             {
                 ImGui.SetNextWindowPos(new Vector2(windowBounds.Right - settingsWidth - 2, windowBounds.Top + titlebarHeight + 2));
@@ -771,6 +794,7 @@ namespace ImTool
                 SubmitSettingPopup();
                 ImGui.EndPopup();
             }
+            
         }
 
         private void SubmitSettingPopup()
@@ -1030,6 +1054,18 @@ namespace ImTool
         {
             if(tabs.Contains(tab))
                 tabs.Remove(tab);
+        }
+
+        public void AddWindowButton(WindowButton windowButton)
+        {
+            if(!windowButtons.Contains(windowButton))
+                windowButtons.Add(windowButton);
+        }
+        
+        public void RemoveWindowButton(WindowButton windowButton)
+        {
+            if(windowButtons.Contains(windowButton))
+                windowButtons.Remove(windowButton);
         }
     }
 }
