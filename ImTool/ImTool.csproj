@@ -5,12 +5,12 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Company>TheMeldingWars</Company>
         <Authors>freakbyte</Authors>
-        <PackageProjectUrl>https://github.com/themeldingwars/Pyre</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/themeldingwars/Pyre</RepositoryUrl>
+        <RepositoryUrl>https://github.com/themeldingwars/ImTool</RepositoryUrl>
         <RuntimeIdentifiers>win-x86;win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
         <AssemblyVersion>1.0.0</AssemblyVersion>
+        <Title>ImTool</Title>
     </PropertyGroup>
-
+    
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <PlatformTarget>x64</PlatformTarget>
     </PropertyGroup>
