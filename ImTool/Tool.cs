@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Serialization;
 
 namespace ImTool
 {
@@ -17,7 +18,7 @@ namespace ImTool
         public Tool()
         {
             config = Configuration.Load<TConfig>();
-            updater = new Updater();
+            updater = new Updater(config);
             
             if(!Initialize(Environment.GetCommandLineArgs()))
                 return;
@@ -25,6 +26,12 @@ namespace ImTool
             updater.CheckForUpdates();
             
             window = Window.Create(config).Result;
+
+            if (IsMainMenuOverridden)
+            {
+                window.OnSubmitGlobalMenuBarOverride = SubmitMainMenu;
+            }
+            
             window.OnExit = () =>
             {
                 Unload();
@@ -42,6 +49,16 @@ namespace ImTool
         protected virtual void Load() { }
 
         protected virtual void Unload() { }
+        public virtual void SubmitMainMenu() { }
+
+        internal bool IsMainMenuOverridden
+        {
+            get
+            {
+                MethodInfo m = GetType().GetMethod("SubmitMainMenu");
+                return m.GetBaseDefinition().DeclaringType != m.DeclaringType;
+            }
+        }
         
         public static async Task Run()
         {

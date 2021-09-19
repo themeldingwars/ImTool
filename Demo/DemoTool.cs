@@ -14,7 +14,10 @@ namespace Demo
         // override the default window settings
         public DemoConfig()
         {
-            Title = "Demo";
+            Title                 = "ImTool Demo";
+            GithubRepositoryOwner = "themeldingwars";
+            GithubRepositoryName  = "ImTool";
+            GithubReleaseName     = "Demo";
         }
     }
     
@@ -42,12 +45,13 @@ namespace Demo
             // tool window has been created at this point
             // its time to load your tabs now
             window.AddTab(new DemoTab());
+            window.AddTab(new DemoTab2());
             config.AdditionalIntToBeSaved = 1234123;
             
-            window.AddWindowButton(new WindowButton("Test button", () =>
+            window.AddWindowButton("Test button", () =>
             {
                 Console.WriteLine("Test window button clicked :>");
-            }));
+            });
         }
 
         protected override void Unload()
@@ -55,7 +59,10 @@ namespace Demo
             // time to clean up your shit
             // you can still do edits to the config,
             // changes will be saved to disk when this method returns
+            
         }
+        
+
     }
 
 
@@ -74,5 +81,79 @@ namespace Demo
         {
             ImGui.Text($"Submitted from DemoTab.SubmitSettings({active})");
         }
+
+
+        public override void SubmitMainMenu()
+        {
+            if (ImGui.BeginMenu("File"))
+            {
+                ImGui.EndMenu();
+            }
+            
+            if (ImGui.BeginMenu("Edit"))
+            {
+                ImGui.EndMenu();
+            }
+            
+            if (ImGui.BeginMenu("View"))
+            {
+                ImGui.EndMenu();
+            }
+            
+            if (ImGui.BeginMenu("Navigate"))
+            {
+                ImGui.EndMenu();
+            }
+            if (ImGui.BeginMenu("Help"))
+            {
+                ImGui.EndMenu();
+            }
+        }
+        
+    }
+    
+    public class DemoTab2 : Tab
+    {
+        public override string Name { get; } = "ImTool Demo Tab 2";
+        public override void SubmitContent()
+        {
+            ImGui.Begin("Winduu");
+            ImGui.Text("I'um deemuu tebu tuu");
+            ImGui.End();
+        }
+
+        public override void SubmitSettings(bool active)
+        {
+            ImGui.Text($"Submitted from DemoTab2.SubmitSettings({active})");
+        }
+
+
+        public override void SubmitMainMenu()
+        {
+            if (ImGui.BeginMenu("Fileuu"))
+            {
+                ImGui.EndMenu();
+            }
+            
+            if (ImGui.BeginMenu("Edituu"))
+            {
+                ImGui.EndMenu();
+            }
+            
+            if (ImGui.BeginMenu("Viewuu"))
+            {
+                ImGui.EndMenu();
+            }
+            
+            if (ImGui.BeginMenu("Navigateuu"))
+            {
+                ImGui.EndMenu();
+            }
+            if (ImGui.BeginMenu("Helpuu"))
+            {
+                ImGui.EndMenu();
+            }
+        }
+        
     }
 }

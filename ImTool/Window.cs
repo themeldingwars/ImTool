@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using imnodesNET;
@@ -18,10 +19,14 @@ namespace ImTool
     {
         private Configuration config;
         public delegate void ExitDelegate();
+        public delegate void GlobalMenuBarOverrideDelegate();
+
+        public GlobalMenuBarOverrideDelegate OnSubmitGlobalMenuBarOverride;
         
         private List<Tab> tabs = new();
         private List<WindowButton> windowButtons = new();
         private Tab activeTab;
+        private bool activeTabGotMainMenu;
         private bool disposed = false;
 
         private Sdl2Window window;
@@ -131,7 +136,7 @@ namespace ImTool
             UpdateWindowBorderThickness();
             Draw();
             UpdateWindowState();
-            
+
             while (window.Exists)
             {
                 long currentFrameTicks = sw.ElapsedTicks;
@@ -849,7 +854,7 @@ namespace ImTool
             ImGui.SetNextWindowSize(windowBounds.Size);
             ImGui.SetNextWindowPos(windowBounds.Position);
             MainWindowStyleOverrides(true);
-            ImGui.Begin("MainWindow", ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoSavedSettings);
+            ImGui.Begin("MainWindow",  ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.NoFocusOnAppearing |  ImGuiWindowFlags.NoBringToFrontOnFocus);
             MainWindowStyleOverrides(false);
 
             if (borderThickness > 0)
@@ -858,38 +863,59 @@ namespace ImTool
             }
 
             ImGui.GetWindowDrawList().AddRectFilled(titlebarBounds.Position, titlebarBounds.MaxPosition, titlebarColor);
-
+            
             SubmitWindowButtons();
 
             ImGui.SetCursorPos(new Vector2(borderThickness + 1, titlebarHeight - 19));
             ImGui.BeginTabBar("Tabs");
-
-            TabStyleOverrides(true);
-            if (tabs.Count == 0 && ImGui.BeginTabItem("Pyre"))
-            {
-                ImGui.SetNextWindowSize(contentBounds.Size);
-                ImGui.SetNextWindowPos(contentBounds.Position);
-                ImGui.Begin("PyreWindow", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDocking);
-                TabStyleOverrides(false);
-                SubmitDemoTab();
-                ImGui.End();
-                ImGui.EndTabItem();
-            }
             
+            ImGui.GetWindowDrawList().AddRectFilled(contentBounds.Position, contentBounds.MaxPosition, ImGui.GetColorU32(ImGuiCol.WindowBg));
+
             foreach (Tab tab in tabs)
             {
                 TabStyleOverrides(true);
                 if (ImGui.BeginTabItem(tab.Name))
                 {
                     if (activeTab != tab)
+                    {
                         activeTab = tab;
+                    }
+
+                    bool hasMainMenuBar = false;
+                    if (tab.IsMainMenuOverridden)
+                    {
+                        hasMainMenuBar = true;
+                        BeginMainMenuBar();
+                        tab.SubmitMainMenu();
+                        EndMainMenuBar();
+                    }
+                    else if (OnSubmitGlobalMenuBarOverride != null)
+                    {
+                        hasMainMenuBar = true;
+                        BeginMainMenuBar();
+                        OnSubmitGlobalMenuBarOverride();
+                        EndMainMenuBar();
+                    }
+
+                    Vector2 dockPos = ImGui.GetCursorPos() + (hasMainMenuBar ? new Vector2(1, 17) : new Vector2(1, -3));
+                    Vector2 dockSize = hasMainMenuBar ? contentBounds.Size - new Vector2(0, 20): contentBounds.Size;
                     
-                    ImGui.SetNextWindowSize(contentBounds.Size);
-                    ImGui.SetNextWindowPos(contentBounds.Position);
-                    ImGui.Begin(tab.Name + "Window", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoBringToFrontOnFocus);
+                    ImGui.SetCursorPos(dockPos);
+                    ImGui.DockSpace(ImGui.GetID(tab.Name+"TabDockspace"), dockSize, ImGuiDockNodeFlags.None);
+                    
+                    //ImGui.SetNextWindowSize(contentBounds.Size);
+                    //ImGui.SetNextWindowPos(contentBounds.Position);
+                    
+                    //ImGui.Begin(tab.Name + "Window", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.DockNodeHost | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.NoFocusOnAppearing |  ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.AlwaysAutoResize);
+                    
+                    //ImGui.SetNextWindowSize(contentBounds.Size);
+                    //ImGui.SetNextWindowPos(contentBounds.Position);
+                    
+                    
+
                     TabStyleOverrides(false);
                     tab.SubmitContent();
-                    ImGui.End();
+                    //ImGui.End();
                     ImGui.EndTabItem();
                 }
             }
@@ -908,6 +934,24 @@ namespace ImTool
 
         }
 
+        private void BeginMainMenuBar()
+        {
+            ImGuiViewportPtr vp = ImGui.GetMainViewport();
+            vp.Pos.Y += titlebarHeight + borderThickness;
+            vp.Pos.X += borderThickness;
+            vp.Size.X -= borderThickness * 2;
+            ImGui.BeginMainMenuBar();
+        }
+        
+        private void EndMainMenuBar()
+        {
+            ImGui.EndMainMenuBar();
+            ImGuiViewportPtr vp = ImGui.GetMainViewport();
+            vp.Pos.Y -= titlebarHeight + borderThickness;
+            vp.Pos.X -= borderThickness;
+            vp.Size.X += borderThickness * 2;
+        }
+        
         public static void MainWindowStyleOverrides(bool apply)
         {
             if(apply)
@@ -931,8 +975,10 @@ namespace ImTool
                 ThemeManager.ApplyOverride(ImGuiStyleVar.WindowBorderSize, 0);
                 ThemeManager.ApplyOverride(ImGuiStyleVar.TabRounding, 0);
                 ThemeManager.ApplyOverride(ImGuiStyleVar.ItemInnerSpacing, new Vector2(1, 0));
-                ThemeManager.ApplyOverride(ImGuiCol.TabActive, new Vector4(0.25f, 0.25f, 0.25f, 1.00f));
+                ThemeManager.ApplyOverride(ImGuiCol.TabActive, ThemeManager.Current[ImGuiCol.WindowBg]);
+                ThemeManager.ApplyOverride(ImGuiCol.MenuBarBg, ThemeManager.Current[ImGuiCol.WindowBg]);
                 ThemeManager.ApplyOverride(ImGuiCol.Tab, new Vector4(0.18f, 0.18f, 0.18f, 1.00f));
+                
             }
             else
             {
@@ -941,6 +987,7 @@ namespace ImTool
                 ThemeManager.ResetOverride(ImGuiStyleVar.TabRounding);
                 ThemeManager.ResetOverride(ImGuiStyleVar.ItemInnerSpacing);
                 ThemeManager.ResetOverride(ImGuiCol.TabActive);
+                ThemeManager.ResetOverride(ImGuiCol.MenuBarBg);
                 ThemeManager.ResetOverride(ImGuiCol.Tab);
             }
         }
@@ -1056,6 +1103,12 @@ namespace ImTool
                 tabs.Remove(tab);
         }
 
+        
+        public void AddWindowButton(string text, WindowButton.ClickedDelegate onClicked)
+        {
+            AddWindowButton(new WindowButton(text, onClicked));
+        }
+        
         public void AddWindowButton(WindowButton windowButton)
         {
             if(!windowButtons.Contains(windowButton))
