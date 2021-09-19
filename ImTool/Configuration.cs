@@ -11,8 +11,12 @@ namespace ImTool
         [JsonIgnore]
         public string File;
         
-        public string Title = "Pyre";
+        public string Title = "ImTool";
         public string Theme = "CorporateGrey";
+        public string GithubRepositoryOwner;
+        public string GithubRepositoryName;
+        public string GithubReleaseName;
+        public bool GithubGetPrereleases;
         public WindowState WindowState = WindowState.Normal;
         public WindowState PreviousWindowState = WindowState.Maximized;
         public int Monitor = 0;
