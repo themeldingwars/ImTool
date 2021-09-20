@@ -13,6 +13,7 @@ ProjectSection(SolutionItems) = preProject
 	.gitmodules = .gitmodules
 	publish.bat = publish.bat
 	.github\workflows\buildAndPublish.yml = .github\workflows\buildAndPublish.yml
+	ImTool.targets = ImTool.targets
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{92EC52FD-84FD-44B0-B90E-FB80F3EA7096}"

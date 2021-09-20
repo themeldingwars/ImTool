@@ -30,6 +30,8 @@ namespace ImTool
 
         public static T Load<T>() where T : Configuration
         {
+            Directory.CreateDirectory("Config");
+            
             string name = typeof(T).FullName;
             string file = Path.Join("Config", name+".json");
             
