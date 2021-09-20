@@ -22,8 +22,8 @@ jobs:
         dotnet-version: 5.0.x
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore -c Release
+    - name: Build ImTool
+      run: dotnet build -c Release ImTool/ImTool.csproj
       
     - name: Publish ImTool nuget
       uses: rohith/publish-nuget@v2
