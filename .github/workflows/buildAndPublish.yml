@@ -29,10 +29,8 @@ jobs:
     - name: Build ImTool
       run: dotnet build -c Release ImTool/ImTool.csproj
       
-    - name: Publish ImTool nuget
-      uses: rohith/publish-nuget@v2
-      if: github.event_name != 'pull_request'
-      with:
-        PROJECT_FILE_PATH: ImTool/ImTool.csproj
-        PACKAGE_NAME: ImTool
-        NUGET_KEY: ${{secrets.TMW_NUGET}}
+    - name: Pack ImTool
+      run: dotnet pack -c Release ImTool/ImTool.csproj -o nupkgs
+          
+    - name: Push ImTool to nuget.org
+      run: dotnet nuget push nupkgs/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.TMW_NUGET }} --skip-duplicate
