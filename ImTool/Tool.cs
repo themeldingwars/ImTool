@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Dynamic;
+using System.IO;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -17,7 +18,12 @@ namespace ImTool
         
         public Tool()
         {
-            config = Configuration.Load<TConfig>();
+            string toolDataBasePath = typeof(TTool).FullName != null ? 
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ImTool", typeof(TTool).FullName) : "";
+
+            Directory.CreateDirectory(toolDataBasePath);
+            
+            config = Configuration.Load<TConfig>(toolDataBasePath);
             updater = new Updater(config);
             
             if(!Initialize(Environment.GetCommandLineArgs()))
@@ -26,7 +32,10 @@ namespace ImTool
             updater.CheckForUpdates();
             
             window = Window.Create(config).Result;
-
+            
+            if (window == null)
+                Environment.Exit(1);
+            
             if (IsMainMenuOverridden)
             {
                 window.OnSubmitGlobalMenuBarOverride = SubmitMainMenu;
@@ -38,6 +47,7 @@ namespace ImTool
                 window = null;
                 updater = null;
             };
+            
             Load();
         }
 

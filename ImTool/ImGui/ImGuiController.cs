@@ -75,7 +75,7 @@ namespace ImGuiNET
         /// <summary>
         /// Constructs a new ImGuiController.
         /// </summary>
-        public unsafe ImGuiController(GraphicsDevice gd, Sdl2Window window, OutputDescription outputDescription, int width, int height)
+        public unsafe ImGuiController(GraphicsDevice gd, Sdl2Window window, OutputDescription outputDescription, int width, int height, string iniFile)
         {
             _gd = gd;
             _window = window;
@@ -96,7 +96,7 @@ namespace ImGuiNET
             ImGuiIOPtr io = ImGui.GetIO();
 
             
-            string iniName = "Config\\" + AppDomain.CurrentDomain.FriendlyName + ".ImGui.ini";
+            string iniName = iniFile ?? ("Config\\" + AppDomain.CurrentDomain.FriendlyName + ".ImGui.ini");
             
             byte[] iniNameBytes = new byte[iniName.Length + 1];
             Encoding.ASCII.GetBytes(iniName).CopyTo(iniNameBytes, 0);

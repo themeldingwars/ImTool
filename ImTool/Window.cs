@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -95,7 +96,7 @@ namespace ImTool
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
             
             ThemeManager.Initialize(config);
-            CorporateGrey.Generate();
+            CorporateGrey.Generate(Path.Combine(config.ToolDataPath, "Themes", "CorporateGrey.json"));
             ThemeManager.ReloadThemes();
             ThemeManager.SetTheme(config.Theme);
         }
@@ -116,13 +117,13 @@ namespace ImTool
                 window.Close();
                 window = null;
             }
-            
-            
+
+            string iniFile = Path.Combine(config.ToolDataPath, "Config", AppDomain.CurrentDomain.FriendlyName + ".ImGui.ini");
             SDL_WindowFlags flags =  SDL_WindowFlags.Shown  | SDL_WindowFlags.Borderless | (config.GraphicsBackend == GraphicsBackend.OpenGL || config.GraphicsBackend == GraphicsBackend.OpenGLES ? SDL_WindowFlags.OpenGL : 0);
             window = new Sdl2Window(config.Title, config.NormalWindowBounds.X, config.NormalWindowBounds.Y, config.NormalWindowBounds.Width, config.NormalWindowBounds.Height, flags, false);
             graphicsDevice = VeldridStartup.CreateGraphicsDevice(window, new GraphicsDeviceOptions(false, null, config.VSync), config.GraphicsBackend);
             commandList = graphicsDevice.ResourceFactory.CreateCommandList();
-            controller = new ImGuiController(graphicsDevice, window, graphicsDevice.MainSwapchain.Framebuffer.OutputDescription, window.Width, window.Height);
+            controller = new ImGuiController(graphicsDevice, window, graphicsDevice.MainSwapchain.Framebuffer.OutputDescription, window.Width, window.Height, iniFile);
         }
         
         private void Run()
@@ -210,14 +211,16 @@ namespace ImTool
                 instance.Run();
             });
 
-            while (instance == null || ex != null)
+            while (instance == null && ex == null)
             {
                 await Task.Delay(16);
             }
 
             if (ex != null)
             {
-                throw ex;
+                Console.WriteLine("An exception was thrown while initializing the ImTool window :<");
+                Console.WriteLine(ex);
+                return null;
             }
             
             return instance;

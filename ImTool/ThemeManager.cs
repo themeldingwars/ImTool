@@ -30,14 +30,15 @@ namespace ImTool
         private static bool initialized;
         private static string themesDirectory;
 
-        public static void Initialize(Configuration configuration, string themesDir = "Themes")
+        public static void Initialize(Configuration configuration)
         {
             if (initialized)
             {
                 return;
             }
-
-            Directory.CreateDirectory(themesDir);
+            
+            themesDirectory = Path.Combine(configuration.ToolDataPath, "Themes");
+            Directory.CreateDirectory(themesDirectory);
             
             initialized = true;
 
@@ -63,8 +64,7 @@ namespace ImTool
                     VariableFields.Add(field.Name, field);
                 }
             }
-
-            themesDirectory = themesDir;
+            
             Themes = new Dictionary<string, Theme>();
 
             ImGuiLight.Name = "ImGuiLight";

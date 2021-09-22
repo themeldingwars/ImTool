@@ -8,8 +8,8 @@ namespace ImTool
 {
     public class Configuration
     {
-        [JsonIgnore]
-        public string File;
+        [JsonIgnore] public string File;
+        [JsonIgnore] public string ToolDataPath;
         
         public string Title = "ImTool";
         public string Theme = "CorporateGrey";
@@ -28,20 +28,22 @@ namespace ImTool
         public GraphicsBackend GraphicsBackend = GraphicsBackend.Vulkan;
         public bool PowerSaving = true;
 
-        public static T Load<T>() where T : Configuration
+        public static T Load<T>(string toolDataPath = "") where T : Configuration
         {
-            Directory.CreateDirectory("Config");
+            string configPath = Path.Combine(toolDataPath, "Config");
+            Directory.CreateDirectory(configPath);
             
             string name = typeof(T).FullName;
-            string file = Path.Join("Config", name+".json");
+            string file = Path.Join(configPath, name + ".json");
             
             T instance = (T) Serializer<T>.DeserializeFromFile(file);
             if (instance == null)
             {
                 instance = (T) Activator.CreateInstance(typeof(T));
             }
-
+            
             instance.File = file;
+            instance.ToolDataPath = toolDataPath;
             return instance;
         }
     }
