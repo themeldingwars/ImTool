@@ -15,10 +15,10 @@
 
         <PackageId>ImTool</PackageId>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.0.1</PackageVersion>
+        <PackageVersion>1.0.4</PackageVersion>
         <Description>Tool UI based on ImGui.NET</Description>
         <PackageProjectUrl>https://github.com/themeldingwars/ImTool</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/themeldingwars/ImTool/blob/main/LICENSE</PackageLicenseUrl>
+        <PackageLicenseUrl>https://github.com/themeldingwars/ImTool/blob/master/LICENSE</PackageLicenseUrl>
 
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
