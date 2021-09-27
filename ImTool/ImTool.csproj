@@ -72,6 +72,7 @@
             <Pack>True</Pack>
             <PackageCopyToOutput>True</PackageCopyToOutput>
         </Content>
+        <EmbeddedResource Include="Fonts\*.ttf" />
     </ItemGroup>
     
     <ItemGroup>
