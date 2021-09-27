@@ -18,6 +18,11 @@ namespace ImTool
         public delegate void OnThemeChangedDelegate();
         public static OnThemeChangedDelegate OnThemeChanged;
 
+        public delegate void PushFontDelegate(Font font);
+        public static PushFontDelegate PushFont;
+        public delegate void PopFontDelegate();
+        public static PopFontDelegate PopFont;
+
         public static readonly Theme ImGuiLight = new Theme();
         public static readonly Theme ImGuiDark = new Theme();
 
@@ -168,7 +173,7 @@ namespace ImTool
         {
             ApplyOverride(field, Current[field]);
         }
-
+        
         public static void Save(Theme theme)
         {
 

@@ -20,6 +20,14 @@ namespace ImTool
         [JsonConverter(typeof(JsonConverters.ColorConverter))]
         public static Vector4 LogError;
 
+        [JsonConverter(typeof(JsonConverters.ColorConverter))]
+        public static Vector4 ToolVersionUpgrade;
+        [JsonConverter(typeof(JsonConverters.ColorConverter))]
+        public static Vector4 ToolVersionDowngrade;
+        [JsonConverter(typeof(JsonConverters.ColorConverter))]
+        public static Vector4 ToolVersionSame;
+        
+        
         public ImToolColors(bool isDark)
         {
             if (isDark) {
@@ -30,6 +38,10 @@ namespace ImTool
                 LogInfo  = RGBAToBGR(ImGui.ColorConvertU32ToFloat4(0x3D3D3D87));
                 LogWarn  = RGBAToBGR(ImGui.ColorConvertU32ToFloat4(0xF5830F79));
                 LogError = RGBAToBGR(ImGui.ColorConvertU32ToFloat4(0xE6171779));
+                
+                ToolVersionUpgrade   = RGBAToBGR(ImGui.ColorConvertU32ToFloat4(0x82FF3380));
+                ToolVersionDowngrade = RGBAToBGR(ImGui.ColorConvertU32ToFloat4(0xE61717AA));
+                ToolVersionSame      = RGBAToBGR(ImGui.ColorConvertU32ToFloat4(0x848484FF));
             }
             else {
                 

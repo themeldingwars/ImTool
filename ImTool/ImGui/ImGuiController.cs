@@ -72,6 +72,8 @@ namespace ImGuiNET
         private readonly Platform_SetWindowTitle _setWindowTitle;
         private int _lastAssignedID = 100;
 
+        private Dictionary<Font, ImFontPtr> fonts = new();
+
         /// <summary>
         /// Constructs a new ImGuiController.
         /// </summary>
@@ -145,9 +147,9 @@ namespace ImGuiNET
             io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
             io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
             io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
-
-            io.Fonts.AddFontDefault();
-
+            
+            LoadFonts();
+            
             CreateDeviceResources(gd, outputDescription);
             SetKeyMappings();
 
@@ -156,6 +158,71 @@ namespace ImGuiNET
 
             ImGui.NewFrame();
             _frameBegun = true;
+
+            ThemeManager.PushFont += PushFont;
+            ThemeManager.PopFont += PopFont;
+        }
+
+        public void PushFont(Font font)
+        {
+            if (!fonts.ContainsKey(font))
+            {
+                ImGui.PushFont(fonts[Font.Default]);
+                return;
+            }
+            ImGui.PushFont(fonts[font]);
+        }
+        public void PopFont()
+        {
+            ImGui.PopFont();
+        }
+        private void LoadFonts()
+        {
+            foreach (Font font in Enum.GetValues(typeof(Font)))
+            {
+                if (font == Font.Default)
+                {
+                    fonts.Add(Font.Default, ImGui.GetIO().Fonts.AddFontDefault());
+                    continue;
+                }
+                
+                string name = font.ToString();
+                byte size = 13;
+                if (name.Contains('_'))
+                {
+                    string[] split = name.Split('_');
+                    name = split[0];
+                    if(!byte.TryParse(split[1], out size))
+                        continue;
+                }
+                
+                
+                Assembly a = Assembly.GetExecutingAssembly();
+                using (Stream resFilestream = a.GetManifestResourceStream($"ImTool.Fonts.{name}.ttf"))
+                {
+                    if (resFilestream == null) continue;
+                    byte[] ba = new byte[resFilestream.Length];
+                    resFilestream.Read(ba, 0, ba.Length);
+            
+                    GCHandle pinnedArray = GCHandle.Alloc(ba, GCHandleType.Pinned);
+                    ImFontPtr imFontPtr;
+
+                    if (FontRange.Ranges.ContainsKey(font))
+                    {
+                        GCHandle rangeHandle = GCHandle.Alloc(new ushort[] { FontRange.Ranges[font].Min, FontRange.Ranges[font].Max, 0}, GCHandleType.Pinned);
+                        imFontPtr = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pinnedArray.AddrOfPinnedObject(), ba.Length, size, null, rangeHandle.AddrOfPinnedObject());
+                        rangeHandle.Free();
+                    }
+                    else
+                    {
+                        imFontPtr = ImGui.GetIO().Fonts.AddFontFromMemoryTTF(pinnedArray.AddrOfPinnedObject(), ba.Length, size);
+                    }
+
+                    pinnedArray.Free();
+                    fonts.Add(font, imFontPtr);
+                }
+                
+            }
         }
 
         private void CreateWindow(ImGuiViewportPtr vp)
