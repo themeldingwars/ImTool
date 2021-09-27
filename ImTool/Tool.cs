@@ -32,10 +32,15 @@ namespace ImTool
             updater.CheckForUpdates();
             
             window = Window.Create(config).Result;
-            
+
             if (window == null)
+            {
+                updater.EmergencyUpdate();
                 Environment.Exit(1);
+            }
             
+            window.SetUpdater(updater);
+
             if (IsMainMenuOverridden)
             {
                 window.OnSubmitGlobalMenuBarOverride = SubmitMainMenu;

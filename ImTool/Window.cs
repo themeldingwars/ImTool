@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -19,6 +20,7 @@ namespace ImTool
     public class Window : IDisposable
     {
         private Configuration config;
+        private Updater updater;
         public delegate void ExitDelegate();
         public delegate void GlobalMenuBarOverrideDelegate();
 
@@ -60,7 +62,7 @@ namespace ImTool
 
         private int dockingMonitor = -1;
         private Rect.Edge dockingEdge;
-
+        
         public ExitDelegate OnExit;
         public WindowState WindowState
         {
@@ -734,13 +736,16 @@ namespace ImTool
             ThemeManager.ApplyOverride(ImGuiCol.Button, new Vector4());
             ImGui.SetCursorPos(WindowButtonPosition(1));
 
-            if (ImGui.Button("×", windowButtonSize))
+
+            ThemeManager.PushFont(Font.FAS);
+            if (ImGui.Button("\uf410", windowButtonSize))
             {
                 Exit();
             }
-
+            
+            
             ImGui.SetCursorPos(WindowButtonPosition(2));
-            if (ImGui.Button("¤", windowButtonSize))
+            if (ImGui.Button(WindowState == WindowState.Maximized ? "\uf2d2" : "\uf2d0", windowButtonSize))
             {
                 if (WindowState == WindowState.Maximized)
                 {
@@ -753,17 +758,30 @@ namespace ImTool
             }
 
             ImGui.SetCursorPos(WindowButtonPosition(3));
-            if (ImGui.Button("-", windowButtonSize))
+            if (ImGui.Button("\uf2d1", windowButtonSize))
             {
                 window.WindowState = Veldrid.WindowState.Minimized;
             }
             
             ImGui.SetCursorPos(WindowButtonPosition(4));
-            if (ImGui.Button("«", windowButtonSize))
+            if (updater != null && updater.UpdateAvailable)
             {
-                ImGui.OpenPopup("imtool_setting_popup");
+                ThemeManager.ApplyOverride(ImGuiCol.Button, ImToolColors.ToolVersionUpgrade);
+                
+                if (ImGui.Button("\uf013", windowButtonSize))
+                    ImGui.OpenPopup("imtool_setting_popup");
+                
+                ThemeManager.ResetOverride(ImGuiCol.Button);
             }
-
+            else
+            {
+                if (ImGui.Button("\uf013", windowButtonSize))
+                    ImGui.OpenPopup("imtool_setting_popup");
+            }
+            
+            ThemeManager.PopFont();
+            ThemeManager.ApplyOverride(ImGuiCol.Button, new Vector4());
+            
             if (windowButtons.Count > 0)
             {
                 Vector2 pos = WindowButtonPosition(4);
@@ -807,7 +825,7 @@ namespace ImTool
 
         private void SubmitSettingPopup()
         {
-            ImTool.Widgets.RenderTitle("ImTool Settings");
+            ImTool.Widgets.RenderTitle("ImTool");
             if (ImGui.BeginCombo("Theme", ThemeManager.Current.Name))
             {
                 foreach (string theme in ThemeManager.Themes.Keys)
@@ -836,21 +854,93 @@ namespace ImTool
             ImGui.Checkbox("Enable VSync  ", ref vsync);
             ImGui.SameLine();
             ImGui.Checkbox("Experimental power saving", ref config.PowerSaving);
-            ImGui.Separator();
-            if (ImGui.Button("Check for updates :) "))
-            {
-                
-            }
-
             ImGui.NewLine();
             
-            Widgets.RenderTitle($"{config.Title} Settings");
+            Widgets.RenderTitle(config.Title);
+            
+            
+            if (ImGui.BeginTable("VersionTable", 2, ImGuiTableFlags.Borders))
+            {
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn(); ImGui.Text("Version");
+                ImGui.TableNextColumn(); ImGui.Text(updater.CurrentVersion.ToString());
+                
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn(); ImGui.Text("Author");
+                ImGui.TableNextColumn(); ImGui.Text(config.GithubRepositoryOwner);
+                
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn(); ImGui.Text("Repository");
+                ImGui.TableNextColumn(); ImGui.Text(config.GithubRepositoryName);
+                
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn(); ImGui.Text("Release name");
+                ImGui.TableNextColumn(); ImGui.Text(config.GithubReleaseName);
+                
+                ImGui.EndTable();
+            }
+            
+            ImGui.NewLine();
+            
+            
+            Widgets.RenderTitle("Releases");
+            if (!updater.IsCheckingForUpdates)
+            {
+                ImGuiTableFlags releaseTableFlags = ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY;
+                if (ImGui.BeginTable("ReleasesTable", 3, releaseTableFlags, new Vector2(0, 85)))
+                {
+                    ImGui.TableSetupColumn("Version");
+                    ImGui.TableSetupColumn("Published");
+                    ImGui.TableSetupColumn("");
+                    ImGui.TableSetupScrollFreeze(0, 1);
+                    ImGui.TableHeadersRow();
+                    
+                    foreach (var kvp  in updater.Releases)
+                    {
+                        if ((!kvp.Value.Prerelease || config.GithubGetPrereleases ) || kvp.Value == updater.CurrentRelease)
+                        {
+                            string published = kvp.Value.PublishedAt != null ? kvp.Value.PublishedAt.Value.LocalDateTime.ToString(CultureInfo.CurrentCulture) : "";
+                            
+                            ImGui.TableNextRow();
+                            ImGui.TableNextColumn();
+                            
+                            if (ImGui.Selectable($"{kvp.Key}{(kvp.Value.Prerelease ? "*" : string.Empty)}", false, ImGuiSelectableFlags.SpanAllColumns))
+                            {
+                                updater.OpenDialog(kvp.Key);
+                            }
+                            
+                            ImGui.TableNextColumn(); ImGui.Text(published);
+                            ImGui.TableNextColumn();
+                            
+                            if (kvp.Key > updater.CurrentVersion)
+                                ImGui.TextColored(ImToolColors.ToolVersionUpgrade, "upgrade");
+                            else if (kvp.Key < updater.CurrentVersion)
+                                ImGui.TextColored(ImToolColors.ToolVersionDowngrade, "downgrade");
+                            else
+                                ImGui.TextColored(ImToolColors.ToolVersionSame, "current version");
+                        }
+                    }
+                    updater.DrawDialogs();
+                    ImGui.EndTable();
+                }
+            
+                ImGui.Checkbox("Include pre-releases", ref config.GithubGetPrereleases);
+                ImGui.SameLine();
+            
+                if (ImGui.Button("  Check for updates  "))
+                {
+                    updater.CheckForUpdates();
+                }
+            }
+            
+            
+            ImGui.Separator();
+            ImGui.NewLine();
             foreach (Tab tab in tabs)
             {
                 tab.SubmitSettings(tab == activeTab);
             }
         }
-        
         private unsafe void SubmitUI()
         {
             
@@ -906,22 +996,12 @@ namespace ImTool
                     ImGui.SetCursorPos(dockPos);
                     ImGui.DockSpace(ImGui.GetID(tab.Name+"TabDockspace"), dockSize, ImGuiDockNodeFlags.None);
                     
-                    //ImGui.SetNextWindowSize(contentBounds.Size);
-                    //ImGui.SetNextWindowPos(contentBounds.Position);
-                    
-                    //ImGui.Begin(tab.Name + "Window", ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.DockNodeHost | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.NoFocusOnAppearing |  ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.AlwaysAutoResize);
-                    
-                    //ImGui.SetNextWindowSize(contentBounds.Size);
-                    //ImGui.SetNextWindowPos(contentBounds.Position);
-                    
-                    
-
                     TabStyleOverrides(false);
                     tab.SubmitContent();
-                    //ImGui.End();
                     ImGui.EndTabItem();
                 }
             }
+            
             TabStyleOverrides(false);
             ImGui.EndTabBar();
             ImGui.End();
@@ -1122,6 +1202,11 @@ namespace ImTool
         {
             if(windowButtons.Contains(windowButton))
                 windowButtons.Remove(windowButton);
+        }
+
+        public void SetUpdater(Updater updater)
+        {
+            this.updater = updater;
         }
     }
 }
