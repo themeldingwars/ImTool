@@ -41,7 +41,7 @@ namespace Demo
         {
             ExtraWidgetsTests.SetupHexView();
             ThemeManager.OnThemeChanged += () => ExtraWidgetsTests.HexViewWidget.SetupSizes();
-            
+
             // tool window has been created at this point
             // its time to load your tabs now
             window.AddTab(new DemoTab());
@@ -73,7 +73,6 @@ namespace Demo
         {
             ImGui.ShowDemoWindow();
             ImGui.ShowMetricsWindow();
-            
             ExtraWidgetsTests.Draw();
         }
 
@@ -118,8 +117,9 @@ namespace Demo
         public override void SubmitContent()
         {
             ImGui.Begin("Winduu");
-            ImGui.Text("I'um deemuu tebu tuu");
+            ImGui.ShowStyleEditor();
             ImGui.End();
+            
         }
 
         public override void SubmitSettings(bool active)
