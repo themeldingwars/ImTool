@@ -1,8 +1,15 @@
 
 # ImTool
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/themeldingwars/ImTool/Build%20and%20publish)
+[![NuGet](https://img.shields.io/nuget/v/ImTool.svg)](https://www.nuget.org/packages/ImTool)
+[![MIT License](https://img.shields.io/github/license/themeldingwars/ImTool.svg)](https://github.com/themeldingwars/ImTool/blob/master/LICENSE)
+
 Cross-platform tool framework for Firefall ❤
 
-![Demo_PmBonUHulZ](https://user-images.githubusercontent.com/5398037/122082412-46517f00-ce00-11eb-852a-901a2f2493f1.png)
+Documentation coming soon™... Please use the Demo project as reference for now :> 
+
+![Demo-win-x64_iVwI74EYU5](https://user-images.githubusercontent.com/5398037/135187068-cc28308a-50d8-401e-8c61-92733494343b.png)
+
 
 **This repository is using submodules, so in order to properly clone it use this**
 ```
