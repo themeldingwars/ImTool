@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -17,7 +19,6 @@ namespace ImTool
     {
         private Configuration config;
         private GitHubClient github;
-        private string updatePath;
         private int releaseCheckMinimumIntervalSeconds = 60;
 
         private bool stableUpdateAvailable;
@@ -28,14 +29,27 @@ namespace ImTool
         private bool updating;
         private float progress = 0;
         
+        private bool updateFailed;
+        private string updateFailedReason;
+        private string currentExePath;
+        private FileInfo currentExeInfo;
+        
         
         public Updater(Configuration config)
         {
             this.config = config;
             github = new GitHubClient(new ProductHeaderValue("ImTool"));
-            updatePath = Path.Combine(config.ToolDataPath, "Update");
-            Directory.CreateDirectory(updatePath);
             ReleaseNamePrefix = $"{config.GithubReleaseName}-{OperatingSystem.GetRuntimeIdentifier}";
+            currentExePath = Process.GetCurrentProcess().MainModule.FileName;
+            
+            if (string.IsNullOrWhiteSpace(currentExePath) || !File.Exists(currentExePath))
+                return;
+
+            currentExeInfo = new FileInfo(currentExePath);
+
+            #if(RELEASE)
+                StartupChecks();
+            #endif
         }
 
         public Version CurrentVersion { get; } = Assembly.GetEntryAssembly().GetName().Version;
@@ -131,7 +145,7 @@ namespace ImTool
                 {
                     updating = true;
                     ImGui.OpenPopup("Downloading update");
-                    Update();
+                    Update(targetVersion);
                 }
             }
 
@@ -152,6 +166,28 @@ namespace ImTool
                 }
                 ImGui.EndPopup();
             }
+
+            if (updateFailed)
+            {
+                updateFailed = false;
+                ImGui.OpenPopup("Update failed");
+            }
+            
+            ImGui.SetNextWindowPos(center, ImGuiCond.Always, new Vector2(0.5f, 0.5f));
+            if (ImGuiEx.BeginPopupModal("Update failed", ImGuiWindowFlags.AlwaysAutoResize))
+            {
+                ImGui.Text(updateFailedReason);
+                ImGui.Separator();
+
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetWindowContentRegionWidth() - 80);
+                if (ImGui.Button("Ooooops!", new Vector2(80, 0)))
+                {
+                    updateFailedReason = string.Empty;
+                    ImGui.CloseCurrentPopup();
+                }
+                ImGui.EndPopup();
+            }
+            
         }
 
         private string ProgressEmoji(float progress)
@@ -164,25 +200,203 @@ namespace ImTool
             if(progress < 0.44) return "( •_•)>⌐■-■";
             return "(⌐■_■)";
         }
-        internal async Task Update()
+        
+        private void StartupChecks()
         {
-            Console.WriteLine("Beginning update.");
+            if (currentExeInfo == null)
+                return;
 
-            for (int i = 0; i < 101; i++)
+            if (currentExeInfo.Name.StartsWith("imt_update_"))
             {
-                progress = 1f/100*i;
-                await Task.Delay(50);
+                try
+                {
+                    string realExeName = currentExeInfo.Name.Remove(0, 11);
+                    string realDir = Path.GetDirectoryName(currentExePath) ?? "";
+                    string realExePath = Path.Combine(realDir, realExeName);
+
+                    if (File.Exists(realExePath))
+                    {
+                        string backupExePath = Path.Combine(realDir, $"imt_backup_{realExeName}");
+                        
+                        if(File.Exists(backupExePath))
+                            File.Delete(backupExePath);
+                        
+                        File.Copy(currentExePath, backupExePath);
+                        File.Delete(realExePath);
+                    }
+                    
+                    File.Copy(currentExePath, realExePath);
+                    
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = realExePath,
+                    });
+                    
+                    Environment.Exit(0);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Derped while installing update!");
+                    Console.WriteLine(e);
+                }
+            }
+            else
+            {
+                string realDir = Path.GetDirectoryName(currentExePath) ?? "";
+                string updateExePath = Path.Combine(realDir, $"imt_update_{currentExeInfo.Name}");
+
+                if (File.Exists(updateExePath))
+                    File.Delete(updateExePath);
+            }
+        }
+
+        internal void PostStartupChecks()
+        {
+            if (currentExeInfo == null)
+                return;
+            
+            string realDir = Path.GetDirectoryName(currentExePath) ?? "";
+            string backupExePath = Path.Combine(realDir, $"imt_backup_{currentExeInfo.Name}");
+
+            if (File.Exists(backupExePath))
+                File.Delete(backupExePath);
+        }
+
+        internal async Task Update(Version version)
+        {
+            progress = 0;
+
+            if (string.IsNullOrWhiteSpace(currentExePath))
+            {
+                UpdateFailed($"Could not determine executable path");
+                return;
             }
 
-            updating = false;
+            if (!Releases.TryGetValue(version, out Release release))
+            {
+                UpdateFailed($"Unknown version {version}");
+                return;
+            }
+
+            ReleaseAsset asset = release.Assets.FirstOrDefault(asset => asset.Name.StartsWith(ReleaseNamePrefix));
+            if (asset == null)
+            {
+                UpdateFailed($"Could not find an asset matching your runtime \"{ReleaseNamePrefix}\"");
+                return;
+            }
+
+            Uri uri = new Uri(asset.BrowserDownloadUrl);
+            string fileName = Path.GetFileName(uri.AbsolutePath);
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                UpdateFailed($"Could not find an asset matching your runtime \"{ReleaseNamePrefix}\"");
+                return;
+            }
             
-            Console.WriteLine("Update done");
+            byte[] data = null;
+            try
+            {
+                using (WebClient webClient = new WebClient())
+                {
+                    webClient.DownloadProgressChanged += (obj, args) =>
+                    {
+                        progress = (1f / args.TotalBytesToReceive) * args.BytesReceived;
+                    };
+                    data = await webClient.DownloadDataTaskAsync(uri);
+                }
+            }
+            catch (Exception e)
+            {
+                UpdateFailed($"Failed to download update");
+                return;
+            }
+
+            string realDir = Path.GetDirectoryName(currentExePath) ?? "";
+            string updateExePath = Path.Combine(realDir, $"imt_update_{currentExeInfo.Name}");
+            
+            try
+            {
+                if(File.Exists(updateExePath))
+                    File.Delete(updateExePath);
+            
+                File.WriteAllBytes(updateExePath, data);
+            }
+            catch (Exception e)
+            {
+                UpdateFailed($"Failed installing update");
+                return;
+            }
+            
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = updateExePath,
+                });
+            }
+            catch (Exception e)
+            {
+                UpdateFailed($"Failed to start new process");
+                return;
+            }
+            
+            updating = false;
+            Environment.Exit(0);
+            
         }
         
-        internal void EmergencyUpdate()
+        private void UpdateFailed(string reason)
         {
-            // oops, something is broken! try to update
+            progress = 0;
+            updateFailed = true;
+            updateFailedReason = $"Ooops! Failed to {(targetVersion > CurrentVersion ? "upgrade" : "downgrade")} to version {targetVersion}! \n{reason} :< \n\n";
+            updating = false;
+        }
+        
+        internal async Task EmergencyUpdate()
+        {
+            #if(DEBUG)
+                Console.ReadLine();
+                return;
+            #endif
             
+            Console.WriteLine("------------------------------");
+            Console.WriteLine("Oooops, something broke badly!");
+            Console.WriteLine("Attempting emergency update!");
+
+            while (IsCheckingForUpdates)
+            {
+                await Task.Delay(500);
+            }
+
+            Version emergencyTarget = null;
+            
+            foreach (var version in Releases.Keys)
+            {
+                if (version != CurrentVersion)
+                {
+                    emergencyTarget = version;
+                    break;
+                }
+            }
+            
+            if (emergencyTarget != null)
+            {
+                Console.WriteLine($"Attempting emergency update to version {emergencyTarget}!");
+                await Update(emergencyTarget);
+            }
+            else
+            {
+                updateFailed = true;
+                updateFailedReason = "No update target version";
+            }
+
+            if (updateFailed)
+            {
+                Console.WriteLine($"Emergency update failed! {updateFailedReason}");
+                Console.ReadLine();
+            }
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿
 using System;
+using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -35,10 +37,11 @@ namespace ImTool
 
             if (window == null)
             {
-                updater.EmergencyUpdate();
+                updater.EmergencyUpdate().Wait();
                 Environment.Exit(1);
             }
             
+            updater.PostStartupChecks();
             window.SetUpdater(updater);
 
             if (IsMainMenuOverridden)
