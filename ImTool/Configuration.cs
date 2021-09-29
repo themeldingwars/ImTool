@@ -25,7 +25,7 @@ namespace ImTool
         public int BorderSize = 1;
         public bool VSync = false;
         public int FpsLimit = 144;
-        public GraphicsBackend GraphicsBackend = GraphicsBackend.Vulkan;
+        public GraphicsBackend GraphicsBackend = GraphicsBackend.OpenGL;
         public bool PowerSaving = true;
 
         public static T Load<T>(string toolDataPath = "") where T : Configuration
