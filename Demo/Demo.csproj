@@ -37,9 +37,5 @@
             <Visible>False</Visible>
         </Content>
     </ItemGroup>
-
-    <ItemGroup>
-        <None Remove="native\**" />
-    </ItemGroup>
     
 </Project>
