@@ -3,4 +3,4 @@
 	url = https://github.com/themeldingwars/ImGui.NET.git
 [submodule "ImTool/Lib/Veldrid"]
 	path = ImTool/Lib/Veldrid
-	url = https://github.com/mellinoe/Veldrid.git
+	url = https://github.com/themeldingwars/veldrid.git
