@@ -62,8 +62,14 @@ namespace ImTool
         public long LastUpdateCheck { get; private set; }
         public Dictionary<Version, Release> Releases { get; private set; } = new (10);
 
+        public bool ValidConfig => !(config.GithubReleaseName == null || config.GithubRepositoryName == null ||
+                                   config.GithubRepositoryOwner == null);
+
         public async Task CheckForUpdates()
         {
+            if(!ValidConfig)
+                return;
+
             // rate limit update checks
             if (Environment.TickCount64 - LastUpdateCheck < releaseCheckMinimumIntervalSeconds * 1000 || IsCheckingForUpdates)
                 return;
