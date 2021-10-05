@@ -51,6 +51,8 @@ namespace ImGuiNET
         private int _windowHeight;
         private Vector2 _scaleFactor = Vector2.One;
 
+        private bool _viewportsEnabled;
+
         // Image trackers
         private readonly Dictionary<TextureView, ResourceSetInfo> _setsByView
             = new Dictionary<TextureView, ResourceSetInfo>();
@@ -77,12 +79,13 @@ namespace ImGuiNET
         /// <summary>
         /// Constructs a new ImGuiController.
         /// </summary>
-        public unsafe ImGuiController(GraphicsDevice gd, Sdl2Window window, OutputDescription outputDescription, int width, int height, string iniFile)
+        public unsafe ImGuiController(GraphicsDevice gd, Sdl2Window window, OutputDescription outputDescription, int width, int height, string iniFile, bool viewportsEnabled)
         {
             _gd = gd;
             _window = window;
             _windowWidth = width;
             _windowHeight = height;
+            _viewportsEnabled = viewportsEnabled;
 
             IntPtr context = ImGui.CreateContext();
             ImGui.SetCurrentContext(context);
@@ -107,7 +110,12 @@ namespace ImGuiNET
             ImGui.GetIO().NativePtr->IniFilename = (byte*) pointer;
 
             io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
-            io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
+
+            if (_viewportsEnabled)
+            {
+                io.ConfigFlags |= ImGuiConfigFlags.ViewportsEnable;
+            }
+            
 
             ImGuiPlatformIOPtr platformIO = ImGui.GetPlatformIO();
             ImGuiViewportPtr mainViewport = platformIO.Viewports[0];
@@ -145,8 +153,12 @@ namespace ImGuiNET
             }
             io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
             io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
-            io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
-            io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
+
+            if (_viewportsEnabled)
+            {
+                io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
+                io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
+            }
             
             LoadFonts();
             
@@ -278,6 +290,9 @@ namespace ImGuiNET
 
         private unsafe delegate uint SDL_GetGlobalMouseState_t(int* x, int* y);
         private static SDL_GetGlobalMouseState_t p_sdl_GetGlobalMouseState;
+        
+        private unsafe delegate uint SDL_GetMouseState_t(int* x, int* y);
+        private static SDL_GetMouseState_t p_sdl_GetMouseState;
 
         private unsafe delegate int SDL_GetDisplayUsableBounds_t(int displayIndex, Rectangle* rect);
         private static SDL_GetDisplayUsableBounds_t p_sdl_GetDisplayUsableBounds_t;
@@ -540,6 +555,7 @@ namespace ImGuiNET
             if (_frameBegun)
             {
                 _frameBegun = false;
+                
                 ImGui.Render();
                 RenderImDrawData(ImGui.GetDrawData(), gd, cl, gd.MainSwapchain.Framebuffer, configPowerSaving);
 
@@ -696,11 +712,16 @@ namespace ImGuiNET
             {
                 p_sdl_GetGlobalMouseState = Sdl2Native.LoadFunction<SDL_GetGlobalMouseState_t>("SDL_GetGlobalMouseState");
             }
+            
+            if (p_sdl_GetMouseState == null)
+            {
+                p_sdl_GetMouseState = Sdl2Native.LoadFunction<SDL_GetMouseState_t>("SDL_GetMouseState");
+            }
 
             int x, y;
             unsafe
             {
-                uint buttons = p_sdl_GetGlobalMouseState(&x, &y);
+                uint buttons = _viewportsEnabled ? p_sdl_GetGlobalMouseState(&x, &y) : p_sdl_GetMouseState(&x, &y);
                 io.MouseDown[0] = (buttons & 0b0001) != 0;
                 io.MouseDown[1] = (buttons & 0b0100) != 0;
                 io.MouseDown[2] = (buttons & 0b0010) != 0;

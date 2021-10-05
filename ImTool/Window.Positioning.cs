@@ -1,10 +1,14 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using ImGuiNET;
 
 namespace ImTool
 {
     public partial class Window
     {
+        private Vector2 globalMousePos;
+        private bool mouseDownPrevious;
+        
         public WindowState WindowState
         {
             get { return config.WindowState; }
@@ -24,6 +28,8 @@ namespace ImTool
         {
             if(window.Focused)
             {
+                SDL.SDL.SDL_GetGlobalMouseState(out globalMousePos);
+                
                 HandleWindowResizing();
                 HandleWindowDragging();
                 HandleMouseCursor();
@@ -43,6 +49,8 @@ namespace ImTool
                         }
                     }
                 }
+
+                mouseDownPrevious = ImGui.IsMouseDown(ImGuiMouseButton.Left);
             }
 
             if (vsync != config.VSync)
@@ -53,10 +61,30 @@ namespace ImTool
 
             bool resized = windowBounds.Width != window.Width || windowBounds.Height != window.Height;
 
-            if (resized || windowBounds.X != window.Bounds.Left || windowBounds.Y != window.Bounds.Top)
+            if (floatersAllowed)
             {
-                windowBounds.X = window.Bounds.Left;
-                windowBounds.Y = window.Bounds.Top;
+                if (resized || windowBounds.X != window.Bounds.Left || windowBounds.Y != window.Bounds.Top)
+                {
+                    windowBounds.X = window.Bounds.Left;
+                    windowBounds.Y = window.Bounds.Top;
+                    windowBounds.Width = window.Bounds.Width;
+                    windowBounds.Height = window.Bounds.Height;
+
+                    titlebarBounds.X = windowBounds.Left + borderThickness;
+                    titlebarBounds.Y = windowBounds.Top + borderThickness;
+                    titlebarBounds.Width = windowBounds.Width - (borderThickness * 2);
+                    titlebarBounds.Height = titlebarHeight;
+
+                    contentBounds.X = windowBounds.Left + borderThickness;
+                    contentBounds.Y = titlebarBounds.Bottom;
+                    contentBounds.Width = windowBounds.Width - (borderThickness * 2);
+                    contentBounds.Height = windowBounds.Height - titlebarBounds.Height - (borderThickness * 2);
+                }
+            }
+            else
+            {
+                windowBounds.X = 0;
+                windowBounds.Y = 0;
                 windowBounds.Width = window.Bounds.Width;
                 windowBounds.Height = window.Bounds.Height;
 
@@ -70,6 +98,7 @@ namespace ImTool
                 contentBounds.Width = windowBounds.Width - (borderThickness * 2);
                 contentBounds.Height = windowBounds.Height - titlebarBounds.Height - (borderThickness * 2);
             }
+
 
             if (resized)
             {
@@ -119,7 +148,7 @@ namespace ImTool
                 return;
             }
 
-            if (windowStartDragPosition == null && ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            if (windowStartDragPosition == null && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !mouseDownPrevious)
             {
                 if (!mouseDownOnTitlebar && titlebarBounds.Contains(ImGui.GetMousePos()))
                 {
@@ -127,6 +156,7 @@ namespace ImTool
                     if (!ImGui.IsAnyItemHovered())
                     {
                         windowStartDragPosition = window.Bounds.Position;
+                        windowStartDragMousePosition = globalMousePos;
                     }
                 }
             }
@@ -181,26 +211,28 @@ namespace ImTool
             {
                 if (WindowState != WindowState.Normal)
                 {
-                    Vector2 mousePos = ImGui.GetMousePos();
-                    float xf = (mousePos.X - window.Bounds.Left) / (window.Bounds.Right - window.Bounds.Left);
+                    float xf = (globalMousePos.X - window.Bounds.Left) / (window.Bounds.Right - window.Bounds.Left);
 
                     WindowState = WindowState.Normal;
 
-                    window.X = (int)(mousePos.X - (window.Width * xf));
+                    window.X = (int)(globalMousePos.X - (window.Width * xf));
                     window.Y = (int)windowStartDragPosition.Value.Y;
                     windowStartDragPosition = window.Bounds.Position;
 
                 }
 
                 Vector2 pos = (Vector2)windowStartDragPosition;
-                pos += ImGui.GetMouseDragDelta();
+                Vector2 delta = globalMousePos - windowStartDragMousePosition;
+                
+                pos += delta;
+                
                 window.X = (int)pos.X;
                 window.Y = (int)pos.Y;
 
                 dockingMonitor = -1;
                 for (int i = 0; i < MonitorInfo.Bounds.Length; i++)
                 {
-                    Rect.Edge edge = MonitorInfo.Bounds[i].EdgeContains(ImGui.GetMousePos(), 8);
+                    Rect.Edge edge = MonitorInfo.Bounds[i].EdgeContains(globalMousePos, 8);
                     if(edge != Rect.Edge.None)
                     {
                         dockingMonitor = i;
@@ -217,9 +249,11 @@ namespace ImTool
                 return;
             }
 
-            Rect.Edge edge = windowBounds.EdgeContains(ImGui.GetMousePos(), 4);
+            Vector2 localPos = floatersAllowed ? ImGui.GetMousePos() :  globalMousePos - window.Bounds.Position;
+            
+            Rect.Edge edge = windowBounds.EdgeContains(localPos, 4);
             Rect.Edge lastEdge = edge;
-            if(mouseDownOnEdge != Rect.Edge.None)
+            if(mouseDownOnEdge != Rect.Edge.None && !ImGui.IsMouseDragging(ImGuiMouseButton.Left))
             {
                 lastEdge = mouseDownOnEdge;
             }
@@ -246,7 +280,7 @@ namespace ImTool
                     break;
             }
 
-            if (windowStartResizePosition == null && ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            if (windowStartResizePosition == null && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !mouseDownPrevious)
             {           
                 if (mouseDownOnEdge == Rect.Edge.None && edge != Rect.Edge.None )
                 {
@@ -255,6 +289,7 @@ namespace ImTool
                     {
                         windowStartResizePosition = window.Bounds.Position;
                         windowStartResizeSize = window.Bounds.Size;
+                        windowStartResizeMousePosition = globalMousePos;
                     }
                 }
             }
@@ -265,10 +300,10 @@ namespace ImTool
                 windowStartResizeSize = null;
             }
 
-            if (windowStartResizePosition != null && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+            if (windowStartResizePosition != null && ImGui.IsMouseDown(ImGuiMouseButton.Left))
             {
-                Vector2 delta = ImGui.GetMouseDragDelta();
-
+                Vector2 delta = (globalMousePos - windowStartResizeMousePosition);
+                
                 float width = windowStartResizeSize.Value.X;
                 float height = windowStartResizeSize.Value.Y;
                 Vector2 pos = (Vector2)windowStartResizePosition;

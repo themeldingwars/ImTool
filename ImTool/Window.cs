@@ -50,7 +50,9 @@ namespace ImTool
         private uint[] windowBorderColor;
         private uint titlebarColor;
         private Vector2? windowStartDragPosition;
+        private Vector2 windowStartDragMousePosition;
         private Vector2? windowStartResizePosition;
+        private Vector2 windowStartResizeMousePosition;
         private Vector2? windowStartResizeSize;
         private Vector2 windowMinSize;
         private bool mouseDownOnTitlebar;
@@ -162,14 +164,12 @@ namespace ImTool
                     UpdateWindow();
                     controller.Update(deltaSeconds, snapshot);
                     SubmitUI();
-
                     if (!window.Exists)
                     {
                         break;
                     }
 
                     Draw();
-
                     if (restartGD)
                     {
                         config.WindowState = WindowState;
@@ -204,9 +204,8 @@ namespace ImTool
             Environment.Exit(-1);
         }
         
-        private void SubmitUI()
+        private unsafe void SubmitUI()
         {
-            
             ImGui.SetNextWindowSize(windowBounds.Size);
             ImGui.SetNextWindowPos(windowBounds.Position);
             MainWindowStyleOverrides(true);
@@ -240,7 +239,6 @@ namespace ImTool
                     // here
                 }
             }
-
         }
 
         private void BeginMainMenuBar()
