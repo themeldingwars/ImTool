@@ -2,6 +2,7 @@
 using System.IO;
 using System.Numerics;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Veldrid;
 
 namespace ImTool
@@ -25,8 +26,11 @@ namespace ImTool
         public int BorderSize = 1;
         public bool VSync = false;
         public int FpsLimit = 144;
-        public GraphicsBackend GraphicsBackend = GraphicsBackend.OpenGL;
+        public GraphicsBackend GraphicsBackend = Window.GetDefaultGraphicsBackend();
         public bool PowerSaving = true;
+        
+        public bool AllowFloatingWindows = true;
+        [JsonIgnore] public bool DisableFloatingWindows = false;
 
         public static T Load<T>(string toolDataPath = "") where T : Configuration
         {

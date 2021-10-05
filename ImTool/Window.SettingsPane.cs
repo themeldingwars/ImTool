@@ -26,7 +26,7 @@ namespace ImTool
             ImGui.SliderInt("Target FPS", ref config.FpsLimit, 20, 200);
             if (ImGui.BeginCombo("Graphics backend", config.GraphicsBackend.ToString()))
             {
-                foreach (GraphicsBackend backend in Enum.GetValues<GraphicsBackend>())
+                foreach (GraphicsBackend backend in SupportedGraphicsBackends)
                 {
                     if (ImGui.Selectable(backend.ToString(), config.GraphicsBackend == backend))
                     {
@@ -36,9 +36,26 @@ namespace ImTool
                 }
                 ImGui.EndCombo();
             }
+            
             ImGui.Checkbox("Enable VSync  ", ref vsync);
             ImGui.SameLine();
             ImGui.Checkbox("Experimental power saving", ref config.PowerSaving);
+            
+            if (!config.DisableFloatingWindows)
+            {
+                if (config.GraphicsBackend == GraphicsBackend.OpenGL)
+                {
+                    ThemeManager.ApplyOverride(ImGuiCol.Text, ImToolColors.LogWarn);
+                    ImGui.AlignTextToFramePadding();
+                    ImGui.Text("OpenGl does not support floating windows!");
+                    ThemeManager.ResetOverride(ImGuiCol.Text);
+                }
+                else
+                {
+                    if(ImGui.Checkbox("Allow floating windows", ref config.AllowFloatingWindows))
+                        restartGD = true;
+                }
+            }
             ImGui.NewLine();
             
             Widgets.RenderTitle(config.Title ?? "Unknown");
