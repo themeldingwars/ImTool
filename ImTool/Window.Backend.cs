@@ -45,6 +45,12 @@ namespace ImTool
         
         private void SetupGD()
         {
+            if (window != null)
+            {
+                window.Close();
+                window = null;
+            }
+            
             if(controller != null)
                 controller.Dispose();
             
@@ -53,20 +59,13 @@ namespace ImTool
             
             if(graphicsDevice != null)
                 graphicsDevice.Dispose();
-
-            if (window != null)
-            {
-                window.Close();
-                window = null;
-            }
-
+            
             if (!IsGraphicsBackendSupported(config.GraphicsBackend))
             {
                 config.GraphicsBackend = GetDefaultGraphicsBackend();
                 config.Save();
             }
-
-
+            
             floatersAllowed = !config.DisableFloatingWindows && config.AllowFloatingWindows && config.GraphicsBackend != GraphicsBackend.OpenGL;
             string iniFile = Path.Combine(config.ToolDataPath, "Config", AppDomain.CurrentDomain.FriendlyName + ".ImGui.ini");
             SDL_WindowFlags flags =  SDL_WindowFlags.Shown | SDL_WindowFlags.Borderless | (config.GraphicsBackend == GraphicsBackend.OpenGL ? SDL_WindowFlags.OpenGL : 0);

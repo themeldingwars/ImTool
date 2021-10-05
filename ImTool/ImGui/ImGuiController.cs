@@ -964,6 +964,15 @@ namespace ImGuiNET
         /// </summary>
         public void Dispose()
         {
+            
+            ImVector<ImGuiViewportPtr> viewports = ImGui.GetPlatformIO().Viewports;
+            for (int i = 1; i < viewports.Size; i++)
+            {
+                ImGuiViewportPtr v = viewports[i];
+                VeldridImGuiWindow window = ((VeldridImGuiWindow)GCHandle.FromIntPtr(v.PlatformUserData).Target);
+                if (window != null) window.Dispose();
+            }
+            
             _vertexBuffer.Dispose();
             _indexBuffer.Dispose();
             _projMatrixBuffer.Dispose();
