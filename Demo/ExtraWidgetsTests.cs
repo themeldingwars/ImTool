@@ -87,9 +87,8 @@ namespace Demo
                 ImGui.Text($"Dialog result: {FileDialogResult}");
 
                 FileBrowser.Draw();
-
-                ImGui.End();
             }
+            ImGui.End();
 
             DrawHexView();
             
@@ -179,8 +178,8 @@ namespace Demo
                 
                 ImGui.Text($"Hovered highlight: {SelectedHexHighlight.HoverName}");
                 
-                ImGui.End();
             }
+            ImGui.End();
         }
     }
 }

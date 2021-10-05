@@ -109,10 +109,11 @@ namespace ImTool
 
         public void DrawWindow()
         {
-            if (ImGui.Begin(Name)) {
+            if (ImGui.Begin(Name))
+            {
                 Draw();
-                ImGui.End();
             }
+            ImGui.End();
         }
 
         public void AddLog(LogLevel level, TCategoryType cat, string message)
