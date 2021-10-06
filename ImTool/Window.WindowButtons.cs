@@ -10,9 +10,10 @@ namespace ImTool
         
         private void SubmitWindowButtons()
         {
+            int nBtn = 1;
             ThemeManager.ApplyOverride(ImGuiStyleVar.FrameRounding, 0);
             ThemeManager.ApplyOverride(ImGuiCol.Button, new Vector4());
-            ImGui.SetCursorPos(WindowButtonPosition(1));
+            ImGui.SetCursorPos(WindowButtonPosition(nBtn));
 
 
             ThemeManager.PushFont(Font.FAS);
@@ -20,28 +21,33 @@ namespace ImTool
             {
                 Exit();
             }
+            nBtn++;
             
-            
-            ImGui.SetCursorPos(WindowButtonPosition(2));
-            if (ImGui.Button(WindowState == WindowState.Maximized ? "\uf2d2" : "\uf2d0", windowButtonSize))
+            if (!config.DisableResizing)
             {
-                if (WindowState == WindowState.Maximized)
+                ImGui.SetCursorPos(WindowButtonPosition(nBtn));
+                if (ImGui.Button(WindowState == WindowState.Maximized ? "\uf2d2" : "\uf2d0", windowButtonSize))
                 {
-                    WindowState = config.PreviousWindowState;
+                    if (WindowState == WindowState.Maximized)
+                    {
+                        WindowState = config.PreviousWindowState;
+                    }
+                    else
+                    {
+                        WindowState = WindowState.Maximized;
+                    }
                 }
-                else
-                {
-                    WindowState = WindowState.Maximized;
-                }
+                nBtn++;
             }
 
-            ImGui.SetCursorPos(WindowButtonPosition(3));
+            ImGui.SetCursorPos(WindowButtonPosition(nBtn));
             if (ImGui.Button("\uf2d1", windowButtonSize))
             {
                 window.WindowState = Veldrid.WindowState.Minimized;
             }
+            nBtn++;
             
-            ImGui.SetCursorPos(WindowButtonPosition(4));
+            ImGui.SetCursorPos(WindowButtonPosition(nBtn));
             if (updater != null && updater.UpdateAvailable)
             {
                 ThemeManager.ApplyOverride(ImGuiCol.Button, ImToolColors.ToolVersionUpgrade);
@@ -62,7 +68,7 @@ namespace ImTool
             
             if (windowButtons.Count > 0)
             {
-                Vector2 pos = WindowButtonPosition(4);
+                Vector2 pos = WindowButtonPosition(nBtn);
                 Vector2 separatorTop = windowBounds.Position + pos + new Vector2(-2, 1);
                 Vector2 separatorBottom = separatorTop + new Vector2(0, windowButtonSize.Y - 2);
                 ImGui.GetWindowDrawList().AddLine(separatorTop, separatorBottom, 0x33000000, 1);

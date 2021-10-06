@@ -165,7 +165,7 @@ namespace ImTool
                 mouseDownOnTitlebar = false;
                 windowStartDragPosition = null;
 
-                if (dockingMonitor != -1)
+                if (dockingMonitor != -1 && !config.DisableResizing)
                 {
                     switch (dockingEdge)
                     {
@@ -244,7 +244,7 @@ namespace ImTool
         }
         private void HandleWindowResizing()
         {
-            if(WindowState != WindowState.Normal || mouseDownOnTitlebar)
+            if(WindowState != WindowState.Normal || mouseDownOnTitlebar || config.DisableResizing)
             {
                 return;
             }
