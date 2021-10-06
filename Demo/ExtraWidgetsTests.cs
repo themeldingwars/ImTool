@@ -65,6 +65,12 @@ namespace Demo
                 if (ImGui.Button("Open File")) {
                     FileBrowser.OpenFile((fielPath) => { FileDialogResult = fielPath; });
                 }
+                
+                ImGui.SameLine();
+                
+                if (ImGui.Button("Open Text File")) {
+                    FileBrowser.OpenFile((fielPath) => { FileDialogResult = fielPath; }, searchPattern: "*.txt");
+                }
 
                 ImGui.SameLine();
 

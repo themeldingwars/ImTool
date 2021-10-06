@@ -22,30 +22,31 @@ namespace ImTool
         public static List<EntryInfo> CurrentEntries = new();
         public static string          SaveFilePath   = "";
 
-        private static Action<string>   OpenFileCb  = null;
-        private static Action<string[]> OpenFilesCb = null;
-        private static Action<string>   SelectDirCb = null;
-        private static Action<string>   SaveFileCb  = null;
+        private static Action<string>   OpenFileCb    = null;
+        private static Action<string[]> OpenFilesCb   = null;
+        private static Action<string>   SelectDirCb   = null;
+        private static Action<string>   SaveFileCb    = null;
+        private static string           SearchPattern = "*";
 
-        public static void OpenFile(Action<string> openFileCb, string baseDir = null)
+        public static void OpenFile(Action<string> openFileCb, string baseDir = null, string searchPattern = null)
         {
             DiaglogMode = Mode.OpenFile;
             OpenFileCb  = openFileCb;
-            Open(baseDir);
+            Open(baseDir, searchPattern);
         }
 
-        public static void OpenFiles(Action<string[]> openFilesCb, string baseDir = null)
+        public static void OpenFiles(Action<string[]> openFilesCb, string baseDir = null, string searchPattern = null)
         {
             DiaglogMode = Mode.OpenMultiple;
             OpenFilesCb = openFilesCb;
-            Open(baseDir);
+            Open(baseDir, searchPattern);
         }
 
-        public static void SaveFile(Action<string> saveFileCb, string baseDir = null)
+        public static void SaveFile(Action<string> saveFileCb, string baseDir = null, string searchPattern = null)
         {
             DiaglogMode = Mode.SaveFile;
             SaveFileCb  = saveFileCb;
-            Open(baseDir);
+            Open(baseDir, searchPattern);
         }
 
         public static void SelectDir(Action<string> selectDirCb, string baseDir = null)
@@ -55,8 +56,9 @@ namespace ImTool
             Open(baseDir);
         }
 
-        private static void Open(string baseDir = null)
+        private static void Open(string baseDir = null, string searchPattern = null)
         {
+            SearchPattern = searchPattern;
             ChangeDir(baseDir ?? LastDir);
             IsOpen = true;
             DirHistory.Clear();
@@ -139,12 +141,13 @@ namespace ImTool
                         IsOpen                = false;
                         ShowOverrideFilePopup = false;
                     }
+
                     ImGui.SameLine();
-                    
+
                     if (ImGui.Button("Cancel")) {
                         ShowOverrideFilePopup = false;
                     }
-                    
+
                     ImGui.EndPopup();
                 }
 
@@ -196,7 +199,7 @@ namespace ImTool
                 ShowOverrideFilePopup = false;
                 IsOpen                = false;
             }
-        } 
+        }
 
         private static void DrawBottomBar()
         {
@@ -298,9 +301,9 @@ namespace ImTool
                     foreach (var drive in drives) {
                         var dirEntry = new EntryInfo
                         {
-                            EntryType    = EntryInfo.EntryTypes.Dir,
-                            Name         = drive,
-                            Path         = drive,
+                            EntryType = EntryInfo.EntryTypes.Dir,
+                            Name      = drive,
+                            Path      = drive,
                         };
                         CurrentEntries.Add(dirEntry);
                     }
@@ -330,7 +333,7 @@ namespace ImTool
                 }
 
                 if (DiaglogMode != Mode.SelectDir) {
-                    var files = Directory.GetFiles(dir);
+                    var files = Directory.GetFiles(dir, SearchPattern ?? "*");
                     foreach (var fileStr in files) {
                         var fileInfo = new FileInfo(fileStr);
                         var fileEntry = new EntryInfo
