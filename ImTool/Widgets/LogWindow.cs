@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ImGuiNET;
 
 namespace ImTool
@@ -83,15 +84,15 @@ namespace ImTool
 
                                 ImGui.TableNextColumn();
                                 ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.ColorConvertFloat4ToU32(color));
-                                ImGui.Text($"{line.Time}");
+                                if (line.ParentIdx <= 0) ImGui.Text($"{line.Time}");
 
                                 ImGui.TableNextColumn();
                                 ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.ColorConvertFloat4ToU32(color));
-                                ImGui.Text($"{line.Level}");
+                                if (line.ParentIdx <= 0) ImGui.Text($"{line.Level}");
 
                                 ImGui.TableNextColumn();
                                 ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.ColorConvertFloat4ToU32(color));
-                                ImGui.Text($"{CategoriesNames[line.Category]}");
+                                if (line.ParentIdx <= 0) ImGui.Text($"{CategoriesNames[line.Category]}");
 
                                 ImGui.TableNextColumn();
                                 ImGui.TableSetBgColor(ImGuiTableBgTarget.CellBg, ImGui.ColorConvertFloat4ToU32(color));
@@ -100,7 +101,7 @@ namespace ImTool
                         }
                     }
                 }
-                
+
                 clipper.End();
 
                 ImGui.EndTable();
@@ -109,22 +110,44 @@ namespace ImTool
 
         public void DrawWindow()
         {
-            if (ImGui.Begin(Name))
-            {
+            if (ImGui.Begin(Name)) {
                 Draw();
             }
+
             ImGui.End();
         }
 
         public void AddLog(LogLevel level, TCategoryType cat, string message)
         {
-            Lines.Add(new LogLine
+            var logLine = new LogLine
             {
-                Time     = DateTime.Now.ToLongTimeString(),
-                Level    = level,
-                Category = (int) (object) cat,
-                Line     = message
-            });
+                Time      = DateTime.Now.ToLongTimeString(),
+                Level     = level,
+                Category  = (int) (object) cat,
+                Line      = message,
+                ParentIdx = -1
+            };
+
+            // If the message has new lines split those across multiple lines so scrolling works right
+            if (message.Contains('\n')) {
+                var lines     = message.Split('\n');
+                var parentIdx = Lines.Count;
+                logLine.Line = lines.First();
+                Lines.Add(logLine);
+
+                foreach (var line in lines[1..]) {
+                    Lines.Add(new LogLine
+                    {
+                        Line      = line,
+                        ParentIdx = parentIdx,
+                        Category  = logLine.Category,
+                        Level     = logLine.Level
+                    });
+                }
+            }
+            else {
+                Lines.Add(logLine);
+            }
         }
 
         public void AddLogTrace(TCategoryType cat, string message) => AddLog(LogLevel.Trace, cat, message);
@@ -151,6 +174,7 @@ namespace ImTool
             public LogLevel Level;
             public int      Category;
             public string   Line;
+            public int      ParentIdx;
         }
     }
 }

@@ -147,6 +147,11 @@ namespace Demo
             TestLogWindow.AddLogTrace(TestLogCategories.Nyaa,"Test message 2 :>");
             TestLogWindow.AddLogWarn(TestLogCategories.Examples,"Test message 3 :>");
             TestLogWindow.AddLogError(TestLogCategories.Test,"Test message 4 :>");
+            
+            TestLogWindow.AddLogInfo(TestLogCategories.Test,@"Multiple line log test
+Line 2
+Line 3
+Line 4");
 
             for (int i = 0; i < 500; i++) {
                 TestLogWindow.AddLogInfo(TestLogCategories.Test,$"Test message {i + 5} :>");
