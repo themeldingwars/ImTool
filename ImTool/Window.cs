@@ -209,7 +209,7 @@ namespace ImTool
             ImGui.SetNextWindowSize(windowBounds.Size);
             ImGui.SetNextWindowPos(windowBounds.Position);
             MainWindowStyleOverrides(true);
-            ImGui.Begin("MainWindow",  ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.NoFocusOnAppearing |  ImGuiWindowFlags.NoBringToFrontOnFocus);
+            ImGui.Begin("MainWindow",  ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoDocking);
             MainWindowStyleOverrides(false);
 
             if (borderThickness > 0)

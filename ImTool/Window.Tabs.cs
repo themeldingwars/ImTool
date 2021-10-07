@@ -53,7 +53,7 @@ namespace ImTool
                     Vector2 dockSize = hasMainMenuBar ? contentBounds.Size - new Vector2(0, 20): contentBounds.Size;
                     
                     ImGui.SetCursorPos(dockPos);
-                    ImGui.DockSpace(ImGui.GetID(tab.Name+"TabDockspace"), dockSize, ImGuiDockNodeFlags.None);
+                    ImGui.DockSpace(tab.DockspaceID, dockSize, tab.DockspaceFlags);
                     
                     TabStyleOverrides(false);
                     tab.SubmitContent();

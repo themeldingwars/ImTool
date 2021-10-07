@@ -1,4 +1,5 @@
 using System.Reflection;
+using ImGuiNET;
 
 namespace ImTool
 {
@@ -6,6 +7,9 @@ namespace ImTool
     {
 
         public abstract string Name { get; } 
+        public uint DockspaceID => ImGui.GetID($"{Name}TabDockspace");
+        public ImGuiDockNodeFlags DockspaceFlags = ImGuiDockNodeFlags.None;
+        
         public abstract void SubmitContent();
         public virtual void SubmitSettings(bool active) { }
         public virtual void SubmitMainMenu() { }
