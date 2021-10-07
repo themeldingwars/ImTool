@@ -185,7 +185,7 @@ namespace ImTool
                 ImGui.Text(updateFailedReason);
                 ImGui.Separator();
 
-                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetWindowContentRegionWidth() - 80);
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionMax().X - 80);
                 if (ImGui.Button("Ooooops!", new Vector2(80, 0)))
                 {
                     updateFailedReason = string.Empty;
