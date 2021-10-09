@@ -94,7 +94,13 @@
         <Compile Include="Lib\ImGui.Net\src\ImPlot.NET\**\*.cs">
             <Link>Lib\ImGui\ImPlot.NET\%(RecursiveDir)/%(FileName)%(Extension)</Link>
         </Compile>
-        
+
+        <Compile Include="Lib\Veldrid\src\Veldrid.MetalBindings\**\*.cs">
+            <Link>Lib\Veldrid\Veldrid.MetalBindings\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\Veldrid\src\Veldrid.OpenGLBindings\**\*.cs">
+            <Link>Lib\Veldrid\Veldrid.OpenGLBindings\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
         <Compile Include="Lib\Veldrid\src\Veldrid\**\*.cs">
             <Link>Lib\Veldrid\Veldrid\%(RecursiveDir)/%(FileName)%(Extension)</Link>
         </Compile>
@@ -103,12 +109,6 @@
         </Compile>
         <Compile Include="Lib\Veldrid\src\Veldrid.ImGui\**\*.cs">
             <Link>Lib\Veldrid\Veldrid.ImGui\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        </Compile>
-        <Compile Include="Lib\Veldrid\src\Veldrid.MetalBindings\**\*.cs">
-            <Link>Lib\Veldrid\Veldrid.MetalBindings\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        </Compile>
-        <Compile Include="Lib\Veldrid\src\Veldrid.OpenGlBindings\**\*.cs">
-            <Link>Lib\Veldrid\Veldrid.OpenGlBindings\%(RecursiveDir)/%(FileName)%(Extension)</Link>
         </Compile>
         <Compile Include="Lib\Veldrid\src\Veldrid.RenderDoc\**\*.cs">
             <Link>Lib\Veldrid\Veldrid.RenderDoc\%(RecursiveDir)/%(FileName)%(Extension)</Link>
