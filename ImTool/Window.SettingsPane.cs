@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Veldrid;
@@ -56,6 +57,16 @@ namespace ImTool
                         restartGD = true;
                 }
             }
+            
+            if (ImGui.Button("Reset DockSpace", new Vector2(-1, 20)))
+            {
+                Tab tab = tabs.FirstOrDefault(tab => tab == activeTab);
+                if (tab != null)
+                {
+                    tab.ResetDockSpace();   
+                }
+            }
+            
             ImGui.NewLine();
             
             Widgets.RenderTitle(config.Title ?? "Unknown");
@@ -148,6 +159,7 @@ namespace ImTool
                 
                 ImGui.Separator();
                 ImGui.NewLine();
+
                 foreach (Tab tab in tabs)
                 {
                     tab.SubmitSettings(tab == activeTab);

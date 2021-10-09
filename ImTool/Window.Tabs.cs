@@ -48,14 +48,13 @@ namespace ImTool
                         OnSubmitGlobalMenuBarOverride();
                         EndMainMenuBar();
                     }
-
+                    
+                    TabStyleOverrides(false);
+                    
                     Vector2 dockPos = ImGui.GetCursorPos() + (hasMainMenuBar ? new Vector2(1, 17) : new Vector2(1, -3));
                     Vector2 dockSize = hasMainMenuBar ? contentBounds.Size - new Vector2(0, 20): contentBounds.Size;
                     
-                    ImGui.SetCursorPos(dockPos);
-                    ImGui.DockSpace(tab.DockspaceID, dockSize, tab.DockspaceFlags);
-                    
-                    TabStyleOverrides(false);
+                    tab.SubmitDockSpace(dockPos, dockSize);
                     tab.SubmitContent();
                     ImGui.EndTabItem();
                 }

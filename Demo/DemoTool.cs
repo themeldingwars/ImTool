@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using ImGuiNET;
 using ImTool;
 using ImTool.SDL;
@@ -69,19 +70,40 @@ namespace Demo
     public class DemoTab : Tab
     {
         public override string Name { get; } = "ImTool Demo Tab";
+
+        protected override void CreateDockSpace(Vector2 size)
+        {
+            // split
+            uint topId;
+            uint bottomId;
+            uint topLeftId;
+            uint topRightId;
+            uint topRightTopId;
+            uint topRightBottomId;
+            
+            ImGui.DockBuilderSplitNode(DockSpaceID, ImGuiDir.Up, 0.80f, out topId, out bottomId);
+            ImGui.DockBuilderSplitNode(topId, ImGuiDir.Left, 0.60f, out topLeftId, out topRightId);
+            ImGui.DockBuilderSplitNode(topRightId, ImGuiDir.Up, 0.70f, out topRightTopId, out topRightBottomId);
+            
+            // assign
+            ImGui.DockBuilderDockWindow("Hex View", topLeftId);
+            ImGui.DockBuilderDockWindow("Extensions test :>", topRightTopId);
+            ImGui.DockBuilderDockWindow("Dear ImGui Demo", topRightTopId);
+            ImGui.DockBuilderDockWindow("Dear ImGui Metrics/Debugger", topRightBottomId);
+            ImGui.DockBuilderDockWindow("Test Log Window", bottomId);
+            
+        }
+        
         public override void SubmitContent()
         {
             ImGui.ShowDemoWindow();
             ImGui.ShowMetricsWindow();
             ExtraWidgetsTests.Draw();
         }
-
         public override void SubmitSettings(bool active)
         {
             ImGui.Text($"Submitted from DemoTab.SubmitSettings({active})");
         }
-
-
         public override void SubmitMainMenu()
         {
             if (ImGui.BeginMenu("File"))
