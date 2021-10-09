@@ -15,12 +15,11 @@
 
         <PackageId>ImTool</PackageId>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.2.0</PackageVersion>
+        <PackageVersion>1.2.2</PackageVersion>
         <Description>Tool UI based on ImGui.NET</Description>
         <PackageProjectUrl>https://github.com/themeldingwars/ImTool</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/themeldingwars/ImTool/blob/master/LICENSE</PackageLicenseUrl>
-
-        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+        <DefineConstants>$(DefineConstants);VALIDATE_USAGE</DefineConstants>
     </PropertyGroup>
     
     <ItemGroup>
@@ -83,30 +82,56 @@
     </ItemGroup>
     
     <ItemGroup>
-      <ProjectReference Include="Lib\ImGui.Net\src\ImGui.NET\ImGui.NET.csproj" />
-      <ProjectReference Include="Lib\ImGui.Net\src\ImGuizmo.NET\ImGuizmo.NET.csproj" />
-      <ProjectReference Include="Lib\ImGui.Net\src\ImNodes.NET\ImNodes.NET.csproj" />
-      <ProjectReference Include="Lib\ImGui.Net\src\ImPlot.NET\ImPlot.NET.csproj" />
-      <ProjectReference Include="Lib\Veldrid\src\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
-      <ProjectReference Include="Lib\Veldrid\src\Veldrid.ImGui\Veldrid.ImGui.csproj" />
-      <ProjectReference Include="Lib\Veldrid\src\Veldrid.MetalBindings\Veldrid.MetalBindings.csproj" />
-      <ProjectReference Include="Lib\Veldrid\src\Veldrid.OpenGLBindings\Veldrid.OpenGLBindings.csproj" />
-      <ProjectReference Include="Lib\Veldrid\src\Veldrid.RenderDoc\Veldrid.RenderDoc.csproj" />
-      <ProjectReference Include="Lib\Veldrid\src\Veldrid.SDL2\Veldrid.SDL2.csproj" />
-      <ProjectReference Include="Lib\Veldrid\src\Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj" />
-      <ProjectReference Include="Lib\Veldrid\src\Veldrid.Utilities\Veldrid.Utilities.csproj" />
-      <ProjectReference Include="Lib\Veldrid\src\Veldrid\Veldrid.csproj" />
+        <Compile Include="Lib\ImGui.Net\src\ImGui.NET\**\*.cs">
+            <Link>Lib\ImGui\ImGui.NET\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\ImGui.Net\src\ImGuizmo.NET\**\*.cs">
+            <Link>Lib\ImGui\ImGuizmo.NET\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\ImGui.Net\src\ImNodes.NET\**\*.cs">
+            <Link>Lib\ImGui\ImNodes.NET\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\ImGui.Net\src\ImPlot.NET\**\*.cs">
+            <Link>Lib\ImGui\ImPlot.NET\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        
+        <Compile Include="Lib\Veldrid\src\Veldrid\**\*.cs">
+            <Link>Lib\Veldrid\Veldrid\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\Veldrid\src\Veldrid.ImageSharp\**\*.cs">
+            <Link>Lib\Veldrid\Veldrid.ImageSharp\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\Veldrid\src\Veldrid.ImGui\**\*.cs">
+            <Link>Lib\Veldrid\Veldrid.ImGui\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\Veldrid\src\Veldrid.MetalBindings\**\*.cs">
+            <Link>Lib\Veldrid\Veldrid.MetalBindings\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\Veldrid\src\Veldrid.OpenGlBindings\**\*.cs">
+            <Link>Lib\Veldrid\Veldrid.OpenGlBindings\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\Veldrid\src\Veldrid.RenderDoc\**\*.cs">
+            <Link>Lib\Veldrid\Veldrid.RenderDoc\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\Veldrid\src\Veldrid.SDL2\**\*.cs" Exclude="Lib\Veldrid\src\Veldrid.SDL2\**\HashHelper.cs">
+            <Link>Lib\Veldrid\Veldrid.SDL2\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\Veldrid\src\Veldrid.StartupUtilities\**\*.cs">
+            <Link>Lib\Veldrid\Veldrid.StartupUtilities\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
+        <Compile Include="Lib\Veldrid\src\Veldrid.Utilities\**\*.cs">
+            <Link>Lib\Veldrid\Veldrid.Utilities\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        </Compile>
     </ItemGroup>
     
     <ItemGroup>
       <PackageReference Include="K4os.Hash.xxHash" Version="1.0.6" />
+      <PackageReference Include="NativeLibraryLoader" Version="1.0.12" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
       <PackageReference Include="Octokit" Version="0.50.0" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-rc0002" />
+      <PackageReference Include="Vk" Version="1.0.25" />
+      <PackageReference Include="Vortice.D3DCompiler" Version="1.9.56" />
+      <PackageReference Include="Vortice.Direct3D11" Version="1.9.56" />
     </ItemGroup>
-    
-    <Target DependsOnTargets="BuildOnlySettings;ResolveReferences" Name="CopyProjectReferencesToPackage">
-        <ItemGroup>
-            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
-        </ItemGroup>
-    </Target>
 </Project>
