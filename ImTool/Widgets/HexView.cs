@@ -260,7 +260,7 @@ namespace ImTool
                             ImGui.Text(HighlightsArr[ByteDataArr[index].HighlightIdx].HoverName);
                             ImGui.SameLine();
                             ImGui.Text($"({HighlightsArr[ByteDataArr[index].HighlightIdx].Offset}, {HighlightsArr[ByteDataArr[index].HighlightIdx].Length})");
-                            OnHighlightSectionHover(HighlightsArr[ByteDataArr[index].HighlightIdx]);
+                            OnHighlightSectionHover?.Invoke(HighlightsArr[ByteDataArr[index].HighlightIdx]);
                         }
 
                         if (ShowParsedValuesInTT) {
