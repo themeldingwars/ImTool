@@ -45,8 +45,8 @@ namespace Demo
 
             // tool window has been created at this point
             // its time to load your tabs now
+            window.AddTab(new DemoWorkspaceTab());
             window.AddTab(new DemoTab());
-            window.AddTab(new DemoTab2());
             config.AdditionalIntToBeSaved = 1234123;
             
             window.AddWindowButton("Test button", () =>
@@ -64,16 +64,19 @@ namespace Demo
         }
     }
     
-    public class DemoTab : Tab
+    
+    
+
+    
+    
+    public class DemoWorkspaceTab : WorkspaceTab
     {
-        public override string Name { get; } = "ImTool Demo Tab";
-        public override ImGuiDockNodeFlags DockSpaceFlags { get; } =  ImGuiDockNodeFlags.PassthruCentralNode;
+        public override string WorkspaceName { get; } = "Workspace";
+        protected override WorkspaceFlags Flags { get; } = WorkspaceFlags.None;
+        public override string Name { get; } = "Workspace demo";
         
         protected override void CreateDockSpace(Vector2 size)
         {
-            // if using PassthruCentralNode dock your workspaces first
-            ImGui.DockBuilderDockWindow("Workspace", DockSpaceID);
-
             // split
             ImGui.DockBuilderSplitNode(DockSpaceID, ImGuiDir.Left, 0.30f, out uint leftId, out uint centerId);
             ImGui.DockBuilderSplitNode(centerId, ImGuiDir.Down, 0.20f, out uint centerBottomId, out uint centerTopId);
@@ -89,21 +92,17 @@ namespace Demo
             
         }
         
-        public override void SubmitContent()
+        protected override void SubmitContent()
         {
-            ImGuiWindowFlags workspaceWindowFlags =  ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar;
-            ImGui.Begin("Workspace", workspaceWindowFlags);
-            ImGui.End();
-            
             ImGui.ShowDemoWindow();
             ImGui.ShowMetricsWindow();
             ExtraWidgetsTests.Draw();
         }
-        public override void SubmitSettings(bool active)
+        protected override void SubmitSettings(bool active)
         {
-            ImGui.Text($"Submitted from DemoTab.SubmitSettings({active})");
+            ImGui.Text($"Submitted from WorkspaceTab.SubmitSettings({active})");
         }
-        public override void SubmitMainMenu()
+        protected override void SubmitMainMenu()
         {
             if (ImGui.BeginMenu("File"))
             {
@@ -129,13 +128,12 @@ namespace Demo
                 ImGui.EndMenu();
             }
         }
-        
     }
     
-    public class DemoTab2 : Tab
+    public class DemoTab : Tab
     {
-        public override string Name { get; } = "ImTool Demo Tab 2";
-        public override void SubmitContent()
+        public override string Name { get; } = "Second tab";
+        protected override void SubmitContent()
         {
             ImGui.Begin("Winduu");
             ImGui.ShowStyleEditor();
@@ -143,13 +141,13 @@ namespace Demo
             
         }
 
-        public override void SubmitSettings(bool active)
+        protected override void SubmitSettings(bool active)
         {
-            ImGui.Text($"Submitted from DemoTab2.SubmitSettings({active})");
+            ImGui.Text($"Submitted from DemoTab.SubmitSettings({active})");
         }
 
 
-        public override void SubmitMainMenu()
+        protected override void SubmitMainMenu()
         {
             if (ImGui.BeginMenu("Fileuu"))
             {
