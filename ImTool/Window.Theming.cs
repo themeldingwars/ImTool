@@ -60,8 +60,8 @@ namespace ImTool
                 ThemeManager.ApplyOverride(ImGuiStyleVar.ItemInnerSpacing, new Vector2(1, 0));
                 ThemeManager.ApplyOverride(ImGuiCol.TabActive, ThemeManager.Current[ImGuiCol.WindowBg]);
                 ThemeManager.ApplyOverride(ImGuiCol.MenuBarBg, ThemeManager.Current[ImGuiCol.WindowBg]);
-                ThemeManager.ApplyOverride(ImGuiCol.Tab, new Vector4(0.18f, 0.18f, 0.18f, 1.00f));
-                
+                ThemeManager.ApplyOverride(ImGuiCol.Tab, new Vector4(0, 0, 0, 0.05f));
+
             }
             else
             {
