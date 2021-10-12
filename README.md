@@ -4,11 +4,11 @@
 [![NuGet](https://img.shields.io/nuget/v/ImTool.svg)](https://www.nuget.org/packages/ImTool)
 [![MIT License](https://img.shields.io/github/license/themeldingwars/ImTool.svg)](https://github.com/themeldingwars/ImTool/blob/master/LICENSE)
 
-Cross-platform tool framework for Firefall ❤
+Cross-platform tool framework based on Dear ImGui ❤
 
 Documentation coming soon™... Please use the Demo project as reference for now :> 
 
-![Demo-win-x64_iVwI74EYU5](https://user-images.githubusercontent.com/5398037/135187068-cc28308a-50d8-401e-8c61-92733494343b.png)
+![imtool](https://user-images.githubusercontent.com/5398037/137033797-e66044b0-0ab0-4cd6-889e-e5d4c8fa6f88.png)
 
 
 **This repository is using submodules, so in order to properly clone it use this**
