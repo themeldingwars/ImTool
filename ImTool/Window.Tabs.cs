@@ -43,7 +43,7 @@ namespace ImTool
                 {
                     hasMainMenuBar = true;
                     BeginMainMenuBar();
-                    tab.SubmitMainMenu();
+                    tab.InternalSubmitMainMenu();
                     EndMainMenuBar();
                 }
                 else if (OnSubmitGlobalMenuBarOverride != null)
@@ -59,8 +59,8 @@ namespace ImTool
                 Vector2 dockPos = ImGui.GetCursorPos() + (hasMainMenuBar ? new Vector2(1, 17) : new Vector2(1, -3));
                 Vector2 dockSize = hasMainMenuBar ? contentBounds.Size - new Vector2(0, 20): contentBounds.Size;
                 
-                tab.SubmitDockSpace(dockPos, dockSize);
-                tab.SubmitContent();
+                tab.InternalSubmitDockSpace(dockPos, dockSize);
+                tab.InternalSubmitContent();
                 ImGui.EndTabItem();
                 
             }

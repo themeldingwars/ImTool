@@ -162,7 +162,7 @@ namespace ImTool
 
                 foreach (Tab tab in tabs)
                 {
-                    tab.SubmitSettings(tab == activeTab);
+                    tab.InternalSubmitSettings(tab == activeTab);
                 }                
             }
         }

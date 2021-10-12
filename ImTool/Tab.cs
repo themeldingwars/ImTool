@@ -13,13 +13,19 @@ namespace ImTool
         public virtual ImGuiDockNodeFlags DockSpaceFlags { get; } = ImGuiDockNodeFlags.None;
         private bool resetDockSpace = false;
         
-        public abstract void SubmitContent();
-        public virtual void SubmitSettings(bool active) { }
-        public virtual void SubmitMainMenu() { }
         public void ResetDockSpace() => resetDockSpace = true;
-        protected virtual void CreateDockSpace(Vector2 size) { }
         
-        internal unsafe void SubmitDockSpace(Vector2 pos, Vector2 size)
+        protected abstract void SubmitContent();
+        protected virtual void SubmitSettings(bool active) { }
+        protected virtual void SubmitMainMenu() { }
+        protected virtual void CreateDockSpace(Vector2 size) { }
+
+
+        internal virtual void InternalSubmitContent() => SubmitContent();
+        internal virtual void InternalSubmitSettings(bool active) => SubmitSettings(active);
+        internal virtual void InternalSubmitMainMenu() => SubmitMainMenu();
+        internal virtual void InternalCreateDockSpace(Vector2 size) => CreateDockSpace(size);
+        internal unsafe void InternalSubmitDockSpace(Vector2 pos, Vector2 size)
         {
             bool first = ImGui.DockBuilderGetNode(DockSpaceID).NativePtr == null;
             
@@ -39,7 +45,7 @@ namespace ImTool
                 ImGui.DockBuilderAddNode(DockSpaceID, DockSpaceFlags | ImGuiDockNodeFlags.DockSpace);
                 ImGui.DockBuilderSetNodeSize(DockSpaceID, size);
                 
-                CreateDockSpace(size);
+                InternalCreateDockSpace(size);
             
                 ImGui.DockBuilderFinish(DockSpaceID);
             }
@@ -49,7 +55,7 @@ namespace ImTool
         {
             get
             {
-                MethodInfo m = GetType().GetMethod("SubmitMainMenu");
+                MethodInfo m = GetType().GetMethod("SubmitMainMenu", BindingFlags.Instance | BindingFlags.NonPublic);
                 return m.GetBaseDefinition().DeclaringType != m.DeclaringType;
             }
         }
