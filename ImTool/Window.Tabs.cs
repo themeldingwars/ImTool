@@ -26,38 +26,43 @@ namespace ImTool
             foreach (Tab tab in tabs)
             {
                 TabStyleOverrides(true);
-                if (ImGui.BeginTabItem(tab.Name))
+                if (!ImGui.BeginTabItem(tab.Name))
                 {
-                    if (activeTab != tab)
-                    {
-                        activeTab = tab;
-                    }
-
-                    bool hasMainMenuBar = false;
-                    if (tab.IsMainMenuOverridden)
-                    {
-                        hasMainMenuBar = true;
-                        BeginMainMenuBar();
-                        tab.SubmitMainMenu();
-                        EndMainMenuBar();
-                    }
-                    else if (OnSubmitGlobalMenuBarOverride != null)
-                    {
-                        hasMainMenuBar = true;
-                        BeginMainMenuBar();
-                        OnSubmitGlobalMenuBarOverride();
-                        EndMainMenuBar();
-                    }
-                    
+                    ImGui.DockSpace(tab.DockSpaceID, new Vector2(0,0), ImGuiDockNodeFlags.KeepAliveOnly);
                     TabStyleOverrides(false);
-                    
-                    Vector2 dockPos = ImGui.GetCursorPos() + (hasMainMenuBar ? new Vector2(1, 17) : new Vector2(1, -3));
-                    Vector2 dockSize = hasMainMenuBar ? contentBounds.Size - new Vector2(0, 20): contentBounds.Size;
-                    
-                    tab.SubmitDockSpace(dockPos, dockSize);
-                    tab.SubmitContent();
-                    ImGui.EndTabItem();
+                    continue;
                 }
+                
+                if (activeTab != tab)
+                {
+                    activeTab = tab;
+                }
+
+                bool hasMainMenuBar = false;
+                if (tab.IsMainMenuOverridden)
+                {
+                    hasMainMenuBar = true;
+                    BeginMainMenuBar();
+                    tab.SubmitMainMenu();
+                    EndMainMenuBar();
+                }
+                else if (OnSubmitGlobalMenuBarOverride != null)
+                {
+                    hasMainMenuBar = true;
+                    BeginMainMenuBar();
+                    OnSubmitGlobalMenuBarOverride();
+                    EndMainMenuBar();
+                }
+                
+                TabStyleOverrides(false);
+                
+                Vector2 dockPos = ImGui.GetCursorPos() + (hasMainMenuBar ? new Vector2(1, 17) : new Vector2(1, -3));
+                Vector2 dockSize = hasMainMenuBar ? contentBounds.Size - new Vector2(0, 20): contentBounds.Size;
+                
+                tab.SubmitDockSpace(dockPos, dockSize);
+                tab.SubmitContent();
+                ImGui.EndTabItem();
+                
             }
             
             TabStyleOverrides(false);

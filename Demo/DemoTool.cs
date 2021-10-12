@@ -62,40 +62,39 @@ namespace Demo
             // changes will be saved to disk when this method returns
             
         }
-        
-
     }
-
-
+    
     public class DemoTab : Tab
     {
         public override string Name { get; } = "ImTool Demo Tab";
-
+        public override ImGuiDockNodeFlags DockSpaceFlags { get; } =  ImGuiDockNodeFlags.PassthruCentralNode;
+        
         protected override void CreateDockSpace(Vector2 size)
         {
+            // if using PassthruCentralNode dock your workspaces first
+            ImGui.DockBuilderDockWindow("Workspace", DockSpaceID);
+
             // split
-            uint topId;
-            uint bottomId;
-            uint topLeftId;
-            uint topRightId;
-            uint topRightTopId;
-            uint topRightBottomId;
-            
-            ImGui.DockBuilderSplitNode(DockSpaceID, ImGuiDir.Up, 0.80f, out topId, out bottomId);
-            ImGui.DockBuilderSplitNode(topId, ImGuiDir.Left, 0.60f, out topLeftId, out topRightId);
-            ImGui.DockBuilderSplitNode(topRightId, ImGuiDir.Up, 0.70f, out topRightTopId, out topRightBottomId);
-            
+            ImGui.DockBuilderSplitNode(DockSpaceID, ImGuiDir.Left, 0.30f, out uint leftId, out uint centerId);
+            ImGui.DockBuilderSplitNode(centerId, ImGuiDir.Down, 0.20f, out uint centerBottomId, out uint centerTopId);
+            ImGui.DockBuilderSplitNode(centerTopId, ImGuiDir.Right, 0.40f, out uint centerRightId, out uint centerLeftId);
+            ImGui.DockBuilderSplitNode(centerRightId, ImGuiDir.Down, 0.40f, out uint centerRightBottomId, out uint centerRightTopId);
+
             // assign
-            ImGui.DockBuilderDockWindow("Hex View", topLeftId);
-            ImGui.DockBuilderDockWindow("Extensions test :>", topRightTopId);
-            ImGui.DockBuilderDockWindow("Dear ImGui Demo", topRightTopId);
-            ImGui.DockBuilderDockWindow("Dear ImGui Metrics/Debugger", topRightBottomId);
-            ImGui.DockBuilderDockWindow("Test Log Window", bottomId);
+            //ImGui.DockBuilderDockWindow("Hex View", topLeftId);
+            ImGui.DockBuilderDockWindow("Test Log Window", centerBottomId);
+            ImGui.DockBuilderDockWindow("Dear ImGui Demo", leftId);
+            ImGui.DockBuilderDockWindow("Dear ImGui Metrics/Debugger", centerRightTopId);
+            ImGui.DockBuilderDockWindow("Extensions test :>", centerRightBottomId);
             
         }
         
         public override void SubmitContent()
         {
+            ImGuiWindowFlags workspaceWindowFlags =  ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoNav | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar;
+            ImGui.Begin("Workspace", workspaceWindowFlags);
+            ImGui.End();
+            
             ImGui.ShowDemoWindow();
             ImGui.ShowMetricsWindow();
             ExtraWidgetsTests.Draw();
