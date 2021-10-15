@@ -69,7 +69,7 @@ namespace Demo
                 ImGui.SameLine();
                 
                 if (ImGui.Button("Open Text File")) {
-                    FileBrowser.OpenFile((fielPath) => { FileDialogResult = fielPath; }, searchPattern: "*.txt");
+                    FileBrowser.OpenFile((fielPath) => { FileDialogResult = fielPath; }, searchPattern: "*.txt|*.log");
                 }
 
                 ImGui.SameLine();

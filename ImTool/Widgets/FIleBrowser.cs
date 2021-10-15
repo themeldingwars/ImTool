@@ -333,8 +333,22 @@ namespace ImTool
                 }
 
                 if (DiaglogMode != Mode.SelectDir) {
-                    var files = Directory.GetFiles(dir, SearchPattern ?? "*");
-                    foreach (var fileStr in files) {
+                    var filesList = new List<string>();
+                    
+                    // Allow multiple patterns
+                    if (SearchPattern != null) {
+                        var searchPatterns = SearchPattern.Split("|");
+                        foreach (var pattern in searchPatterns) {
+                            var patternFiles = Directory.GetFiles(dir, pattern);
+                            filesList.AddRange(patternFiles);
+                        }
+                    }
+                    else {
+                        var files = Directory.GetFiles(dir, SearchPattern ?? "*");
+                        filesList.AddRange(files);
+                    }
+                    
+                    foreach (var fileStr in filesList) {
                         var fileInfo = new FileInfo(fileStr);
                         var fileEntry = new EntryInfo
                         {
