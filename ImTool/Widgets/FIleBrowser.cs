@@ -69,11 +69,16 @@ namespace ImTool
         {
             ImGui.SetNextWindowSize(new Num.Vector2(800, 400), ImGuiCond.Once);
             if (ImGui.BeginPopupModal(POPUP_ID, ref IsOpen)) {
-                if (ImGui.ArrowButton("Back", ImGuiDir.Left)) GoBack();
+                ImGui.Spacing();
+                ImGui.SameLine();
+                
+                ThemeManager.PushFont(Font.FAS);
+                if (ImGui.Button("")) GoBack();
                 ImGui.SameLine();
 
-                if (ImGui.ArrowButton("Up", ImGuiDir.Up)) GoUp();
+                if (ImGui.Button("")) GoUp();
                 ImGui.SameLine();
+                ThemeManager.PopFont();
 
                 ImGui.SetNextItemWidth(-1);
                 if (ImGui.InputText("###CurrentDir", ref CurrentDir, 400, ImGuiInputTextFlags.EnterReturnsTrue)) {
@@ -105,12 +110,16 @@ namespace ImTool
 
                             ImGui.SameLine();
 
+                            ThemeManager.PushFont(Font.FAS);
                             if (entry.EntryType == EntryInfo.EntryTypes.Dir) {
-                                ImGui.Text("[DIR]  ");
+                                ImGui.Text("");
                             }
                             else {
-                                ImGui.Text("[FILE] ");
+                                ImGui.Text("");
+                                ImGui.SameLine(28);
+                                ImGui.Spacing();
                             }
+                            ThemeManager.PopFont();
 
                             ImGui.SameLine();
 
