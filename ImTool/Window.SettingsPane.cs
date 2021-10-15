@@ -82,21 +82,21 @@ namespace ImTool
                 {
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn(); ImGui.Text("Author");
-                    ImGui.TableNextColumn(); ImGui.Text(config.GithubRepositoryOwner);
+                    ImGui.TableNextColumn(); Widgets.Hyperlink(config.GithubRepositoryOwner, $"https://github.com/{config.GithubRepositoryOwner}");
                 }
 
                 if (config.GithubRepositoryName != null)
                 {
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn(); ImGui.Text("Repository");
-                    ImGui.TableNextColumn(); ImGui.Text(config.GithubRepositoryName);
+                    ImGui.TableNextColumn(); Widgets.Hyperlink(config.GithubRepositoryName, $"https://github.com/{config.GithubRepositoryOwner}/{config.GithubRepositoryName}");
                 }
                 
                 if (config.GithubReleaseName != null)
                 {
                     ImGui.TableNextRow();
-                    ImGui.TableNextColumn(); ImGui.Text("Release name");
-                    ImGui.TableNextColumn(); ImGui.Text(config.GithubReleaseName);
+                    ImGui.TableNextColumn(); ImGui.Text("Release");
+                    ImGui.TableNextColumn(); Widgets.Hyperlink(config.GithubReleaseName, $"https://github.com/{config.GithubRepositoryOwner}/{config.GithubRepositoryName}/releases");
                 }
                 
                 ImGui.EndTable();
