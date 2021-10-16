@@ -65,6 +65,24 @@ namespace Demo
                 if (ImGui.Button("Open File")) {
                     FileBrowser.OpenFile((fielPath) => { FileDialogResult = fielPath; });
                 }
+
+                ImGui.SameLine();
+                
+                if (Widgets.IconButton("", "Icon button test")) {
+                    TestLogWindow.AddLogInfo( TestLogCategories.Test,"Icon button clicked :D");
+                }
+                
+                ImGui.SameLine();
+                
+                if (Widgets.IconButton("", "Icon 2", new Vector4(1, 0, 0, 1))) {
+                    TestLogWindow.AddLogInfo( TestLogCategories.Test,"Icon 2 button clicked :D");
+                }
+                
+                ImGui.SameLine();
+                
+                if (Widgets.IconButton("")) {
+                    TestLogWindow.AddLogInfo( TestLogCategories.Test,"Icon 3 button clicked :D");
+                }
                 
                 ImGui.SameLine();
                 
