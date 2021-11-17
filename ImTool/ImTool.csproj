@@ -15,7 +15,7 @@
 
         <PackageId>ImTool</PackageId>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.2.7</PackageVersion>
+        <PackageVersion>1.2.8</PackageVersion>
         <Description>Tool UI based on ImGui.NET</Description>
         <PackageProjectUrl>https://github.com/themeldingwars/ImTool</PackageProjectUrl>
         <PackageLicenseUrl>https://github.com/themeldingwars/ImTool/blob/master/LICENSE</PackageLicenseUrl>
