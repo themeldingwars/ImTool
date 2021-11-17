@@ -128,14 +128,19 @@ namespace ImTool
             config.Theme = Current.Name;
             config.Save();
 
+            ApplyTheme(Current);
+        }
+        
+        // Apply a custom theme from a theme class
+        public static void ApplyTheme(Theme theme)
+        {
             unsafe
             {
                 ImGuiStyle* stylePtr = ImGui.GetStyle().NativePtr;
-                Marshal.StructureToPtr(Current.Style, (IntPtr)stylePtr, true);
+                Marshal.StructureToPtr(theme.Style, (IntPtr)stylePtr, true);
             }
 
             OnThemeChanged?.Invoke();
-
         }
 
         public static unsafe void ApplyOverride(ImGuiStyleVar variable, object value)
