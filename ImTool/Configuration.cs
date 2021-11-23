@@ -32,6 +32,7 @@ namespace ImTool
         public bool AllowFloatingWindows = true;
         [JsonIgnore] public bool DisableFloatingWindows = false;
         [JsonIgnore] public bool DisableResizing = false;
+        [JsonIgnore] public bool DisableSettingsPane = false;
 
         public static T Load<T>(string toolDataPath = "") where T : Configuration
         {

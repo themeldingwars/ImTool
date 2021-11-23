@@ -45,22 +45,25 @@ namespace ImTool
             {
                 window.WindowState = Veldrid.WindowState.Minimized;
             }
-            nBtn++;
-            
-            ImGui.SetCursorPos(WindowButtonPosition(nBtn));
-            if (updater != null && updater.UpdateAvailable)
+
+            if (!config.DisableSettingsPane)
             {
-                ThemeManager.ApplyOverride(ImGuiCol.Button, ImToolColors.ToolVersionUpgrade);
-                
-                if (ImGui.Button("\uf013", windowButtonSize))
-                    ImGui.OpenPopup("imtool_setting_popup");
-                
-                ThemeManager.ResetOverride(ImGuiCol.Button);
-            }
-            else
-            {
-                if (ImGui.Button("\uf013", windowButtonSize))
-                    ImGui.OpenPopup("imtool_setting_popup");
+                nBtn++;
+                ImGui.SetCursorPos(WindowButtonPosition(nBtn));
+                if (updater != null && updater.UpdateAvailable)
+                {
+                    ThemeManager.ApplyOverride(ImGuiCol.Button, ImToolColors.ToolVersionUpgrade);
+                    
+                    if (ImGui.Button("\uf013", windowButtonSize))
+                        ImGui.OpenPopup("imtool_setting_popup");
+                    
+                    ThemeManager.ResetOverride(ImGuiCol.Button);
+                }
+                else
+                {
+                    if (ImGui.Button("\uf013", windowButtonSize))
+                        ImGui.OpenPopup("imtool_setting_popup");
+                }
             }
             
             ThemeManager.PopFont();
@@ -92,17 +95,21 @@ namespace ImTool
             
             ThemeManager.ResetOverride(ImGuiStyleVar.FrameRounding);
             ThemeManager.ResetOverride(ImGuiCol.Button);
-            
-            if(ImGui.IsPopupOpen("imtool_setting_popup"))
+
+            if (!config.DisableSettingsPane)
             {
-                ImGui.SetNextWindowPos(new Vector2(windowBounds.Right - settingsWidth - 2, windowBounds.Top + titlebarHeight + 2));
-                ImGui.SetNextWindowSize(new Vector2(settingsWidth, windowBounds.Height - titlebarHeight - 4));
-            }
-            
-            if (ImGui.BeginPopup("imtool_setting_popup", ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove))
-            {
-                SubmitSettingPane();
-                ImGui.EndPopup();
+                if (ImGui.IsPopupOpen("imtool_setting_popup"))
+                {
+                    ImGui.SetNextWindowPos(new Vector2(windowBounds.Right - settingsWidth - 2,
+                        windowBounds.Top + titlebarHeight + 2));
+                    ImGui.SetNextWindowSize(new Vector2(settingsWidth, windowBounds.Height - titlebarHeight - 4));
+                }
+
+                if (ImGui.BeginPopup("imtool_setting_popup", ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoMove))
+                {
+                    SubmitSettingPane();
+                    ImGui.EndPopup();
+                }
             }
         }
                 
