@@ -623,10 +623,6 @@ namespace ImGuiNET
 
             _frameBegun = true;
             ImGui.NewFrame();
-
-            ImGui.Text($"Main viewport Position: {ImGui.GetPlatformIO().Viewports[0].Pos}");
-            ImGui.Text($"Main viewport Size: {ImGui.GetPlatformIO().Viewports[0].Size}");
-            ImGui.Text($"MoouseHoveredViewport: {ImGui.GetIO().MouseHoveredViewport}");
         }
 
         private unsafe void UpdateMonitors()
