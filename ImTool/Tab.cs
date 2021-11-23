@@ -15,6 +15,9 @@ namespace ImTool
         
         public void ResetDockSpace() => resetDockSpace = true;
         
+        public virtual void Load() { }
+        public virtual void Unload() { }
+        
         protected abstract void SubmitContent();
         protected virtual void SubmitSettings(bool active) { }
         protected virtual void SubmitMainMenu() { }

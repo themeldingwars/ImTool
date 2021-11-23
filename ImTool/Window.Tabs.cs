@@ -12,13 +12,19 @@ namespace ImTool
         public void AddTab(Tab tab)
         {
             if (!tabs.Contains(tab))
+            {
+                tab.Load();
                 tabs.Add(tab);
+            }
         }
 
         public void RemoveTab(Tab tab)
         {
             if (tabs.Contains(tab))
+            {
                 tabs.Remove(tab);
+                tab.Unload();
+            }
         }
 
         private void SubmitTabs()
