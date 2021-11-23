@@ -10,7 +10,7 @@
         <Company>The Melding Wars</Company>
         <Authors>freakbyte</Authors>
         <Version>1.0.0</Version>
-        <AssemblyVersion>1.0.1.1</AssemblyVersion>
+        <AssemblyVersion>1.0.1.2</AssemblyVersion>
         <RepositoryUrl>https://github.com/themeldingwars/ImTool</RepositoryUrl>
     </PropertyGroup>
 
