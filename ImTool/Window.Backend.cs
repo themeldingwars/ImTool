@@ -50,6 +50,8 @@ namespace ImTool
                 window.Close();
                 window = null;
             }
+         
+            ClearTextureBindings();
             
             if(controller != null)
                 controller.Dispose();
