@@ -14,9 +14,9 @@ namespace ImTool
 {
     public abstract class Tool<TTool, TConfig> where TConfig : Configuration where TTool : Tool<TTool, TConfig>
     {
-        protected TConfig config;
-        protected Window window;
-        protected Updater updater;
+        public TConfig Config;
+        public Window Window;
+        public Updater Updater;
         
         public Tool()
         {
@@ -25,35 +25,35 @@ namespace ImTool
 
             Directory.CreateDirectory(toolDataBasePath);
             
-            config = Configuration.Load<TConfig>(toolDataBasePath);
-            updater = new Updater(config);
+            Config = Configuration.Load<TConfig>(toolDataBasePath);
+            Updater = new Updater(Config);
             
             if(!Initialize(Environment.GetCommandLineArgs()))
                 return;
             
-            updater.CheckForUpdates();
+            Updater.CheckForUpdates();
             
-            window = Window.Create(config).Result;
+            Window = Window.Create(Config).Result;
 
-            if (window == null)
+            if (Window == null)
             {
-                updater.EmergencyUpdate().Wait();
+                Updater.EmergencyUpdate().Wait();
                 Environment.Exit(1);
             }
             
-            updater.PostStartupChecks();
-            window.SetUpdater(updater);
+            Updater.PostStartupChecks();
+            Window.SetUpdater(Updater);
 
             if (IsMainMenuOverridden)
             {
-                window.OnSubmitGlobalMenuBarOverride = SubmitMainMenu;
+                Window.OnSubmitGlobalMenuBarOverride = SubmitMainMenu;
             }
             
-            window.OnExit = () =>
+            Window.OnExit = () =>
             {
                 Unload();
-                window = null;
-                updater = null;
+                Window = null;
+                Updater = null;
             };
             
             Load();
@@ -81,7 +81,7 @@ namespace ImTool
         public static async Task Run()
         {
             TTool instance = Activator.CreateInstance<TTool>();
-            while (instance.window != null)
+            while (instance.Window != null)
             {
                 await Task.Delay(50);
             }
