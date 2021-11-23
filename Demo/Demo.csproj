@@ -37,5 +37,10 @@
             <Visible>False</Visible>
         </Content>
     </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Images\*.png" />
+        <EmbeddedResource Include="Images\*.png" />
+    </ItemGroup>
     
 </Project>

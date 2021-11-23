@@ -1,8 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Numerics;
+using System.Reflection;
 using ImGuiNET;
 using ImTool;
 using ImTool.SDL;
+using Veldrid.ImageSharp;
 
 namespace Demo
 {
@@ -19,6 +22,7 @@ namespace Demo
             GithubRepositoryOwner = "themeldingwars";
             GithubRepositoryName  = "ImTool";
             GithubReleaseName     = "Demo";
+            DisableSettingsPane   = false;
         }
     }
     
@@ -45,11 +49,11 @@ namespace Demo
 
             // tool window has been created at this point
             // its time to load your tabs now
-            window.AddTab(new DemoWorkspaceTab());
-            window.AddTab(new DemoTab());
-            config.AdditionalIntToBeSaved = 1234123;
+            Window.AddTab(new DemoWorkspaceTab(this));
+            Window.AddTab(new DemoTab());
+            Config.AdditionalIntToBeSaved = 1234123;
             
-            window.AddWindowButton("Test button", () =>
+            Window.AddWindowButton("Test button", () =>
             {
                 Console.WriteLine("Test window button clicked :>");
             });
@@ -64,17 +68,18 @@ namespace Demo
         }
     }
     
-    
-    
-
-    
-    
     public class DemoWorkspaceTab : WorkspaceTab
     {
+        // if access to tool, config, updater or main window is needed
+        // pass a ref to the tool in the constructor, the rest can be reached from there
+        private DemoTool tool;
+        public DemoWorkspaceTab(DemoTool tool) => this.tool = tool;
+
         public override string WorkspaceName { get; } = "Workspace";
         protected override WorkspaceFlags Flags { get; } = WorkspaceFlags.None;
         public override string Name { get; } = "Workspace demo";
         
+        // if you want a custom default docking layout, this is the place to do that
         protected override void CreateDockSpace(Vector2 size)
         {
             // split
@@ -91,17 +96,62 @@ namespace Demo
             ImGui.DockBuilderDockWindow("Extensions test :>", centerRightBottomId);
             
         }
-        
+
+        // load gets called when the tab gets added to the window
+        // this is a good time to load resources, images etc needed by the tab
+
+        private ImageSharpTexture testImage;
+        public override void Load()
+        {
+            // image test
+            Stream resFilestream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"Demo.Images.Merch.png");
+            testImage = new ImageSharpTexture(resFilestream);
+        }
+
+        // unload gets called when the tab is removed from the window
+        // time to do some cleanup :>
+        public override void Unload()
+        {
+            // image test
+            tool.Window.DisposeTextureBinding(testImage);
+            testImage = null;
+        }
+
+        // here you can submit your own windows
+        // happens on every frame
         protected override void SubmitContent()
         {
             ImGui.ShowDemoWindow();
             ImGui.ShowMetricsWindow();
             ExtraWidgetsTests.Draw();
+            
+            // image test
+            ImGui.Begin("Test Image");
+            ImGui.Image(tool.Window.GetOrCreateTextureBinding(testImage), new Vector2(96, 96));
+            ImGui.End();
         }
+
+        // the "workspace" is the central node / free space in a tab
+        // you can change its behavior by overriding the Flags property on this tab
+        // for instance, WorkspaceFlags.SingleWorkspace is great if you have a small tool with a single tab
+        // since it will disable docking in the workspace and remove the inner tab bar
+        // it might also be a good idea to set AllowFloatingWindows = false in the config constructor to disable viewports
+        // if you're using this mode
+        //
+        // you can sumbit controls directly to the workspace from this override as the workspace is contained in a imgui window
+        protected override void SubmitWorkspaceContent()
+        {
+            
+        }
+
+        // anything you submit here appears on the settings pane
+        // the "active" bool tells you if this tab is currently active
         protected override void SubmitSettings(bool active)
         {
             ImGui.Text($"Submitted from WorkspaceTab.SubmitSettings({active})");
         }
+        
+        // submit your file menu etc from here :)
         protected override void SubmitMainMenu()
         {
             if (ImGui.BeginMenu("File"))
@@ -133,6 +183,16 @@ namespace Demo
     public class DemoTab : Tab
     {
         public override string Name { get; } = "Second tab";
+        
+        public override void Load()
+        {
+            
+        }
+        public override void Unload()
+        {
+            
+        }
+        
         protected override void SubmitContent()
         {
             ImGui.Begin("Winduu");
