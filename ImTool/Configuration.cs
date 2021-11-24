@@ -13,9 +13,8 @@ namespace ImTool
         [JsonIgnore] public string ConfigurationFilePath;
         [JsonIgnore] public string ToolDataPath;
         
-        // tool name / window title
         [JsonIgnore] public string Title = "ImTool";
-        
+
         // github info is optional, but the built in updater relies on these
         [JsonIgnore] public string GithubRepositoryOwner;
         [JsonIgnore] public string GithubRepositoryName;

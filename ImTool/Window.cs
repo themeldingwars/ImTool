@@ -62,10 +62,14 @@ namespace ImTool
         private Rect.Edge dockingEdge;
         
         public ExitDelegate OnExit;
+
+        public string Title;
         
         internal Window(Configuration config)
         {
             this.config = config;
+            Title = config.Title ?? "Untitled";
+            
             ThemeManager.OnThemeChanged += OnThemeChange;
 
             windowBounds = new Rect();
@@ -133,6 +137,10 @@ namespace ImTool
             {
                 while (window.Exists)
                 {
+                    // update window title
+                    if (window.Title != Title)
+                        window.Title = Title;
+                    
                     long currentFrameTicks = sw.ElapsedTicks;
                     float deltaSeconds = (currentFrameTicks - previousFrameTicks) / (float)Stopwatch.Frequency;
 
