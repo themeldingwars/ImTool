@@ -41,14 +41,14 @@ namespace ImTool
             {
                 return;
             }
-            
+            config = configuration;
             themesDirectory = Path.Combine(configuration.ToolDataPath, "Themes");
-            Directory.CreateDirectory(themesDirectory);
+            
+            if(!config.DisableJsonThemes)
+                Directory.CreateDirectory(themesDirectory);
             
             initialized = true;
-
-            config = configuration;
-
+            
             VariableFields = new Dictionary<string, FieldInfo>();
             ColorFields = new Dictionary<ImGuiCol, FieldInfo>();
 
@@ -104,7 +104,10 @@ namespace ImTool
 
             Themes.Add(ImGuiLight.Name, ImGuiLight);
             Themes.Add(ImGuiDark.Name, ImGuiDark);
+            Themes.Add("CorporateGrey", CorporateGrey.Generate(config.DisableJsonThemes ? null : Path.Combine(config.ToolDataPath, "Themes", "CorporateGrey.json")));
             
+            ReloadThemes();
+            SetTheme(config.Theme);
         }
 
         private static void ApplyTheme(string name)
@@ -132,6 +135,9 @@ namespace ImTool
         }
         
         // Apply a custom theme from a theme class
+        // ! No need for this, please use this instead:
+        // ! ThemeManager.Themes.Add("name", theme)
+        // ! ThemeManager.SetTheme("name");
         public static void ApplyTheme(Theme theme)
         {
             unsafe
@@ -194,9 +200,14 @@ namespace ImTool
         }
         public static void ReloadThemes()
         {
+            if (config.DisableJsonThemes)
+            {
+                ApplyTheme(config.Theme);
+                return;
+            }
+            
             Directory.CreateDirectory(themesDirectory);
             string[] themePaths = Directory.GetFiles(themesDirectory, "*.json");
-            List<Theme> themes = new List<Theme>();
 
             foreach (string themePath in themePaths)
             {

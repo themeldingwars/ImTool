@@ -10,7 +10,7 @@ namespace ImTool
 {
     public static class CorporateGrey
     {
-        public static void Generate(string outputFile)
+        public static Theme Generate(string outputFile = null)
         {
             Theme theme = new Theme("CorporateGrey", "malamanteau", true);
 
@@ -86,8 +86,10 @@ namespace ImTool
             theme[ImGuiCol.TabUnfocusedActive] = new Vector4(0.33f, 0.33f, 0.33f, 1.00f);
             //theme[ImGuiCol.DockingPreview] = new Vector4(0.85f, 0.85f, 0.85f, 0.28f);
 
-            File.WriteAllText(outputFile, Theme.Serialize(theme));
-            
+            if(!string.IsNullOrWhiteSpace(outputFile))
+                File.WriteAllText(outputFile, Theme.Serialize(theme));
+
+            return theme;
         }
     }
 }

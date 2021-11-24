@@ -81,9 +81,6 @@ namespace ImTool
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
             
             ThemeManager.Initialize(config);
-            CorporateGrey.Generate(Path.Combine(config.ToolDataPath, "Themes", "CorporateGrey.json"));
-            ThemeManager.ReloadThemes();
-            ThemeManager.SetTheme(config.Theme);
         }
         
         public static async Task<Window> Create(Configuration config)
