@@ -28,14 +28,16 @@ namespace ImTool
         public int FpsLimit = 144;
         public GraphicsBackend GraphicsBackend = Window.GetDefaultGraphicsBackend();
         public bool PowerSaving = true;
-        
         public bool AllowFloatingWindows = true;
+        
         [JsonIgnore] public bool DisableFloatingWindows = false;
         [JsonIgnore] public bool DisableResizing = false;
         [JsonIgnore] public bool DisableSettingsPane = false;
         [JsonIgnore] public bool DisableUserPersistence = false;
         [JsonIgnore] public bool DisableImGuiPersistence = false;
         [JsonIgnore] public bool DisableJsonThemes = false;
+        
+        [JsonIgnore] public bool DisableUpdater = false;
         
 
         public static T Load<T>(string toolDataPath = "") where T : Configuration

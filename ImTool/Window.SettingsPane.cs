@@ -102,7 +102,7 @@ namespace ImTool
                 ImGui.EndTable();
             }
             
-            if (updater.ValidConfig)
+            if (!config.DisableUpdater && updater.ValidConfig)
             {
                 ImGui.NewLine();
                 Widgets.RenderTitle("Releases");

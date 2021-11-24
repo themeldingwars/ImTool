@@ -67,7 +67,7 @@ namespace ImTool
 
         public async Task CheckForUpdates()
         {
-            if(!ValidConfig)
+            if(config.DisableUpdater || !ValidConfig)
                 return;
 
             // rate limit update checks
