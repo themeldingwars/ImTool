@@ -23,9 +23,11 @@ namespace ImTool
             string toolDataBasePath = typeof(TTool).FullName != null ? 
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ImTool", typeof(TTool).FullName) : "";
 
-            Directory.CreateDirectory(toolDataBasePath);
-            
             Config = Configuration.Load<TConfig>(toolDataBasePath);
+            
+            if(!Config.DisableJsonThemes || !Config.DisableUserPersistence || !Config.DisableImGuiPersistence)
+                Directory.CreateDirectory(toolDataBasePath);
+            
             Updater = new Updater(Config);
             
             if(!Initialize(Environment.GetCommandLineArgs()))
