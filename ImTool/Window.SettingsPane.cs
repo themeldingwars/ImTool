@@ -11,64 +11,69 @@ namespace ImTool
     {
         private void SubmitSettingPane()
         {
-            ImTool.Widgets.RenderTitle("ImTool");
-            if (ImGui.BeginCombo("Theme", ThemeManager.Current.Name))
+            if (!config.HideImToolSettings)
             {
-                foreach (string theme in ThemeManager.Themes.Keys)
+                ImTool.Widgets.RenderTitle("ImTool");
+                if (ImGui.BeginCombo("Theme", ThemeManager.Current.Name))
                 {
-                    if (ImGui.Selectable(theme, ThemeManager.Current.Name == theme))
+                    foreach (string theme in ThemeManager.Themes.Keys)
                     {
-                        ThemeManager.SetTheme(theme);
+                        if (ImGui.Selectable(theme, ThemeManager.Current.Name == theme))
+                        {
+                            ThemeManager.SetTheme(theme);
+                        }
+                    }
+
+                    ImGui.EndCombo();
+                }
+
+                ImGui.SliderInt("Target FPS", ref config.FpsLimit, 20, 200);
+                if (ImGui.BeginCombo("Graphics backend", config.GraphicsBackend.ToString()))
+                {
+                    foreach (GraphicsBackend backend in SupportedGraphicsBackends)
+                    {
+                        if (ImGui.Selectable(backend.ToString(), config.GraphicsBackend == backend))
+                        {
+                            config.GraphicsBackend = backend;
+                            restartGD = true;
+                        }
+                    }
+
+                    ImGui.EndCombo();
+                }
+
+                ImGui.Checkbox("Enable VSync  ", ref vsync);
+                ImGui.SameLine();
+                ImGui.Checkbox("Experimental power saving", ref config.PowerSaving);
+
+                if (!config.DisableFloatingWindows)
+                {
+                    if (config.GraphicsBackend == GraphicsBackend.OpenGL)
+                    {
+                        ThemeManager.ApplyOverride(ImGuiCol.Text, ImToolColors.LogWarn);
+                        ImGui.AlignTextToFramePadding();
+                        ImGui.Text("OpenGl does not support floating windows!");
+                        ThemeManager.ResetOverride(ImGuiCol.Text);
+                    }
+                    else
+                    {
+                        if (ImGui.Checkbox("Allow floating windows", ref config.AllowFloatingWindows))
+                            restartGD = true;
                     }
                 }
-                ImGui.EndCombo();
+
+                if (ImGui.Button("Reset DockSpace", new Vector2(-1, 20)))
+                {
+                    Tab tab = tabs.FirstOrDefault(tab => tab == activeTab);
+                    if (tab != null)
+                    {
+                        tab.ResetDockSpace();
+                    }
+                }
+
+                ImGui.NewLine();
             }
 
-            ImGui.SliderInt("Target FPS", ref config.FpsLimit, 20, 200);
-            if (ImGui.BeginCombo("Graphics backend", config.GraphicsBackend.ToString()))
-            {
-                foreach (GraphicsBackend backend in SupportedGraphicsBackends)
-                {
-                    if (ImGui.Selectable(backend.ToString(), config.GraphicsBackend == backend))
-                    {
-                        config.GraphicsBackend = backend;
-                        restartGD = true;
-                    }
-                }
-                ImGui.EndCombo();
-            }
-            
-            ImGui.Checkbox("Enable VSync  ", ref vsync);
-            ImGui.SameLine();
-            ImGui.Checkbox("Experimental power saving", ref config.PowerSaving);
-            
-            if (!config.DisableFloatingWindows)
-            {
-                if (config.GraphicsBackend == GraphicsBackend.OpenGL)
-                {
-                    ThemeManager.ApplyOverride(ImGuiCol.Text, ImToolColors.LogWarn);
-                    ImGui.AlignTextToFramePadding();
-                    ImGui.Text("OpenGl does not support floating windows!");
-                    ThemeManager.ResetOverride(ImGuiCol.Text);
-                }
-                else
-                {
-                    if(ImGui.Checkbox("Allow floating windows", ref config.AllowFloatingWindows))
-                        restartGD = true;
-                }
-            }
-            
-            if (ImGui.Button("Reset DockSpace", new Vector2(-1, 20)))
-            {
-                Tab tab = tabs.FirstOrDefault(tab => tab == activeTab);
-                if (tab != null)
-                {
-                    tab.ResetDockSpace();   
-                }
-            }
-            
-            ImGui.NewLine();
-            
             Widgets.RenderTitle(config.Title ?? "Unknown");
             
             

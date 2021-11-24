@@ -38,6 +38,7 @@ namespace ImTool
         [JsonIgnore] public bool DisableJsonThemes = false;
         
         [JsonIgnore] public bool DisableUpdater = false;
+        [JsonIgnore] public bool HideImToolSettings = false;
         
 
         public static T Load<T>(string toolDataPath = "") where T : Configuration
