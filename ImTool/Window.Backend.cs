@@ -69,7 +69,14 @@ namespace ImTool
             }
             
             floatersAllowed = !config.DisableFloatingWindows && config.AllowFloatingWindows && config.GraphicsBackend != GraphicsBackend.OpenGL;
-            string iniFile = Path.Combine(config.ToolDataPath, "Config", AppDomain.CurrentDomain.FriendlyName + ".ImGui.ini");
+            
+            string iniFile = "";
+            if (!config.DisableImGuiPersistence)
+            {
+                Directory.CreateDirectory(Path.Combine(config.ToolDataPath, "Config"));
+                iniFile = Path.Combine(config.ToolDataPath, "Config", AppDomain.CurrentDomain.FriendlyName + ".ImGui.ini");
+            }
+            
             SDL_WindowFlags flags =  SDL_WindowFlags.Shown | SDL_WindowFlags.Borderless | (config.GraphicsBackend == GraphicsBackend.OpenGL ? SDL_WindowFlags.OpenGL : 0);
             window = new Sdl2Window(config.Title, config.NormalWindowBounds.X, config.NormalWindowBounds.Y, config.NormalWindowBounds.Width, config.NormalWindowBounds.Height, flags, false);
             graphicsDevice = VeldridStartup.CreateGraphicsDevice(window, new GraphicsDeviceOptions(false, null, config.VSync, ResourceBindingModel.Improved, true, false), config.GraphicsBackend);
