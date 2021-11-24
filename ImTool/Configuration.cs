@@ -33,20 +33,29 @@ namespace ImTool
         [JsonIgnore] public bool DisableFloatingWindows = false;
         [JsonIgnore] public bool DisableResizing = false;
         [JsonIgnore] public bool DisableSettingsPane = false;
+        [JsonIgnore] public bool DisableUserPersistence = false;
+        [JsonIgnore] public bool DisableImGuiPersistence = false;
+        [JsonIgnore] public bool DisableJsonThemes = false;
+        
 
         public static T Load<T>(string toolDataPath = "") where T : Configuration
         {
+            T defaultInstance = (T) Activator.CreateInstance(typeof(T));
+            T instance = null;
+            
             string configPath = Path.Combine(toolDataPath, "Config");
-            Directory.CreateDirectory(configPath);
+            
+            if (defaultInstance is {DisableUserPersistence: false})
+                Directory.CreateDirectory(configPath);
             
             string name = typeof(T).FullName;
             string file = Path.Join(configPath, name + ".json");
             
-            T instance = (T) Serializer<T>.DeserializeFromFile(file);
+            if (defaultInstance is {DisableUserPersistence: false})
+                instance = (T) Serializer<T>.DeserializeFromFile(file);
+            
             if (instance == null)
-            {
-                instance = (T) Activator.CreateInstance(typeof(T));
-            }
+                instance = defaultInstance;
             
             instance.File = file;
             instance.ToolDataPath = toolDataPath;
@@ -58,6 +67,9 @@ namespace ImTool
     {
         public static void Save<T>(this T instance) where T : Configuration
         {
+            if (instance.DisableUserPersistence)
+                return;
+            
             Serializer<T>.SerializeToFile(instance, instance.File);
         }
     }
