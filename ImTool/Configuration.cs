@@ -9,14 +9,20 @@ namespace ImTool
 {
     public class Configuration
     {
-        [JsonIgnore] public string File;
+        // these get automatically assigned
+        [JsonIgnore] public string ConfigurationFilePath;
         [JsonIgnore] public string ToolDataPath;
         
-        public string Title = "ImTool";
+        // tool name / window title
+        [JsonIgnore] public string Title = "ImTool";
+        
+        // github info is optional, but the built in updater relies on these
+        [JsonIgnore] public string GithubRepositoryOwner;
+        [JsonIgnore] public string GithubRepositoryName;
+        [JsonIgnore] public string GithubReleaseName;
+        
+        // user changeable values
         public string Theme = "CorporateGrey";
-        public string GithubRepositoryOwner;
-        public string GithubRepositoryName;
-        public string GithubReleaseName;
         public bool GithubGetPrereleases;
         public WindowState WindowState = WindowState.Normal;
         public WindowState PreviousWindowState = WindowState.Maximized;
@@ -30,16 +36,15 @@ namespace ImTool
         public bool PowerSaving = true;
         public bool AllowFloatingWindows = true;
         
+        // dev overrides
         [JsonIgnore] public bool DisableFloatingWindows = false;
         [JsonIgnore] public bool DisableResizing = false;
         [JsonIgnore] public bool DisableSettingsPane = false;
         [JsonIgnore] public bool DisableUserPersistence = false;
         [JsonIgnore] public bool DisableImGuiPersistence = false;
         [JsonIgnore] public bool DisableJsonThemes = false;
-        
         [JsonIgnore] public bool DisableUpdater = false;
         [JsonIgnore] public bool HideImToolSettings = false;
-        
 
         public static T Load<T>(string toolDataPath = "") where T : Configuration
         {
@@ -60,7 +65,7 @@ namespace ImTool
             if (instance == null)
                 instance = defaultInstance;
             
-            instance.File = file;
+            instance.ConfigurationFilePath = file;
             instance.ToolDataPath = toolDataPath;
             return instance;
         }
@@ -73,7 +78,7 @@ namespace ImTool
             if (instance.DisableUserPersistence)
                 return;
             
-            Serializer<T>.SerializeToFile(instance, instance.File);
+            Serializer<T>.SerializeToFile(instance, instance.ConfigurationFilePath);
         }
     }
 }
