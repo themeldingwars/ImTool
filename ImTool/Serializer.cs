@@ -77,6 +77,9 @@ namespace ImTool
         {
             try
             {
+                if (!File.Exists(file))
+                    return null;
+                
                 return Deserialize(File.ReadAllText(file));
             }
             catch (Exception ex)
