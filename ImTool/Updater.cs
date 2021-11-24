@@ -62,8 +62,8 @@ namespace ImTool
         public long LastUpdateCheck { get; private set; }
         public Dictionary<Version, Release> Releases { get; private set; } = new (10);
 
-        public bool ValidConfig => !(config.GithubReleaseName == null || config.GithubRepositoryName == null ||
-                                   config.GithubRepositoryOwner == null);
+        public bool ValidConfig => !(string.IsNullOrWhiteSpace(config.GithubReleaseName) || string.IsNullOrWhiteSpace(config.GithubRepositoryName) ||
+                                     string.IsNullOrWhiteSpace(config.GithubRepositoryOwner));
 
         public async Task CheckForUpdates()
         {
