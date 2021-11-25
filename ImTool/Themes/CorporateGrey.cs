@@ -14,9 +14,9 @@ namespace ImTool
         {
             Theme theme = new Theme("CorporateGrey", "malamanteau", true);
 
-            theme.TitlebarBackgroundColor = new Vector4(1f, 0.15f, 0.15f, 0.15f);
-            theme.WindowBorderGradientBegin = new Vector4(Color.DarkMagenta.A / 255f, Color.DarkMagenta.R / 255f, Color.DarkMagenta.G / 255f, Color.DarkMagenta.B / 255f);
-            theme.WindowBorderGradientEnd = new Vector4(Color.Teal.A / 255f, Color.Teal.R / 255f, Color.Teal.G / 255f, Color.Teal.B / 255f);
+            theme.TitlebarBackgroundColor = new Vector4(0.15f, 0.15f, 0.15f, 1f);
+            theme.WindowBorderGradientBegin = new Vector4(Color.DarkMagenta.R / 255f, Color.DarkMagenta.G / 255f, Color.DarkMagenta.B / 255f, Color.DarkMagenta.A / 255f);
+            theme.WindowBorderGradientEnd = new Vector4(Color.Teal.R / 255f, Color.Teal.G / 255f, Color.Teal.B / 255f, Color.Teal.A / 255f);
             theme.WindowBackgroundColor = new Vector4(0.25f, 0.25f, 0.25f, 1.00f);
 
             theme[ImGuiStyleVar.PopupRounding] = 3;

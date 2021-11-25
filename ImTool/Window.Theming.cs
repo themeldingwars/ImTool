@@ -116,10 +116,10 @@ namespace ImTool
         {
             return new byte[]
             {
+                (byte)(v.X * byte.MaxValue),
                 (byte)(v.Y * byte.MaxValue),
                 (byte)(v.Z * byte.MaxValue),
                 (byte)(v.W * byte.MaxValue),
-                (byte)(v.X * byte.MaxValue),
             };
         }
     }
