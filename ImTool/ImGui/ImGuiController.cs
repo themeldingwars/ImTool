@@ -75,6 +75,8 @@ namespace ImGuiNET
         private int _lastAssignedID = 100;
 
         private Dictionary<Font, ImFontPtr> fonts = new();
+        private Dictionary<string, ImFontPtr> runtimeFonts = new();
+        private Dictionary<string, string> fontLoadQueue = new();
 
         /// <summary>
         /// Constructs a new ImGuiController.
@@ -161,7 +163,8 @@ namespace ImGuiNET
             }
             
             LoadFonts();
-            
+            LoadQueuedFonts();
+
             CreateDeviceResources(gd, outputDescription);
             SetKeyMappings();
 
@@ -235,6 +238,25 @@ namespace ImGuiNET
                 }
                 
             }
+        }
+        private void LoadQueuedFonts()
+        {
+            if (FontManager.QueuedFonts.Count > 0)
+            {
+                foreach (KeyValuePair<string, ImToolFontObj> item in FontManager.QueuedFonts)
+                {
+                    LoadLooseQueuedFont(item.Key, item.Value.FontFilePath, item.Value.FontSize);
+                }
+                FontManager.QueuedFonts.Clear();
+                RecreateFontDeviceTexture(_gd);
+            }
+        }
+
+        private void LoadLooseQueuedFont(string name, string path, float size)
+        {
+            ImFontPtr imFontPtr = new ImFontPtr();
+            imFontPtr = ImGui.GetIO().Fonts.AddFontFromFileTTF(path, size);
+            FontManager.RuntimeFonts.Add(name, imFontPtr);
         }
 
         private void CreateWindow(ImGuiViewportPtr vp)
