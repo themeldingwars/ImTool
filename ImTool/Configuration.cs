@@ -12,6 +12,7 @@ namespace ImTool
         // these get automatically assigned
         [JsonIgnore] public string ConfigurationFilePath;
         [JsonIgnore] public string ToolDataPath;
+        [JsonIgnore] public bool FirstLaunch = false;
         
         [JsonIgnore] public string Title = "ImTool";
 
@@ -60,9 +61,12 @@ namespace ImTool
             
             if (defaultInstance is {DisableUserPersistence: false})
                 instance = (T) Serializer<T>.DeserializeFromFile(file);
-            
+
             if (instance == null)
+            {
                 instance = defaultInstance;
+                instance.FirstLaunch = true;
+            }
             
             instance.ConfigurationFilePath = file;
             instance.ToolDataPath = toolDataPath;

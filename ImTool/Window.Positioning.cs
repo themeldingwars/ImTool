@@ -8,6 +8,7 @@ namespace ImTool
     {
         private Vector2 globalMousePos;
         private bool mouseDownPrevious;
+        private bool windowWasCentered;
         
         public WindowState WindowState
         {
@@ -135,11 +136,20 @@ namespace ImTool
                 currentMonitor = 0;
             }
 
+            if (!windowWasCentered && config.FirstLaunch)
+            {
+                windowWasCentered = true;
+                Rect usableBounds = MonitorInfo.UsableBounds[currentMonitor];
+                config.NormalWindowBounds.X = (usableBounds.Width - config.NormalWindowBounds.Width) / 2;
+                config.NormalWindowBounds.Y = (usableBounds.Height - config.NormalWindowBounds.Height) / 2;
+            }
+
             Rect bounds = GetDockingBounds(currentMonitor, config.WindowState);
             window.X = bounds.X;
             window.Y = bounds.Y;
             window.Height = bounds.Height;
             window.Width = bounds.Width;
+            
         }
         private void HandleWindowDragging()
         {
