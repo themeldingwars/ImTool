@@ -29,7 +29,9 @@ namespace ImTool
                 Directory.CreateDirectory(toolDataBasePath);
             
             Updater = new Updater(Config);
-            
+
+            FontManager.Initialize(Config);
+
             if(!Initialize(Environment.GetCommandLineArgs()))
                 return;
             
