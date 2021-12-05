@@ -39,6 +39,27 @@ namespace Demo
             //      mutex check to ensure only a single instance of the tool is running
             //      routing cmd-line messages to a single instance tool
             //
+            
+            // You can also load custom fonts and add different sizes to the default fonts here
+            // FontManager.AddFont(Font font)
+            // FontManager.Fonts["Regular"].AddSize(50);
+            //
+            // ImTool fonts:
+            // - ProggyClean:   Default ImGui font, not built to be scaled, 13px
+            // - FAS:           FontAwesome Solid
+            // - FAR:           FontAwesome Regular
+            // - FAB:           FontAwesome Brands
+            // - Regular:       SourceSansPro Regular
+            // - Bold:          SourceSansPro Bold
+            // - Italic:        SourceSansPro Italic
+            // - BoldItalic:    SourceSansPro Bold Italic
+            // - FreeSans:      FreeSans Regular (huge number of glyphs)
+            //
+            // To switch between fonts: 
+            // FontManager.PushFont("FAB");
+            // FontManager.PushFont("Regular", 18);
+            // FontManager.PopFont();
+            
             return true;
         }
 

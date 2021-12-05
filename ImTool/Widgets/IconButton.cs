@@ -12,27 +12,27 @@ namespace ImTool
             var result = false;
 
             if (text == null) {
-                ThemeManager.PushFont(Font.FAS);
+                FontManager.PushFont("FAS");
                 result = ImGui.Button(icon);
-                ThemeManager.PopFont();
+                FontManager.PopFont();
             }
             else {
-                ThemeManager.PushFont(Font.FAS);
+                FontManager.PushFont("FAS");
                 var sizeOfSpace = ImGui.CalcTextSize(" ").X;
                 var iconSize    = ImGui.CalcTextSize(icon);
                 var iconWidth   = (int) (Math.Ceiling(iconSize.X) / sizeOfSpace) + 2;
-                ThemeManager.PopFont();
+                FontManager.PopFont();
 
                 var pos = ImGui.GetCursorPosX();
 
                 result = ImGui.Button(text.PadLeft(text.Length + iconWidth));
                 ImGui.SameLine();
                 var secondPos = ImGui.GetCursorPosX();
-                ThemeManager.PushFont(Font.FAS);
+                FontManager.PushFont("FAS");
                 ImGui.PushStyleColor(ImGuiCol.Text, iconColor ?? System.Numerics.Vector4.One);
                 ImGui.RenderText(ImGui.GetCursorScreenPos() - new Vector2(secondPos - pos - 5, -3), icon);
                 ImGui.PopStyleColor(1);
-                ThemeManager.PopFont();   
+                FontManager.PopFont();   
             }
 
             return result;

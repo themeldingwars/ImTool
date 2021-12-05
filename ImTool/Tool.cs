@@ -30,8 +30,6 @@ namespace ImTool
             
             Updater = new Updater(Config);
 
-            FontManager.Initialize(Config);
-
             if(!Initialize(Environment.GetCommandLineArgs()))
                 return;
             

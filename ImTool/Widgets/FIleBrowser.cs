@@ -72,13 +72,13 @@ namespace ImTool
                 ImGui.Spacing();
                 ImGui.SameLine();
                 
-                ThemeManager.PushFont(Font.FAS);
+                FontManager.PushFont("FAS");
                 if (ImGui.Button("")) GoBack();
                 ImGui.SameLine();
 
                 if (ImGui.Button("")) GoUp();
                 ImGui.SameLine();
-                ThemeManager.PopFont();
+                FontManager.PopFont();
 
                 ImGui.SetNextItemWidth(-1);
                 if (ImGui.InputText("###CurrentDir", ref CurrentDir, 400, ImGuiInputTextFlags.EnterReturnsTrue)) {
@@ -110,7 +110,7 @@ namespace ImTool
 
                             ImGui.SameLine();
 
-                            ThemeManager.PushFont(Font.FAS);
+                            FontManager.PushFont("FAS");
                             if (entry.EntryType == EntryInfo.EntryTypes.Dir) {
                                 ImGui.Text("");
                             }
@@ -119,7 +119,7 @@ namespace ImTool
                                 ImGui.SameLine(28);
                                 ImGui.Spacing();
                             }
-                            ThemeManager.PopFont();
+                            FontManager.PopFont();
 
                             ImGui.SameLine();
 

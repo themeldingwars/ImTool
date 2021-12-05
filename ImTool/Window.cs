@@ -211,10 +211,6 @@ namespace ImTool
         
         private unsafe void SubmitUI()
         {
-            if (FontManager.DefaultFont != "" && FontManager.RuntimeFonts.ContainsKey(FontManager.DefaultFont))
-            {
-                ImGui.PushFont(FontManager.RuntimeFonts[FontManager.DefaultFont]);
-            }
             ImGui.SetNextWindowSize(windowBounds.Size);
             ImGui.SetNextWindowPos(windowBounds.Position);
             MainWindowStyleOverrides(true);
@@ -230,13 +226,14 @@ namespace ImTool
             
             SubmitWindowButtons();
 
-            ImGui.SetCursorPos(new Vector2(borderThickness + 1, titlebarHeight - 19));
+            int tabHeight = 4 + (int)ImGui.CalcTextSize("ABCD").Y;
+            ImGui.SetCursorPos(new Vector2(borderThickness + 1, titlebarHeight - tabHeight));
             ImGui.BeginTabBar("Tabs");
             
             ImGui.GetWindowDrawList().AddRectFilled(contentBounds.Position, contentBounds.MaxPosition, ImGui.GetColorU32(ImGuiCol.WindowBg));
 
             SubmitTabs();
-            
+
             ImGui.EndTabBar();
             ImGui.End();
 

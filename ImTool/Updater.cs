@@ -162,9 +162,9 @@ namespace ImTool
             {
                 ImGui.Text($"{(targetVersion > CurrentVersion ? "Upgrading" : "Downgrading")} to version {targetVersion}... \n\n");
                 ImGui.Separator();
-                ThemeManager.PushFont(Font.FreeSans);
+                FontManager.PushFont("FreeSans");
                 ImGui.ProgressBar(progress, new Vector2(ImGui.GetWindowWidth() - 8, 25), ProgressEmoji(progress));
-                ThemeManager.PopFont();
+                FontManager.PopFont();
                 if (!updating)
                 {
                     targetVersion = null;

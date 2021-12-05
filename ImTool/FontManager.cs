@@ -9,74 +9,47 @@ namespace ImTool
 {
     public static class FontManager
     {
-        private static Configuration config;
+        public static Dictionary<string, Font> Fonts { get; private set; }
 
-        public static Dictionary<string, ImFontPtr> RuntimeFonts { get; private set; }
-
-        public static Dictionary<string, ImToolFontObj> QueuedFonts;
-
-        public static string DefaultFont = "";
-
-        private static bool initialized;
-
-        public static void Initialize(Configuration configuration)
+        static FontManager()
         {
-            if (initialized)
-            {
-                return;
-            }
-
-            config = configuration;
-
-            RuntimeFonts = new Dictionary<string, ImFontPtr>();
-            QueuedFonts = new Dictionary<string, ImToolFontObj>();
-
-            initialized = true;
+            Fonts = new Dictionary<string, Font>();
+            
+            AddFont(new Font("Regular", 18, new FontFile("ImTool.Fonts.SourceSansPro-Regular.ttf")));
+            AddFont(new Font("Bold", 18, new FontFile("ImTool.Fonts.SourceSansPro-Bold.ttf")));
+            AddFont(new Font("Italic", 18, new FontFile("ImTool.Fonts.SourceSansPro-Italic.ttf")));
+            AddFont(new Font("BoldItalic", 18, new FontFile("ImTool.Fonts.SourceSansPro-BoldItalic.ttf")));
+            AddFont(new Font("ProggyClean", 13, new FontFile("ImGui.Default")));
+            AddFont(new Font("FAS", 13, new FontFile("ImTool.Fonts.FAS.ttf", new GlyphRange(0xE000, 0xF8FF))));
+            AddFont(new Font("FAR", 13, new FontFile("ImTool.Fonts.FAR.ttf", new GlyphRange(0xF000, 0xF5C8))));
+            AddFont(new Font("FAB", 13, new FontFile("ImTool.Fonts.FAB.ttf", new GlyphRange(0xE000, 0xF8E8))));
+            AddFont(new Font("FreeSans", 18, new FontFile("ImTool.Fonts.FreeSans.ttf", new GlyphRange(0x0001, 0xFFFF))));
+        }
+        public static void AddFont(Font font)
+        {
+            if(!Fonts.ContainsKey(font.Name))
+                Fonts.Add(font.Name, font);
         }
 
-        public static void LoadFont(string fontName, string filePath, float fontSize)
+        public static ImFontPtr GetImFontPointer(string font, byte fontSize = 0)
         {
-            if (RuntimeFonts.ContainsKey(fontName) == false && QueuedFonts.ContainsKey(fontName) == false && System.IO.File.Exists(filePath))
-            {
-                QueuedFonts.Add(fontName, new ImToolFontObj(fontName, filePath, fontSize));
-            }
-        }
-
-        public static void UnloadFont(string fontName)
-        {
-            if (RuntimeFonts.ContainsKey(fontName))
-            {
-
-            }
-        }
-
-        static public ImFontPtr GetFont(string fontName)
-        {
-            if (RuntimeFonts.ContainsKey(fontName))
-            {
-                return RuntimeFonts[fontName];
-            }
-
+            if (Fonts.ContainsKey(font))
+                return Fonts[font].GetPointer(fontSize);
+            
             return ImGui.GetIO().FontDefault;
         }
-    }
-
-    public class ImToolFontObj
-    {
-        public string FontName = "";
-        public string FontFilePath = "";
-        public float FontSize = 13.0f;
-
-        public ImToolFontObj()
+        
+        public static void PushFont(string font, byte fontSize = 0) => ImGui.PushFont(GetImFontPointer(font, fontSize));
+        public static void PopFont() => ImGui.PopFont();
+        public static void Clear()
         {
-
-        }
-
-        public ImToolFontObj(string fontName, string fontFilePath, float fontSize)
-        {
-            FontName = fontName;
-            FontFilePath = fontFilePath;
-            FontSize = fontSize;
+            if(Fonts == null)
+                return;
+            
+            foreach (Font font in Fonts.Values)
+                font.Clear();
+            
+           // ImGui.GetIO().Fonts.Clear();
         }
     }
 }

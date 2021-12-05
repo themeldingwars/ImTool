@@ -52,6 +52,7 @@ namespace ImTool
             }
          
             ClearTextureBindings();
+            FontManager.Clear();
             
             if(controller != null)
                 controller.Dispose();

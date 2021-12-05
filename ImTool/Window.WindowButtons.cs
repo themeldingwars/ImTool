@@ -16,7 +16,7 @@ namespace ImTool
             ImGui.SetCursorPos(WindowButtonPosition(nBtn));
 
 
-            ThemeManager.PushFont(Font.FAS);
+            FontManager.PushFont("FAS");
             if (ImGui.Button("\uf410", windowButtonSize))
             {
                 Exit();
@@ -66,7 +66,7 @@ namespace ImTool
                 }
             }
             
-            ThemeManager.PopFont();
+            FontManager.PopFont();
             ThemeManager.ApplyOverride(ImGuiCol.Button, new Vector4());
             
             if (windowButtons.Count > 0)
