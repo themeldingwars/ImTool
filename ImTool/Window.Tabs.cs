@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
@@ -43,7 +44,7 @@ namespace ImTool
                 {
                     activeTab = tab;
                 }
-
+                
                 bool hasMainMenuBar = false;
                 if (tab.IsMainMenuOverridden)
                 {
@@ -61,9 +62,10 @@ namespace ImTool
                 }
                 
                 TabStyleOverrides(false);
-                
-                Vector2 dockPos = ImGui.GetCursorPos() + (hasMainMenuBar ? new Vector2(1, 17) : new Vector2(1, -3));
-                Vector2 dockSize = hasMainMenuBar ? contentBounds.Size - new Vector2(0, 20): contentBounds.Size;
+
+                int mainMenuHeight = hasMainMenuBar ? (int) ImGui.GetItemRectSize().Y : 0;
+                Vector2 dockPos = new Vector2(borderThickness, borderThickness + titlebarHeight + mainMenuHeight);
+                Vector2 dockSize = contentBounds.Size - new Vector2(0, mainMenuHeight);
                 
                 tab.InternalSubmitDockSpace(dockPos, dockSize);
                 tab.InternalSubmitContent();
