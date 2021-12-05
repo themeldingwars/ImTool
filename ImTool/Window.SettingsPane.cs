@@ -62,7 +62,7 @@ namespace ImTool
                     }
                 }
 
-                if (ImGui.Button("Reset DockSpace", new Vector2(-1, 20)))
+                if (ImGui.Button("Reset DockSpace", new Vector2(-1, 0)))
                 {
                     Tab tab = tabs.FirstOrDefault(tab => tab == activeTab);
                     if (tab != null)
