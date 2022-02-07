@@ -13,6 +13,7 @@ using System.Threading;
 using imnodesNET;
 using ImPlotNET;
 using ImTool;
+using ImTool.SDL;
 using K4os.Hash.xxHash;
 
 namespace ImGuiNET
@@ -705,6 +706,11 @@ namespace ImGuiNET
                 VeldridImGuiWindow window = ((VeldridImGuiWindow)GCHandle.FromIntPtr(v.PlatformUserData).Target);
                 window.Update();
             }
+
+            IntPtr focusHandle = SDL.SDL_GetMouseFocus();
+            
+            if (focusHandle == IntPtr.Zero)
+                io.MousePos = new Vector2(-1, -1);
         }
 
         private static void SetKeyMappings()

@@ -24,5 +24,11 @@ namespace ImTool.SDL
             unsafe { p_sdl_GetGlobalMouseState(&_x, &_y); }
             vec2 = new Vector2(_x, _y);
         }
+        
+        
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private unsafe delegate IntPtr SDL_GetMouseFocus_t();
+        private static SDL_GetMouseFocus_t p_sdl_GetMouseFocus = LoadFunction<SDL_GetMouseFocus_t>();
+        public static IntPtr SDL_GetMouseFocus() => p_sdl_GetMouseFocus();
     }
 }
