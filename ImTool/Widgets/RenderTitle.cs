@@ -11,7 +11,7 @@ namespace ImTool
             Vector2 cursorScreenPos = ImGui.GetCursorScreenPos();
             ImGuiStylePtr styles = ImGui.GetStyle();
             dl.AddRectFilled(cursorScreenPos, cursorScreenPos + new Vector2(ImGui.GetColumnWidth(), 24), ImGui.GetColorU32(ImGuiCol.TitleBg), styles.WindowRounding);
-            dl.AddText(cursorScreenPos + new Vector2(5f, 6f), ImGui.GetColorU32(ImGuiCol.Text), title);
+            dl.AddText(cursorScreenPos + new Vector2(5f, (24f - ImGui.GetTextLineHeight())/2), ImGui.GetColorU32(ImGuiCol.Text), title);
             ImGui.SetCursorPosY(ImGui.GetCursorPosY()+26);
         }
     }
