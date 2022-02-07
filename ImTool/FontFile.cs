@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Numerics;
 using System.Reflection;
 
 namespace ImTool
@@ -8,17 +9,39 @@ namespace ImTool
     {
         public string Path { get; }
         public GlyphRange[] Ranges { get; }
-        public ushort RangeMax { get; }
+        public Vector2 GlyphOffset { get; } = new Vector2(0, 0);
 
-        public FontFile(string path, GlyphRange[] ranges = null)
+
+        public FontFile(string path, GlyphRange[] ranges = null, Vector2? glyphOffset = null)
         {
             Path = path;
             Ranges = ranges;
+            
+            if (glyphOffset != null)
+                GlyphOffset = (Vector2) glyphOffset;
         }
-        public FontFile(string path, GlyphRange range)
+        
+        public FontFile(string path, Vector2? glyphOffset = null, GlyphRange[] ranges = null)
+        {
+            Path = path;
+            Ranges = ranges;
+
+            if (glyphOffset != null)
+                GlyphOffset = (Vector2) glyphOffset;
+        }
+        
+        public FontFile(string path, GlyphRange range, Vector2? glyphOffset = null)
         {
             Path = path;
             Ranges = new [] { range };
+            
+            if (glyphOffset != null)
+                GlyphOffset = (Vector2) glyphOffset;
+        }
+        
+        public FontFile(string path)
+        {
+            Path = path;
         }
 
         public bool TryGetStream(out Stream stream)

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,15 +16,15 @@ namespace ImTool
         {
             Fonts = new Dictionary<string, Font>();
             
-            AddFont(new Font("Regular", 18, new FontFile("ImTool.Fonts.SourceSansPro-Regular.ttf")));
-            AddFont(new Font("Bold", 18, new FontFile("ImTool.Fonts.SourceSansPro-Bold.ttf")));
-            AddFont(new Font("Italic", 18, new FontFile("ImTool.Fonts.SourceSansPro-Italic.ttf")));
-            AddFont(new Font("BoldItalic", 18, new FontFile("ImTool.Fonts.SourceSansPro-BoldItalic.ttf")));
+            AddFont(new Font("Regular", 18, new FontFile("ImTool.Fonts.SourceSansPro-Regular.ttf", new Vector2(0, -1))));
+            AddFont(new Font("Bold", 18, new FontFile("ImTool.Fonts.SourceSansPro-Bold.ttf", new Vector2(0, -1))));
+            AddFont(new Font("Italic", 18, new FontFile("ImTool.Fonts.SourceSansPro-Italic.ttf", new Vector2(0, -1))));
+            AddFont(new Font("BoldItalic", 18, new FontFile("ImTool.Fonts.SourceSansPro-BoldItalic.ttf", new Vector2(0, -1))));
             AddFont(new Font("ProggyClean", 13, new FontFile("ImGui.Default")));
             AddFont(new Font("FAS", 13, new FontFile("ImTool.Fonts.FAS.ttf", new GlyphRange(0xE000, 0xF8FF))));
             AddFont(new Font("FAR", 13, new FontFile("ImTool.Fonts.FAR.ttf", new GlyphRange(0xF000, 0xF5C8))));
             AddFont(new Font("FAB", 13, new FontFile("ImTool.Fonts.FAB.ttf", new GlyphRange(0xE000, 0xF8E8))));
-            AddFont(new Font("FreeSans", 18, new FontFile("ImTool.Fonts.FreeSans.ttf", new GlyphRange(0x0001, 0xFFFF))));
+            AddFont(new Font("FreeSans", 18, new FontFile("ImTool.Fonts.FreeSans.ttf", new GlyphRange(0x0001, 0xFFFF), new Vector2(0, -1))));
         }
         public static void AddFont(Font font)
         {
