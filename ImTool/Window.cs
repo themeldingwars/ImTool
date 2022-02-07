@@ -162,10 +162,9 @@ namespace ImTool
                     previousFrameTicks = currentFrameTicks;
                 
                 
-                    InputSnapshot snapshot = null;
-                    Sdl2Events.ProcessEvents();
-                    snapshot = window.PumpEvents();
+                    InputSnapshot snapshot = window.PumpEvents();
                     MonitorInfo.Update();
+
                     UpdateWindow();
                     controller.Update(deltaSeconds, snapshot);
                     SubmitUI();
