@@ -109,6 +109,7 @@ namespace ImTool
 
         public unsafe void Draw()
         {
+            FontManager.PushFont("ProggyClean");
             if (ByteDataArr == null) {
                 return;
             }
@@ -154,6 +155,7 @@ namespace ImTool
                 }
 
                 ImGui.EndTable();
+                FontManager.PopFont();
             }
         }
 
