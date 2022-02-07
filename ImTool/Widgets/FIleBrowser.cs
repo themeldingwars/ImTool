@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using Num = System.Numerics;
@@ -69,14 +70,12 @@ namespace ImTool
         {
             ImGui.SetNextWindowSize(new Num.Vector2(800, 400), ImGuiCond.Once);
             if (ImGui.BeginPopupModal(POPUP_ID, ref IsOpen)) {
-                ImGui.Spacing();
-                ImGui.SameLine();
                 
                 FontManager.PushFont("FAS");
-                if (ImGui.Button("")) GoBack();
+                if (ImGui.Button("", new Num.Vector2(26, 26))) GoBack();
                 ImGui.SameLine();
 
-                if (ImGui.Button("")) GoUp();
+                if (ImGui.Button("", new Num.Vector2(26, 26))) GoUp();
                 ImGui.SameLine();
                 FontManager.PopFont();
 
@@ -85,62 +84,61 @@ namespace ImTool
                     ChangeDir(CurrentDir);
                 }
 
-                if (ImGui.BeginChildFrame(1, new Num.Vector2(-1, -25), ImGuiWindowFlags.NoBackground)) {
-                    // Draw the entries
-                    if (ImGui.BeginTable("Dir Entries", 5,
-                        ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable)) {
-                        ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.DefaultSort, 4f, 0);
-                        ImGui.TableSetupColumn("Extension", ImGuiTableColumnFlags.DefaultSort, 0.8f);
-                        ImGui.TableSetupColumn("Created", ImGuiTableColumnFlags.DefaultSort, 1f);
-                        ImGui.TableSetupColumn("Modified", ImGuiTableColumnFlags.DefaultSort, 1f);
-                        ImGui.TableSetupColumn("Size", ImGuiTableColumnFlags.DefaultSort, 0.5f);
-                        ImGui.TableHeadersRow();
+                // Draw the entries
+                if (ImGui.BeginTable("Dir Entries", 5,
+                    ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.ScrollY, new Num.Vector2(0, -32))) {
+                    
+                    // freeze header row
+                    ImGui.TableSetupScrollFreeze(0,1);
+                    
+                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.DefaultSort, 4f, 0);
+                    ImGui.TableSetupColumn("Extension", ImGuiTableColumnFlags.DefaultSort, 0.8f);
+                    ImGui.TableSetupColumn("Created", ImGuiTableColumnFlags.DefaultSort, 1.2f);
+                    ImGui.TableSetupColumn("Modified", ImGuiTableColumnFlags.DefaultSort, 1.2f);
+                    ImGui.TableSetupColumn("Size", ImGuiTableColumnFlags.DefaultSort, 0.8f);
+                    ImGui.TableHeadersRow();
 
-                        var sorts = ImGui.TableGetSortSpecs();
-                        if (sorts.SpecsDirty) {
-                            SortEntrys(sorts);
+                    var sorts = ImGui.TableGetSortSpecs();
+                    if (sorts.SpecsDirty) {
+                        SortEntrys(sorts);
+                    }
+                    
+                    foreach (var entry in CurrentEntries) {
+                        ImGui.TableNextColumn();
+                        if (ImGui.Selectable($"###SelectEntry{entry.Name}", entry.IsSelected,
+                            ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick | ImGuiSelectableFlags.DontClosePopups)) {
+                            if (HandleSelection(entry)) return;
                         }
 
-                        foreach (var entry in CurrentEntries) {
-                            ImGui.TableNextColumn();
-                            if (ImGui.Selectable($"###SelectEntry{entry.Name}", entry.IsSelected,
-                                ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick | ImGuiSelectableFlags.DontClosePopups)) {
-                                if (HandleSelection(entry)) return;
-                            }
+                        ImGui.SameLine();
 
-                            ImGui.SameLine();
-
-                            FontManager.PushFont("FAS");
-                            if (entry.EntryType == EntryInfo.EntryTypes.Dir) {
-                                ImGui.Text("");
-                            }
-                            else {
-                                ImGui.Text("");
-                                ImGui.SameLine(28);
-                                ImGui.Spacing();
-                            }
-                            FontManager.PopFont();
-
-                            ImGui.SameLine();
-
-                            ImGui.Text(entry.Name);
-                            ImGui.TableNextColumn();
-                            ImGui.Text(entry.Extension);
-                            ImGui.TableNextColumn();
-                            ImGui.Text(entry.DateCreated);
-                            ImGui.TableNextColumn();
-                            ImGui.Text(entry.DateModified);
-                            ImGui.TableNextColumn();
-                            ImGui.Text(entry.SizeStr);
+                        FontManager.PushFont("FAS");
+                        if (entry.EntryType == EntryInfo.EntryTypes.Dir) {
+                            ImGui.Text("");
                         }
+                        else {
+                            ImGui.Text("");
+                            ImGui.SameLine(28);
+                            ImGui.Spacing();
+                        }
+                        FontManager.PopFont();
 
-                        ImGui.EndTable();
+                        ImGui.SameLine();
+
+                        ImGui.Text(entry.Name);
+                        ImGui.TableNextColumn();
+                        ImGui.Text(entry.Extension);
+                        ImGui.TableNextColumn();
+                        ImGui.Text(entry.DateCreated);
+                        ImGui.TableNextColumn();
+                        ImGui.Text(entry.DateModified);
+                        ImGui.TableNextColumn();
+                        ImGui.Text(entry.SizeStr);
                     }
 
-                    ImGui.EndChildFrame();
-
-                    DrawBottomBar();
+                    ImGui.EndTable();
                 }
+                DrawBottomBar();
 
                 // Confirm Override popup
                 if (ImGui.BeginPopupModal(OVERRIDE_EXISTING_FILE_POPUP_ID, ref ShowOverrideFilePopup)) {
@@ -212,10 +210,13 @@ namespace ImTool
 
         private static void DrawBottomBar()
         {
+            ImGui.Dummy(new Num.Vector2(1,1));
+            ImGui.NewLine();
+            
+            float rightAlignedButtonPos = -4;
+
             if (DiaglogMode == Mode.OpenFile || DiaglogMode == Mode.OpenMultiple) {
-                ImGui.Dummy(new Num.Vector2(0, 0));
-                ImGui.SameLine(ImGui.GetWindowWidth() - 135);
-                if (ImGui.Button(" Open ")) {
+                if (RightAlignedButton("Open")) {
                     if (DiaglogMode == Mode.OpenFile) {
                         var selected = CurrentEntries.FirstOrDefault(x => x.IsSelected);
                         if (selected != default) {
@@ -231,40 +232,43 @@ namespace ImTool
                         }
                     }
                 }
-
-                ImGui.SameLine(ImGui.GetWindowWidth() - 75);
-                if (ImGui.Button("Cancel")) {
+                
+                if (RightAlignedButton("Cancel"))
                     IsOpen = false;
-                }
             }
             else if (DiaglogMode == Mode.SaveFile) {
-                ImGui.SetNextItemWidth(-135);
-                ImGui.InputText("###SaveFilePath", ref SaveFilePath, 400);
-                ImGui.SameLine(ImGui.GetWindowWidth() - 135);
-                if (ImGui.Button(" Save ")) {
+                
+                if (RightAlignedButton("Save"))
                     CheckAndHandleExistingFile(SaveFilePath);
-                }
 
-                ImGui.SameLine(ImGui.GetWindowWidth() - 75);
-                if (ImGui.Button("Cancel")) {
+                if (RightAlignedButton("Cancel")) 
                     IsOpen = false;
-                }
+
+                float width = ImGui.GetContentRegionMax().X - (rightAlignedButtonPos + 10);
+                ImGui.SetNextItemWidth(width);
+                ImGui.SameLine(5);
+                ImGui.InputText("###SaveFilePath", ref SaveFilePath, (uint) width);
             }
             else if (DiaglogMode == Mode.SelectDir) {
-                ImGui.Dummy(new Num.Vector2(0, 0));
-                ImGui.SameLine(ImGui.GetWindowWidth() - 150);
-                if (ImGui.Button(" Select ")) {
+                if (RightAlignedButton("Select")) {
                     var selected = CurrentEntries.FirstOrDefault(x => x.IsSelected);
                     if (selected != default) {
                         SelectDirCb(selected.Path);
                         IsOpen = false;
                     }
                 }
-
-                ImGui.SameLine(ImGui.GetWindowWidth() - 75);
-                if (ImGui.Button("Cancel")) {
+                
+                if (RightAlignedButton("Cancel")) 
                     IsOpen = false;
-                }
+            }
+
+
+            bool RightAlignedButton(string text)
+            {
+                Num.Vector2 size = new Num.Vector2(24, 8) + ImGui.CalcTextSize(text);
+                rightAlignedButtonPos += (size.X + 5);
+                ImGui.SameLine(ImGui.GetContentRegionMax().X - rightAlignedButtonPos);
+                return ImGui.Button(text, size);
             }
         }
 
