@@ -11,29 +11,26 @@ namespace ImTool
         {
             var result = false;
 
-            if (text == null) {
-                FontManager.PushFont("FAS");
-                result = ImGui.Button(icon);
-                FontManager.PopFont();
-            }
-            else {
-                FontManager.PushFont("FAS");
-                var sizeOfSpace = ImGui.CalcTextSize(" ").X;
-                var iconSize    = ImGui.CalcTextSize(icon);
-                var iconWidth   = (int) (Math.Ceiling(iconSize.X) / sizeOfSpace) + 2;
-                FontManager.PopFont();
+            if (text == null)
+                text = "";
+            
+            var sizeOfSpace = ImGui.CalcTextSize(" ").X;
+            
+            FontManager.PushFont("FAS");
+            var iconSize    = ImGui.CalcTextSize(icon);
+            var iconWidth   = (int) (Math.Ceiling(iconSize.X) / sizeOfSpace) + 2;
+            FontManager.PopFont();
 
-                var pos = ImGui.GetCursorPosX();
+            var pos = ImGui.GetCursorScreenPos();
 
-                result = ImGui.Button(text.PadLeft(text.Length + iconWidth));
-                ImGui.SameLine();
-                var secondPos = ImGui.GetCursorPosX();
-                FontManager.PushFont("FAS");
-                ImGui.PushStyleColor(ImGuiCol.Text, iconColor ?? System.Numerics.Vector4.One);
-                ImGui.RenderText(ImGui.GetCursorScreenPos() - new Vector2(secondPos - pos - 5, -3), icon);
-                ImGui.PopStyleColor(1);
-                FontManager.PopFont();   
-            }
+            result = ImGui.Button(text.PadLeft(text.Length + iconWidth));
+            ImGui.SameLine();
+            var secondPos = ImGui.GetCursorPosX();
+            FontManager.PushFont("FAS");
+            ImGui.PushStyleColor(ImGuiCol.Text, iconColor ?? System.Numerics.Vector4.One);
+            ImGui.RenderText(pos + new Vector2(text == "" ? 8 : 6, (ImGui.GetItemRectSize().Y - iconSize.Y)/2), icon);
+            ImGui.PopStyleColor(1);
+            FontManager.PopFont();
 
             return result;
         }
