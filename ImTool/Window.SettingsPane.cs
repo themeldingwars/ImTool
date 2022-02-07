@@ -14,6 +14,8 @@ namespace ImTool
             if (!config.HideImToolSettings)
             {
                 ImTool.Widgets.RenderTitle("ImTool");
+                
+                ImGui.SetNextItemWidth(218);
                 if (ImGui.BeginCombo("Theme", ThemeManager.Current.Name))
                 {
                     foreach (string theme in ThemeManager.Themes.Keys)
@@ -27,7 +29,10 @@ namespace ImTool
                     ImGui.EndCombo();
                 }
 
+                ImGui.SetNextItemWidth(218);
                 ImGui.SliderInt("Target FPS", ref config.FpsLimit, 20, 200);
+                
+                ImGui.SetNextItemWidth(218);
                 if (ImGui.BeginCombo("Graphics backend", config.GraphicsBackend.ToString()))
                 {
                     foreach (GraphicsBackend backend in SupportedGraphicsBackends)
@@ -155,8 +160,8 @@ namespace ImTool
                     }
                     ImGui.Checkbox("Include pre-releases", ref config.GithubGetPrereleases);
                     ImGui.SameLine();
-                
-                    if (ImGui.Button("  Check for updates  "))
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 46);
+                    if (ImGui.Button(" Check for updates "))
                     {
                         updater.CheckForUpdates();
                     }
