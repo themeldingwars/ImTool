@@ -157,7 +157,7 @@ namespace ImTool
 
             
             ImGui.SetNextWindowPos(center, ImGuiCond.Always, new Vector2(0.5f, 0.5f));
-            ImGui.SetNextWindowSize(new Vector2(250, 85));
+            ImGui.SetNextWindowSize(new Vector2(250, 98));
             if (ImGuiEx.BeginPopupModal("Downloading update", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize))
             {
                 ImGui.Text($"{(targetVersion > CurrentVersion ? "Upgrading" : "Downgrading")} to version {targetVersion}... \n\n");
