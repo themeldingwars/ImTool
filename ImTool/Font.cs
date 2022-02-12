@@ -82,8 +82,7 @@ namespace ImTool
                 stream.Dispose();
                 ret.Add(file);
             }
-
-            Console.WriteLine(ret.Count);
+            
             return ret;
         }
         private List<byte> ValidateSizes(List<byte> sizes)
@@ -134,14 +133,15 @@ namespace ImTool
                     ushort[] ranges = file.GetGlyphRanges();
                     if (ranges == null || ranges.Length == 0)
                     {
-                        imFontPtr = atlasPtr.AddFontFromMemoryTTF(pinnedArray.AddrOfPinnedObject(), ba.Length, fontSize, configPtr);
+                        imFontPtr = atlasPtr.AddFontFromMemoryTTF(pinnedArray.AddrOfPinnedObject(), ba.Length, configPtr.SizePixels, configPtr);
                     }
                     else
                     {
                         GCHandle rangeHandle = GCHandle.Alloc(ranges, GCHandleType.Pinned);
-                        imFontPtr = atlasPtr.AddFontFromMemoryTTF(pinnedArray.AddrOfPinnedObject(), ba.Length, fontSize, configPtr, rangeHandle.AddrOfPinnedObject());
+                        imFontPtr = atlasPtr.AddFontFromMemoryTTF(pinnedArray.AddrOfPinnedObject(), ba.Length, configPtr.SizePixels, configPtr, rangeHandle.AddrOfPinnedObject());
                         rangeHandle.Free();
                     }
+                    
                     pinnedArray.Free();
                     stream.Dispose();
                 }
@@ -149,7 +149,7 @@ namespace ImTool
                 first = false;
                 ImGuiNative.ImFontConfig_destroy(configPtr);
             }
-
+            
             return imFontPtr;
         }
         private unsafe ImFontConfigPtr CreateImFontConfigPtr(byte fontSize, bool mergeMode)
