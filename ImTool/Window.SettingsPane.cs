@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using ImGuiNET;
 using Veldrid;
 
@@ -14,7 +15,12 @@ namespace ImTool
             if (!config.HideImToolSettings)
             {
                 ImTool.Widgets.RenderTitle("ImTool");
+
+                if (SubmitAboutButton())
+                    ImGui.OpenPopup("About ImTool");
                 
+                SubmitAboutModal();
+
                 ImGui.SetNextItemWidth(218);
                 if (ImGui.BeginCombo("Theme", ThemeManager.Current.Name))
                 {
@@ -46,7 +52,7 @@ namespace ImTool
 
                     ImGui.EndCombo();
                 }
-
+                
                 ImGui.Checkbox("Enable VSync  ", ref vsync);
                 ImGui.SameLine();
                 ImGui.Checkbox("Experimental power saving", ref config.PowerSaving);
@@ -174,6 +180,104 @@ namespace ImTool
                 {
                     tab.InternalSubmitSettings(tab == activeTab);
                 }                
+            }
+        }
+
+        private bool SubmitAboutButton()
+        {
+            bool clicked;
+            Vector2 curPos = ImGui.GetCursorPos();
+            Vector2 textPos = new Vector2(310, -21) + curPos;
+
+            ImGui.SetCursorPos(textPos);
+            ThemeManager.ApplyOverride(ImGuiCol.HeaderHovered, ThemeManager.Current[ImGuiCol.TitleBg]);
+            ThemeManager.ApplyOverride(ImGuiCol.HeaderActive, ThemeManager.Current[ImGuiCol.TitleBg]);
+            FontManager.PushFont("FAS");
+            clicked = ImGui.Selectable("\uf05a", false, ImGuiSelectableFlags.DontClosePopups, new Vector2(10, 18));
+            FontManager.PopFont();
+            ThemeManager.ResetOverride(ImGuiCol.HeaderHovered);
+            ThemeManager.ResetOverride(ImGuiCol.HeaderActive);
+
+            if (ImGui.IsItemHovered())
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                
+            ImGui.SetCursorPos(curPos);
+
+            return clicked;
+        }
+        private void SubmitAboutModal()
+        {
+            Vector2 center = ImGui.GetMainViewport().GetCenter();
+            ImGui.SetNextWindowPos(center, ImGuiCond.Always, new Vector2(0.5f, 0.5f));
+            if (ImGuiEx.BeginPopupModal("About ImTool", ImGuiWindowFlags.AlwaysAutoResize))
+            {
+                FontManager.PushFont("Bold"); ImGui.Text($"ImTool " + typeof(ImTool.Updater).GetTypeInfo().Assembly.GetName().Version); FontManager.PopFont();
+
+                ImGui.NewLine();  Widgets.Hyperlink("ImTool", "https://github.com/themeldingwars/ImTool");
+                ImGui.SameLine(); ImGui.Text("is made available to you under the");
+                ImGui.SameLine(); Widgets.Hyperlink("MIT", "https://github.com/themeldingwars/ImTool/blob/master/LICENSE");
+                ImGui.SameLine(); ImGui.Text("License and");
+                
+                ImGui.Text("includes"); ImGui.SameLine();
+                if (Widgets.TextButton("open-source software", "Show Third-Party Software", true))
+                    ImGui.OpenPopup("Third-Party Software used by ImTool");
+                
+                ImGui.SameLine(); ImGui.Text("under a variety of other licenses.");
+                
+                ImGui.NewLine();  ImGui.Text($"Copyright"); 
+                ImGui.SameLine(); ImGui.SetCursorPosY(ImGui.GetCursorPosY()+2); FontManager.PushFont("FAS"); ImGui.Text("\uf1f9"); FontManager.PopFont();
+                ImGui.SameLine(); ImGui.SetCursorPosY(ImGui.GetCursorPosY()-2); ImGui.Text($"2021-{DateTime.Now.Year} The Melding Wars");
+                ImGui.SameLine(); ImGui.SetCursorPosY(ImGui.GetCursorPosY()+2); FontManager.PushFont("FAS"); ImGui.Text("\uf004"); FontManager.PopFont();
+
+                ImGui.Separator();
+
+                ImGui.SetCursorPos(ImGui.GetCursorPos() + ImGui.GetItemRectSize() - new Vector2(128, 0));
+                if (ImGui.Button("Close", new Vector2(120, 0)))
+                {
+                    ImGui.CloseCurrentPopup();
+                }
+                ImGui.SetItemDefaultFocus();
+                
+                SubmitThirdPartyModal();
+                ImGui.EndPopup();
+            }
+        }
+
+        private void SubmitThirdPartyModal()
+        {
+            Vector2 center = ImGui.GetMainViewport().GetCenter();
+            ImGui.SetNextWindowPos(center, ImGuiCond.Always, new Vector2(0.5f, 0.5f));
+            if (ImGuiEx.BeginPopupModal("Third-Party Software used by ImTool", ImGuiWindowFlags.AlwaysAutoResize))
+            {
+                
+                ImGuiTableFlags thirdPartyTableFlags = ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY;
+                if (ImGui.BeginTable("ThirdPartyTable", 2, thirdPartyTableFlags, new Vector2(440, 440)))
+                {
+                    ImGui.TableSetupColumn("Software", ImGuiTableColumnFlags.None, 230);
+                    ImGui.TableSetupColumn("License");
+                    ImGui.TableSetupScrollFreeze(0, 1);
+                    ImGui.TableHeadersRow();
+                    
+                    foreach (var info in ThirdPartySoftware.Info)
+                    {
+                        ImGui.TableNextRow();
+                        ImGui.TableNextColumn(); Widgets.Hyperlink(info.Name, info.ProjectUrl);
+                        ImGui.TableNextColumn(); Widgets.Hyperlink(info.License, info.LicenseUrl);
+                    }
+                    updater.DrawDialogs();
+                    ImGui.EndTable();
+                }
+                
+                
+                ImGui.Separator();
+
+                ImGui.SetCursorPos(ImGui.GetCursorPos() + ImGui.GetItemRectSize() - new Vector2(128, 0));
+                if (ImGui.Button("Close", new Vector2(120, 0)))
+                {
+                    ImGui.CloseCurrentPopup();
+                }
+                ImGui.SetItemDefaultFocus();
+                ImGui.EndPopup();
             }
         }
     }
