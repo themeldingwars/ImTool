@@ -53,9 +53,28 @@ namespace ImTool
                     ImGui.EndCombo();
                 }
                 
+                if (config.PowerSaving)
+                {
+                    if (vsync)
+                        vsync = false;
+                    
+                    ImGui.BeginDisabled();
+                }
                 ImGui.Checkbox("Enable VSync  ", ref vsync);
+                if(config.PowerSaving) ImGui.EndDisabled();
+                
                 ImGui.SameLine();
+                
+                if (vsync)
+                {
+                    if (config.PowerSaving)
+                        config.PowerSaving = false;
+                    
+                    ImGui.BeginDisabled();
+                }
+                
                 ImGui.Checkbox("Experimental power saving", ref config.PowerSaving);
+                if(vsync) ImGui.EndDisabled();
 
                 if (!config.DisableFloatingWindows)
                 {
