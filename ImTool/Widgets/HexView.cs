@@ -52,6 +52,7 @@ namespace ImTool
 
         private ParsedValuesStruct ParsedValues;
 
+        private bool FontSizesNeedSetupAgain = true;
         public HexView()
         {
             SetupSizes();
@@ -112,6 +113,11 @@ namespace ImTool
             FontManager.PushFont("ProggyClean");
             if (ByteDataArr == null) {
                 return;
+            }
+
+            if (FontSizesNeedSetupAgain) {
+                SetupSizes();
+                FontSizesNeedSetupAgain = false;
             }
 
             int numFullLines   = ByteDataArr.Length / BYTE_WIDTH;
