@@ -33,7 +33,6 @@ namespace ImGuiNET
         private DeviceBuffer _indexBuffer;
         private DeviceBuffer _projMatrixBuffer;
         private Texture _fontTexture;
-        private TextureView _fontTextureView;
         private Shader _vertexShader;
         private Shader _fragmentShader;
         private ResourceLayout _layout;
@@ -162,8 +161,6 @@ namespace ImGuiNET
             foreach (Font font in FontManager.Fonts.Values)
                 font.Build();
             
-            RecreateFontDeviceTexture(_gd);
-
             CreateDeviceResources(gd, outputDescription);
             SetKeyMappings();
 
@@ -294,7 +291,6 @@ namespace ImGuiNET
             _vertexBuffer.Name = "ImGui.NET Vertex Buffer";
             _indexBuffer = factory.CreateBuffer(new BufferDescription(2000, BufferUsage.IndexBuffer | BufferUsage.Dynamic));
             _indexBuffer.Name = "ImGui.NET Index Buffer";
-            RecreateFontDeviceTexture(gd);
 
             _projMatrixBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             _projMatrixBuffer.Name = "ImGui.NET Projection Buffer";
@@ -333,7 +329,7 @@ namespace ImGuiNET
                 _projMatrixBuffer,
                 gd.PointSampler));
 
-            _fontTextureResourceSet = factory.CreateResourceSet(new ResourceSetDescription(_textureLayout, _fontTextureView));
+            RecreateFontDeviceTexture(gd);
         }
 
         /// <summary>
@@ -353,6 +349,17 @@ namespace ImGuiNET
             }
 
             return rsi.ImGuiBinding;
+        }
+
+        public void RemoveImGuiBinding(TextureView textureView)
+        {
+            if(_setsByView.TryGetValue(textureView, out ResourceSetInfo rsi))
+            {
+                _setsByView.Remove(textureView);
+                _viewsById.Remove(rsi.ImGuiBinding);
+                _ownedResources.Remove(rsi.ResourceSet);
+                rsi.ResourceSet.Dispose();
+            }
         }
 
         private IntPtr GetNextImGuiBindingID()
@@ -377,17 +384,28 @@ namespace ImGuiNET
             return GetOrCreateImGuiBinding(factory, textureView);
         }
 
+        public void RemoveImGuiBinding(Texture texture)
+        {
+            if (_autoViewsByTexture.TryGetValue(texture, out TextureView textureView))
+            {
+                _autoViewsByTexture.Remove(texture);
+                _ownedResources.Remove(textureView);
+                textureView.Dispose();
+                RemoveImGuiBinding(textureView);
+            }
+        }
+
         /// <summary>
         /// Retrieves the shader texture binding for the given helper handle.
         /// </summary>
         public ResourceSet GetImageResourceSet(IntPtr imGuiBinding)
         {
-            if (!_viewsById.TryGetValue(imGuiBinding, out ResourceSetInfo tvi))
+            if (!_viewsById.TryGetValue(imGuiBinding, out ResourceSetInfo rsi))
             {
                 throw new InvalidOperationException("No registered ImGui binding with id " + imGuiBinding.ToString());
             }
 
-            return tvi.ResourceSet;
+            return rsi.ResourceSet;
         }
 
         public void ClearCachedImageResources()
@@ -477,7 +495,9 @@ namespace ImGuiNET
                 1,
                 0,
                 0);
-            _fontTextureView = gd.ResourceFactory.CreateTextureView(_fontTexture);
+
+            _fontTextureResourceSet?.Dispose();
+            _fontTextureResourceSet = gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(_textureLayout, _fontTexture));
 
             io.Fonts.ClearTexData();
         }
@@ -549,6 +569,18 @@ namespace ImGuiNET
         /// </summary>
         public void Update(float deltaSeconds, InputSnapshot snapshot)
         {
+            BeginUpdate(deltaSeconds);
+            UpdateImGuiInput(snapshot);
+            UpdateMonitors();
+            EndUpdate();
+        }
+
+        /// <summary>
+        /// Called before we handle the input in <see cref="Update(float, InputSnapshot)"/>.
+        /// This render ImGui and update the state.
+        /// </summary>
+        protected void BeginUpdate(float deltaSeconds)
+        {
             if (_frameBegun)
             {
                 ImGui.Render();
@@ -556,9 +588,14 @@ namespace ImGuiNET
             }
 
             SetPerFrameImGuiData(deltaSeconds);
-            UpdateImGuiInput(snapshot);
-            UpdateMonitors();
+        }
 
+        /// <summary>
+        /// Called at the end of <see cref="Update(float, InputSnapshot)"/>.
+        /// This tells ImGui that we are on the next frame.
+        /// </summary>
+        protected void EndUpdate()
+        {
             _frameBegun = true;
             ImGui.NewFrame();
         }
@@ -619,8 +656,9 @@ namespace ImGuiNET
             bool leftPressed = false;
             bool middlePressed = false;
             bool rightPressed = false;
-            foreach (MouseEvent me in snapshot.MouseEvents)
+            for (int i = 0; i < snapshot.MouseEvents.Count; i++)
             {
+                MouseEvent me = snapshot.MouseEvents[i];
                 if (me.Down)
                 {
                     switch (me.MouseButton)
@@ -639,8 +677,8 @@ namespace ImGuiNET
             }
 
             io.MouseDown[0] = leftPressed   || snapshot.IsMouseDown(MouseButton.Left);
-            io.MouseDown[1] = middlePressed || snapshot.IsMouseDown(MouseButton.Middle);
-            io.MouseDown[2] = rightPressed  || snapshot.IsMouseDown(MouseButton.Right);
+            io.MouseDown[1] = rightPressed || snapshot.IsMouseDown(MouseButton.Right);
+            io.MouseDown[2] = middlePressed || snapshot.IsMouseDown(MouseButton.Middle);
 
             if (p_sdl_GetGlobalMouseState == null)
             {
@@ -657,8 +695,8 @@ namespace ImGuiNET
             {
                 uint buttons = _viewportsEnabled ? p_sdl_GetGlobalMouseState(&x, &y) : p_sdl_GetMouseState(&x, &y);
                 io.MouseDown[0] = (buttons & 0b0001) != 0;
-                io.MouseDown[1] = (buttons & 0b0100) != 0;
-                io.MouseDown[2] = (buttons & 0b0010) != 0;
+                io.MouseDown[1] = (buttons & 0b0010) != 0;
+                io.MouseDown[2] = (buttons & 0b0100) != 0;
             }
 
             io.MousePos = new Vector2(x, y);
@@ -736,7 +774,6 @@ namespace ImGuiNET
             io.KeyMap[(int)ImGuiKey.X] = (int)Key.X;
             io.KeyMap[(int)ImGuiKey.Y] = (int)Key.Y;
             io.KeyMap[(int)ImGuiKey.Z] = (int)Key.Z;
-            io.KeyMap[(int)ImGuiKey.Space] = (int)Key.Space;
         }
 
         public class FramebufferHash
@@ -801,14 +838,14 @@ namespace ImGuiNET
             uint totalVBSize = (uint)(draw_data.TotalVtxCount * Unsafe.SizeOf<ImDrawVert>());
             if (totalVBSize > _vertexBuffer.SizeInBytes)
             {
-                gd.DisposeWhenIdle(_vertexBuffer);
+                _vertexBuffer.Dispose();
                 _vertexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)(totalVBSize * 1.5f), BufferUsage.VertexBuffer | BufferUsage.Dynamic));
             }
 
             uint totalIBSize = (uint)(draw_data.TotalIdxCount * sizeof(ushort));
             if (totalIBSize > _indexBuffer.SizeInBytes)
             {
-                gd.DisposeWhenIdle(_indexBuffer);
+                _indexBuffer.Dispose();
                 _indexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)(totalIBSize * 1.5f), BufferUsage.IndexBuffer | BufferUsage.Dynamic));
             }
             
@@ -889,11 +926,11 @@ namespace ImGuiNET
                             (uint)(pcmd.ClipRect.Z - pcmd.ClipRect.X),
                             (uint)(pcmd.ClipRect.W - pcmd.ClipRect.Y));
 
-                        cl.DrawIndexed(pcmd.ElemCount, 1, (uint)idx_offset, vtx_offset, 0);
+                        cl.DrawIndexed(pcmd.ElemCount, 1, pcmd.IdxOffset + (uint)idx_offset, (int)(pcmd.VtxOffset + vtx_offset), 0);
                     }
-
-                    idx_offset += (int)pcmd.ElemCount;
                 }
+
+                idx_offset += cmd_list.IdxBuffer.Size;
                 vtx_offset += cmd_list.VtxBuffer.Size;
             }
         }
@@ -916,13 +953,13 @@ namespace ImGuiNET
             _indexBuffer.Dispose();
             _projMatrixBuffer.Dispose();
             _fontTexture.Dispose();
-            _fontTextureView.Dispose();
             _vertexShader.Dispose();
             _fragmentShader.Dispose();
             _layout.Dispose();
             _textureLayout.Dispose();
             _pipeline.Dispose();
             _mainResourceSet.Dispose();
+            _fontTextureResourceSet.Dispose();
 
             foreach (IDisposable resource in _ownedResources)
             {
