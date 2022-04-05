@@ -129,9 +129,9 @@
       <PackageReference Include="NativeLibraryLoader" Version="1.0.12" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
       <PackageReference Include="Octokit" Version="0.50.0" />
-      <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-rc0002" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
       <PackageReference Include="Vk" Version="1.0.25" />
-      <PackageReference Include="Vortice.D3DCompiler" Version="1.9.56" />
-      <PackageReference Include="Vortice.Direct3D11" Version="1.9.56" />
+      <PackageReference Include="Vortice.D3DCompiler" Version="2.1.0" />
+      <PackageReference Include="Vortice.Direct3D11" Version="2.1.0" />
     </ItemGroup>
 </Project>
