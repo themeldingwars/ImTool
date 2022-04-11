@@ -93,6 +93,12 @@ namespace ImTool
 
             return ret;
         }
+
+        private int DigitCount(int n)
+        {
+            return n == 0 ? 1 : (n > 0 ? 1 : 2) + (int)Math.Log10(Math.Abs((double)n));
+        }
+
         internal void Build()
         {
             Clear();
@@ -100,6 +106,7 @@ namespace ImTool
             foreach (byte size in Sizes)
                 pointers.Add(size, Create(size));
         }
+
         private unsafe ImFontPtr Create(byte fontSize)
         {
             ImFontAtlasPtr atlasPtr = ImGui.GetIO().Fonts;
@@ -110,6 +117,16 @@ namespace ImTool
             {
                 ImFontConfigPtr configPtr = CreateImFontConfigPtr(fontSize, !first);
                 configPtr.GlyphOffset = file.GlyphOffset;
+
+                byte[] fontNameBytes = new byte[configPtr.Name.Count];
+                int maxFontNameLength = (fontNameBytes.Length - 1) - (4 + DigitCount(fontSize));
+                string fontNameFormat = $"{(Name.Length > maxFontNameLength ? Name.Substring(0, maxFontNameLength) : Name)}, {(int)fontSize}px";
+                Encoding.ASCII.GetBytes(fontNameFormat).CopyTo(fontNameBytes, 0);
+                for (int i = 0; i < fontNameBytes.Length; i++)
+                {
+                    configPtr.Name[i] = fontNameBytes[i];
+                }
+                
                 if (file.Path == "ImGui.Default")
                 {
                     imFontPtr = atlasPtr.AddFontDefault();
