@@ -210,6 +210,11 @@ namespace ImTool
         
         private unsafe void SubmitUI()
         {
+            if (FontManager.DefaultFont != "" && FontManager.Fonts.ContainsKey(FontManager.DefaultFont))
+            {
+                FontManager.PushFont(FontManager.DefaultFont);
+            }
+
             ImGui.SetNextWindowSize(windowBounds.Size);
             ImGui.SetNextWindowPos(windowBounds.Position);
             MainWindowStyleOverrides(true);

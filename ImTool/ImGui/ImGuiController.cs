@@ -157,9 +157,11 @@ namespace ImGuiNET
                 io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
                 io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports;
             }
-            
+
             foreach (Font font in FontManager.Fonts.Values)
+            {
                 font.Build();
+            }
             
             CreateDeviceResources(gd, outputDescription);
             SetKeyMappings();

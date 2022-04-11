@@ -12,6 +12,8 @@ namespace ImTool
     {
         public static Dictionary<string, Font> Fonts { get; private set; }
 
+        public static string DefaultFont = "";
+
         static FontManager()
         {
             Fonts = new Dictionary<string, Font>();
