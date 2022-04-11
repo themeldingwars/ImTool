@@ -2,16 +2,20 @@
 using System.IO;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace ImTool
 {
     public class FontFile
     {
+        
+        private byte[] data;
+        private GCHandle handle;
+        
         public string Path { get; }
         public GlyphRange[] Ranges { get; }
         public Vector2 GlyphOffset { get; } = new Vector2(0, 0);
-
-
+        public bool IsValid { get; private set; } = false;
         public FontFile(string path, GlyphRange[] ranges = null, Vector2? glyphOffset = null)
         {
             Path = path;
@@ -19,6 +23,8 @@ namespace ImTool
             
             if (glyphOffset != null)
                 GlyphOffset = (Vector2) glyphOffset;
+
+            ValidateAndLoad();
         }
         
         public FontFile(string path, Vector2? glyphOffset = null, GlyphRange[] ranges = null)
@@ -28,6 +34,8 @@ namespace ImTool
 
             if (glyphOffset != null)
                 GlyphOffset = (Vector2) glyphOffset;
+            
+            ValidateAndLoad();
         }
         
         public FontFile(string path, GlyphRange range, Vector2? glyphOffset = null)
@@ -37,14 +45,42 @@ namespace ImTool
             
             if (glyphOffset != null)
                 GlyphOffset = (Vector2) glyphOffset;
+            
+            ValidateAndLoad();
         }
         
         public FontFile(string path)
         {
             Path = path;
+            
+            ValidateAndLoad();
+        }
+        
+        private object key = new object();
+        private void ValidateAndLoad()
+        {
+            if (Path == "ImGui.Default")
+            {
+                IsValid = true;
+                return;
+            }
+            
+            lock (key)
+            {
+                Stream stream;
+                if(!TryGetStream(out stream) || stream == null || stream.Length == 0)
+                    return;
+
+                data = new byte[stream.Length];
+                stream.Read(data, 0, data.Length);
+                handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+
+                IsValid = true;
+                stream.Dispose();
+            }
         }
 
-        public bool TryGetStream(out Stream stream)
+        private bool TryGetStream(out Stream stream)
         {
             stream = null;
             
@@ -87,5 +123,8 @@ namespace ImTool
             }
             return ret;
         }
+
+        internal IntPtr GetPinnedData() => handle.AddrOfPinnedObject();
+        internal int GetPinnedDataLength() => data?.Length ?? 0;
     }
 }

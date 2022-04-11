@@ -67,20 +67,14 @@ namespace ImTool
             
             foreach (FontFile file in files)
             {
-                if (file.Path == "ImGui.Default")
+                if (file.IsValid)
                 {
                     ret.Add(file);
-                    continue;
                 }
-
-                if (!file.TryGetStream(out Stream stream) || stream == null || stream.Length == 0)
+                else
                 {
-                    Console.WriteLine($"Could not find font file \"{file.Path}\" when creating font {Name}.");
-                    continue;
+                    Console.WriteLine($"Font '{Name}', file {file.Path} is invalid and will not be loaded.");
                 }
-                
-                stream.Dispose();
-                ret.Add(file);
             }
             
             return ret;
@@ -122,28 +116,17 @@ namespace ImTool
                 }
                 else
                 {
-                    Stream stream;
-                    if(!file.TryGetStream(out stream))
-                        continue;
-                
-                    byte[] ba = new byte[stream.Length];
-                    stream.Read(ba, 0, ba.Length);
-                    GCHandle pinnedArray = GCHandle.Alloc(ba, GCHandleType.Pinned);
-                
                     ushort[] ranges = file.GetGlyphRanges();
                     if (ranges == null || ranges.Length == 0)
                     {
-                        imFontPtr = atlasPtr.AddFontFromMemoryTTF(pinnedArray.AddrOfPinnedObject(), ba.Length, configPtr.SizePixels, configPtr);
+                        imFontPtr = atlasPtr.AddFontFromMemoryTTF(file.GetPinnedData(), file.GetPinnedDataLength(), configPtr.SizePixels, configPtr);
                     }
                     else
                     {
                         GCHandle rangeHandle = GCHandle.Alloc(ranges, GCHandleType.Pinned);
-                        imFontPtr = atlasPtr.AddFontFromMemoryTTF(pinnedArray.AddrOfPinnedObject(), ba.Length, configPtr.SizePixels, configPtr, rangeHandle.AddrOfPinnedObject());
+                        imFontPtr = atlasPtr.AddFontFromMemoryTTF(file.GetPinnedData(), file.GetPinnedDataLength(), configPtr.SizePixels, configPtr, rangeHandle.AddrOfPinnedObject());
                         rangeHandle.Free();
                     }
-                    
-                    pinnedArray.Free();
-                    stream.Dispose();
                 }
                 
                 first = false;
@@ -164,8 +147,7 @@ namespace ImTool
             configPtr.SizePixels = fontSize;
             return configPtr;
         }
-
-
+        
     }
     
     public struct GlyphRange
