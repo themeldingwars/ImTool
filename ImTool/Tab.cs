@@ -8,8 +8,10 @@ namespace ImTool
     public abstract class Tab
     {
         public abstract string Name { get; }
+
+        public string DisplayName { get; set; } = null;
         
-        public uint DockSpaceID => ImGui.GetID($"{Name}TabDockspace");
+        public uint DockSpaceID => ImGui.GetID($"{DisplayName ?? Name}###{Name}TabDockspace");
         public virtual ImGuiDockNodeFlags DockSpaceFlags { get; } = ImGuiDockNodeFlags.None;
         private bool resetDockSpace = false;
         

@@ -42,7 +42,7 @@ namespace ImTool
                 foreach (Tab tab in tabs)
                 {
                     TabStyleOverrides(true);
-                    if (!ImGui.BeginTabItem(tab.Name))
+                    if (!ImGui.BeginTabItem($"{tab.DisplayName ?? tab.Name}###{tab.Name}TabDockspace"))
                     {
                         ImGui.DockSpace(tab.DockSpaceID, new Vector2(0, 0), ImGuiDockNodeFlags.KeepAliveOnly);
                         TabStyleOverrides(false);
