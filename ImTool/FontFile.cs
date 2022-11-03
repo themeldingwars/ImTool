@@ -85,7 +85,9 @@ namespace ImTool
             stream = null;
             
             if (string.IsNullOrWhiteSpace(Path))
+            {
                 return false;
+            }
             
             try
             {
@@ -100,7 +102,18 @@ namespace ImTool
                 Assembly a = Assembly.GetExecutingAssembly();
                 stream = a.GetManifestResourceStream(Path);
                 if (stream != null)
+                {
                     return true;
+                }
+
+                foreach (var ResourceAssembly in FontManager.ResourceAssemblies)
+                {
+                    stream = ResourceAssembly.GetManifestResourceStream(Path);
+                    if (stream != null)
+                    {
+                        return true;
+                    }
+                }
             }
             catch (Exception)
             {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,9 +15,12 @@ namespace ImTool
 
         public static string DefaultFont = "";
 
+        public static List<Assembly> ResourceAssemblies { get; private set; }
+
         static FontManager()
         {
             Fonts = new Dictionary<string, Font>();
+            ResourceAssemblies = new List<Assembly>();
             
             AddFont(new Font("Regular", 18, new FontFile("ImTool.Fonts.SourceSansPro-Regular.ttf", new Vector2(0, -1))));
             AddFont(new Font("Bold", 18, new FontFile("ImTool.Fonts.SourceSansPro-Bold.ttf", new Vector2(0, -1))));
@@ -54,6 +58,14 @@ namespace ImTool
                 font.Clear();
             
            // ImGui.GetIO().Fonts.Clear();
+        }
+
+        public static void RegisterResourceAssembly(Assembly assembly)
+        {
+            if (!ResourceAssemblies.Contains(assembly))
+            {
+                ResourceAssemblies.Add(assembly);
+            }
         }
 
         private static GlyphRange[] BuildExtendedRange()
