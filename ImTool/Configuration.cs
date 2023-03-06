@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
 using Newtonsoft.Json;
@@ -9,6 +10,8 @@ namespace ImTool
 {
     public class Configuration
     {
+        public Configuration() { }
+        
         // these get automatically assigned
         [JsonIgnore] public string ConfigurationFilePath;
         [JsonIgnore] public string ToolDataPath;
@@ -45,8 +48,8 @@ namespace ImTool
         [JsonIgnore] public bool DisableJsonThemes = false;
         [JsonIgnore] public bool DisableUpdater = false;
         [JsonIgnore] public bool HideImToolSettings = false;
-
-        public static T Load<T>(string toolDataPath = "") where T : Configuration
+        
+        public static T Load<T>(string toolDataPath = "") where T : Configuration, new()
         {
             T defaultInstance = (T) Activator.CreateInstance(typeof(T));
             T instance = null;

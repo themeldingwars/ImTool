@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 
@@ -8,11 +9,14 @@ namespace ImTool.JsonConverters
 {
     public class ColorConverter : JsonConverter
     {
+        public ColorConverter() {}
+        
         public override bool CanConvert(Type objectType)
         {
             return objectType == typeof(Vector4);
         }
 
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ColorConverter))]
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             Vector4 vec = default;

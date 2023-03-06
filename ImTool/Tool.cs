@@ -12,7 +12,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace ImTool
 {
-    public abstract class Tool<TTool, TConfig> where TConfig : Configuration where TTool : Tool<TTool, TConfig>
+    public abstract class Tool<TTool, TConfig> where TConfig : Configuration, new() where TTool : Tool<TTool, TConfig>, new()
     {
         public TConfig Config;
         public Window Window;
