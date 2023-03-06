@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Reflection;
 using System.IO;
+using System.IO.Hashing;
 using Veldrid;
 using System.Runtime.CompilerServices;
 using Veldrid.Sdl2;
@@ -14,7 +16,6 @@ using imnodesNET;
 using ImPlotNET;
 using ImTool;
 using ImTool.SDL;
-using K4os.Hash.xxHash;
 
 namespace ImGuiNET
 {
@@ -786,6 +787,7 @@ namespace ImGuiNET
         
         public Dictionary<Framebuffer, FramebufferHash> FramebufferHashes = new();
         
+        private XxHash32 _xx32 = new XxHash32();
         private void RenderImDrawData(ImDrawDataPtr draw_data, GraphicsDevice gd, CommandList cl, Framebuffer fb,
             bool configPowerSaving)
         {
@@ -814,8 +816,9 @@ namespace ImGuiNET
                             cmd_list.VtxBuffer.Size * sizeof(ushort));
                         unchecked
                         {
-                            hash += XXH32.DigestOf(vBytes);
-                            hash += XXH32.DigestOf(iBytes);
+                            _xx32.Append(vBytes);
+                            _xx32.Append(iBytes);
+                            hash += BinaryPrimitives.ReadUInt32BigEndian(_xx32.GetHashAndReset());
                         }
                     }
                 }
