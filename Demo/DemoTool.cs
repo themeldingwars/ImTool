@@ -150,6 +150,14 @@ namespace Demo
             ImGui.Begin("Test Image");
             ImGui.Image(tool.Window.GetOrCreateTextureBinding(testImage), new Vector2(96, 96));
             ImGui.End();
+            
+            // fullscreen test
+            ImGui.Begin("Test Fullscreen");
+            if (ImGui.Button($"{(tool.Window.FullscreenMode ? "Disable fullscreen" : "Enable Fullscreen")}###FullScreenToggle"))
+            {
+                tool.Window.FullscreenMode = !tool.Window.FullscreenMode;
+            }
+            ImGui.End();
         }
 
         // the "workspace" is the central node / free space in a tab
