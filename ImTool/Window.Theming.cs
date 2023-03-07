@@ -8,7 +8,7 @@ namespace ImTool
     {
         private void UpdateWindowBorderThickness()
         {
-            borderThickness = WindowState == WindowState.Maximized ? 0 : config.BorderSize;
+            borderThickness = (WindowState == WindowState.Maximized || FullscreenMode) ? 0 : config.BorderSize;
         }
         private void UpdateBorderColor()
         {

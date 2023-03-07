@@ -36,7 +36,7 @@ namespace ImTool
         private bool vsync;
         private bool restartGD;
 
-        private int titlebarHeight = 28;
+        private int titlebarHeight => TitlebarDisabled ? 0 : 28;
         private int windowBtnWidth = 30;
         private int borderThickness = 0;
         private int currentMonitor = -1;
@@ -226,12 +226,17 @@ namespace ImTool
                 ImGui.GetWindowDrawList().AddRectFilledMultiColor(windowBounds.Position, windowBounds.MaxPosition, windowBorderColor[0], windowBorderColor[1], windowBorderColor[2], windowBorderColor[3]);
             }
 
-            ImGui.GetWindowDrawList().AddRectFilled(titlebarBounds.Position, titlebarBounds.MaxPosition, titlebarColor);
-            
-            SubmitWindowButtons();
+            if (!TitlebarDisabled)
+            {
+                ImGui.GetWindowDrawList().AddRectFilled(titlebarBounds.Position, titlebarBounds.MaxPosition, titlebarColor);
+                SubmitWindowButtons();
+            }
+
 
             int tabHeight = 4 + (int)ImGui.CalcTextSize("ABCD").Y;
-            ImGui.SetCursorPos(new Vector2(borderThickness + 1, titlebarHeight - tabHeight));
+            int yStart = TitlebarDisabled ? 0 : titlebarHeight - tabHeight;
+            
+            ImGui.SetCursorPos(new Vector2(borderThickness + 1, yStart));
             ImGui.BeginTabBar("Tabs");
             
             ImGui.GetWindowDrawList().AddRectFilled(contentBounds.Position, contentBounds.MaxPosition, ImGui.GetColorU32(ImGuiCol.WindowBg));

@@ -10,6 +10,9 @@ namespace ImTool
         private bool mouseDownPrevious;
         private bool windowWasCentered;
         
+        private readonly Veldrid.WindowState fullscreenMode = Veldrid.WindowState.BorderlessFullScreen;
+        private Veldrid.WindowState preFullscreenMode;
+        
         public WindowState WindowState
         {
             get { return config.WindowState; }
@@ -124,6 +127,7 @@ namespace ImTool
         }
         private void UpdateWindowState()
         {
+            
             if(config.WindowState != WindowState.Normal)
             {
                 StoreNormalBounds();
@@ -153,11 +157,9 @@ namespace ImTool
         }
         private void HandleWindowDragging()
         {
-            if(mouseDownOnEdge != Rect.Edge.None)
-            {
+            if(mouseDownOnEdge != Rect.Edge.None || FullscreenMode)
                 return;
-            }
-
+            
             if (windowStartDragPosition == null && ImGui.IsMouseDown(ImGuiMouseButton.Left) && !mouseDownPrevious)
             {
                 if (!mouseDownOnTitlebar && titlebarBounds.Contains(ImGui.GetMousePos()))
@@ -254,7 +256,7 @@ namespace ImTool
         }
         private void HandleWindowResizing()
         {
-            if(WindowState != WindowState.Normal || mouseDownOnTitlebar || config.DisableResizing)
+            if(WindowState != WindowState.Normal || mouseDownOnTitlebar || config.DisableResizing || FullscreenMode)
             {
                 return;
             }
@@ -484,5 +486,26 @@ namespace ImTool
             config.NormalWindowBounds.Height = window.Bounds.Height;
             config.Save();
         }
+        public bool FullscreenMode
+        {
+            get => window != null && window.WindowState == fullscreenMode;
+            set
+            {
+                if (value && !FullscreenMode)
+                {
+                    preFullscreenMode = window.WindowState;
+                    window.WindowState = fullscreenMode;
+                    UpdateWindowState();
+                }
+                else if (!value && FullscreenMode)
+                {
+                    window.WindowState = preFullscreenMode;
+                    UpdateWindowState();
+                }
+            }
+        }
+
+        public bool DisableTitlebarInFullscreenMode = true;
+        public bool TitlebarDisabled => FullscreenMode && DisableTitlebarInFullscreenMode;
     }
 }

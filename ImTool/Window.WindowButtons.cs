@@ -10,64 +10,67 @@ namespace ImTool
         
         private void SubmitWindowButtons()
         {
+            
             int nBtn = 1;
             ThemeManager.ApplyOverride(ImGuiStyleVar.FrameRounding, 0);
             ThemeManager.ApplyOverride(ImGuiCol.Button, new Vector4());
-            ImGui.SetCursorPos(WindowButtonPosition(nBtn));
 
-
-            FontManager.PushFont("FAS");
-            if (ImGui.Button("\uf410", windowButtonSize))
-            {
-                Exit();
-            }
-            nBtn++;
-            
-            if (!config.DisableResizing)
+            if (!FullscreenMode)
             {
                 ImGui.SetCursorPos(WindowButtonPosition(nBtn));
-                if (ImGui.Button(WindowState == WindowState.Maximized ? "\uf2d2" : "\uf2d0", windowButtonSize))
+                FontManager.PushFont("FAS");
+                if (ImGui.Button("\uf410", windowButtonSize))
                 {
-                    if (WindowState == WindowState.Maximized)
+                    Exit();
+                }
+                nBtn++;
+                
+                if (!config.DisableResizing)
+                {
+                    ImGui.SetCursorPos(WindowButtonPosition(nBtn));
+                    if (ImGui.Button(WindowState == WindowState.Maximized ? "\uf2d2" : "\uf2d0", windowButtonSize))
                     {
-                        WindowState = config.PreviousWindowState;
+                        if (WindowState == WindowState.Maximized)
+                        {
+                            WindowState = config.PreviousWindowState;
+                        }
+                        else
+                        {
+                            WindowState = WindowState.Maximized;
+                        }
+                    }
+                    nBtn++;
+                }
+
+                ImGui.SetCursorPos(WindowButtonPosition(nBtn));
+                if (ImGui.Button("\uf2d1", windowButtonSize))
+                {
+                    window.WindowState = Veldrid.WindowState.Minimized;
+                }
+
+                if (!config.DisableSettingsPane)
+                {
+                    nBtn++;
+                    ImGui.SetCursorPos(WindowButtonPosition(nBtn));
+                    if (updater != null && updater.UpdateAvailable)
+                    {
+                        ThemeManager.ApplyOverride(ImGuiCol.Button, ImToolColors.ToolVersionUpgrade);
+                        
+                        if (ImGui.Button("\uf013", windowButtonSize))
+                            ImGui.OpenPopup("imtool_setting_popup");
+                        
+                        ThemeManager.ResetOverride(ImGuiCol.Button);
                     }
                     else
                     {
-                        WindowState = WindowState.Maximized;
+                        if (ImGui.Button("\uf013", windowButtonSize))
+                            ImGui.OpenPopup("imtool_setting_popup");
                     }
                 }
-                nBtn++;
+                
+                FontManager.PopFont();
+                ThemeManager.ApplyOverride(ImGuiCol.Button, new Vector4());
             }
-
-            ImGui.SetCursorPos(WindowButtonPosition(nBtn));
-            if (ImGui.Button("\uf2d1", windowButtonSize))
-            {
-                window.WindowState = Veldrid.WindowState.Minimized;
-            }
-
-            if (!config.DisableSettingsPane)
-            {
-                nBtn++;
-                ImGui.SetCursorPos(WindowButtonPosition(nBtn));
-                if (updater != null && updater.UpdateAvailable)
-                {
-                    ThemeManager.ApplyOverride(ImGuiCol.Button, ImToolColors.ToolVersionUpgrade);
-                    
-                    if (ImGui.Button("\uf013", windowButtonSize))
-                        ImGui.OpenPopup("imtool_setting_popup");
-                    
-                    ThemeManager.ResetOverride(ImGuiCol.Button);
-                }
-                else
-                {
-                    if (ImGui.Button("\uf013", windowButtonSize))
-                        ImGui.OpenPopup("imtool_setting_popup");
-                }
-            }
-            
-            FontManager.PopFont();
-            ThemeManager.ApplyOverride(ImGuiCol.Button, new Vector4());
             
             if (windowButtons.Count > 0)
             {
@@ -131,7 +134,7 @@ namespace ImTool
         
         private Vector2 WindowButtonPosition(int n)
         {
-            if (WindowState == WindowState.Maximized)
+            if (WindowState == WindowState.Maximized || FullscreenMode)
             {
                 return new Vector2((windowBounds.Width - (windowBtnWidth + 1) * n), borderThickness + 1);
             }
