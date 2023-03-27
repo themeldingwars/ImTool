@@ -2,6 +2,7 @@
 using System.Numerics;
 using ImGuiNET;
 using ImTool;
+using ImTool.Scene3D;
 
 namespace Demo
 {
@@ -23,6 +24,7 @@ namespace Demo
         private static HexView.HighlightSection SelectedHexHighlight;
 
         public static Scene3dWidget Scene3d;
+        private static Transform Transform = new();
 
         public enum TestLogCategories
         {
@@ -115,6 +117,11 @@ namespace Demo
                 FileBrowser.Draw();
             }
             ImGui.End();
+
+            if (ImGui.Begin("Other widgets"))
+            {
+                Transform.DrawImguiWidget(true, true);
+            }
 
             DrawHexView();
             
