@@ -64,7 +64,10 @@ namespace ImTool
         public ExitDelegate OnExit;
 
         public string Title;
-        
+
+        public GraphicsDevice GetGraphicsDevice() => graphicsDevice;
+        public ImGuiController GetImGuiController() => controller;
+
         internal Window(Configuration config)
         {
             this.config = config;

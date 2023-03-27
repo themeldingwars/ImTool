@@ -68,6 +68,8 @@ namespace Demo
             ExtraWidgetsTests.SetupHexView();
             ThemeManager.OnThemeChanged += () => ExtraWidgetsTests.HexViewWidget.SetupSizes();
 
+            ExtraWidgetsTests.Scene3d = new Scene3dWidget(Window);
+
             // tool window has been created at this point
             // its time to load your tabs now
             Window.AddTab(new DemoWorkspaceTab(this));
