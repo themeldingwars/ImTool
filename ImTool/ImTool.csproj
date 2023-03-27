@@ -23,6 +23,7 @@
     </PropertyGroup>
     
     <ItemGroup>
+        <Folder Include="3D\" />
         <Folder Include="Shaders" />
     </ItemGroup>
 
