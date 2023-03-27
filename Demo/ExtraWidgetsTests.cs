@@ -22,6 +22,8 @@ namespace Demo
         public static  HexView                  HexViewWidget;
         private static HexView.HighlightSection SelectedHexHighlight;
 
+        public static Scene3dWidget Scene3d;
+
         public enum TestLogCategories
         {
             Test,
@@ -117,6 +119,8 @@ namespace Demo
             DrawHexView();
             
             TestLogWindow.DrawWindow();
+
+            Scene3d.DrawWindow("3D Test");
         }
 
         public static void SetupHexView()
