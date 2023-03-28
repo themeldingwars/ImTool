@@ -19,6 +19,8 @@ namespace ImTool
 
         private bool NeedsToInit = true;
 
+        public GraphicsDevice GetGfxDevice => GfxDevice;
+
         public SceneWidget(Window win)
         {
             MainWindow = win;
@@ -31,9 +33,13 @@ namespace ImTool
             if (ImGui.Begin(title))
             {
                 var size = ImGui.GetContentRegionAvail();
+                size.X   = size.X <= 0 ? 1 : size.X;
+                size.Y   = size.Y <= 0 ? 1 : size.Y;
+
                 Draw(size);
-                ImGui.End();
             }
+
+            ImGui.End();
         }
 
         public virtual void Draw(Vector2 size)

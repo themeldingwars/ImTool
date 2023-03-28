@@ -21,10 +21,6 @@
         <PackageLicenseUrl>https://github.com/themeldingwars/ImTool/blob/master/LICENSE</PackageLicenseUrl>
         <DefineConstants>$(DefineConstants);VALIDATE_USAGE</DefineConstants>
     </PropertyGroup>
-    
-    <ItemGroup>
-        <Folder Include="Shaders" />
-    </ItemGroup>
 
     <ItemGroup>
         <EmbeddedResource Include="Shaders/GLSL/imgui-vertex.glsl" LogicalName="imgui-vertex.glsl" />
@@ -137,5 +133,9 @@
       <PackageReference Include="Vk" Version="1.0.25" />
       <PackageReference Include="Vortice.D3DCompiler" Version="2.1.0" />
       <PackageReference Include="Vortice.Direct3D11" Version="2.1.0" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Shaders\SPIR-V\3D\Grid\" />
     </ItemGroup>
 </Project>
