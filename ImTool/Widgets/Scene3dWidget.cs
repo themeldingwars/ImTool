@@ -10,11 +10,11 @@ namespace ImTool
 
         public bool ShowDebugInfo = true;
 
-        // Create a scene to render a world and manage the worklld itself
+        // Create a scene to render a world and manage the world itself
         public Scene3dWidget(Window win) : base(win)
         {
             IsExternalWorld = false;
-            WorldScene = new World();
+            WorldScene = new World(win);
         }
 
         // Crate a scene for an exteranly managed world, eg a camera view into one

@@ -72,8 +72,9 @@ namespace Demo
 
             // tool window has been created at this point
             // its time to load your tabs now
-            Window.AddTab(new DemoWorkspaceTab(this));
-            Window.AddTab(new DemoTab());
+            //Window.AddTab(new DemoWorkspaceTab(this));
+            //Window.AddTab(new DemoTab());
+            Window.AddTab(new SceneTestTab(this));
             Config.AdditionalIntToBeSaved = 1234123;
             
             Window.AddWindowButton("Test button", () =>
@@ -210,7 +211,7 @@ namespace Demo
             }
         }
     }
-    
+
     public class DemoTab : Tab
     {
         public override string Name { get; } = "Second tab";

@@ -21,10 +21,6 @@
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <DefineConstants>$(DefineConstants);VALIDATE_USAGE</DefineConstants>
     </PropertyGroup>
-    
-    <ItemGroup>
-        <Folder Include="Shaders" />
-    </ItemGroup>
 
     <ItemGroup>
         <None Include="..\README.md" Pack="true" PackagePath="\" />
@@ -146,5 +142,9 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Shaders\SPIR-V\3D\Grid\" />
     </ItemGroup>
 </Project>

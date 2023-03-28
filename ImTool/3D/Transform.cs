@@ -6,9 +6,9 @@ namespace ImTool.Scene3D
 {
     public struct Transform
     {
-        public static Vector3 Up      => Vector3.UnitY;
-        public static Vector3 Left    => Vector3.UnitX;
-        public static Vector3 Forward => Vector3.UnitZ;
+        public Vector3 Up      => Vector3.Transform(Vector3.UnitY, Rotation);
+        public Vector3 Left    => Vector3.Transform(Vector3.UnitX, Rotation);
+        public Vector3 Forward => Vector3.Transform(Vector3.UnitZ, Rotation);
 
         public Matrix4x4 World;
 
