@@ -122,6 +122,7 @@ namespace Demo
             {
                 Transform.DrawImguiWidget(true, true);
             }
+            ImGui.End();
 
             DrawHexView();
             
