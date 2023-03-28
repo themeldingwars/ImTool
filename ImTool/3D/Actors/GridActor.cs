@@ -52,7 +52,7 @@ namespace ImTool.Scene3D
         {
             var gridVert    = Resources.LoadShader("SPIR-V/Anvil/Grid/GridVert.glsl", ShaderStages.Vertex);
             var gridFrag    = Resources.LoadShader("SPIR-V/Anvil/Grid/GridFrag.glsl", ShaderStages.Fragment);
-            //var gridShaders = World.MainWindow.GetGraphicsDevice().ResourceFactory.CreateFromSpirv(gridVert, gridFrag);
+            var gridShaders = World.MainWindow.GetGraphicsDevice().ResourceFactory.CreateFromSpirv(gridVert, gridFrag);
 
             //Veldrid.SPIRV.ResourceFactoryExtensions.CreateFromSpirv(World.MainWindow.GetGraphicsDevice().ResourceFactory, gridVert, gridFrag);
 
