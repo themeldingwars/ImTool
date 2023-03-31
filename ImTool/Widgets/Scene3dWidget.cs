@@ -28,6 +28,8 @@ namespace ImTool
         {
             base.Render(dt);
 
+            WorldScene.CurrentSceneViewport = this;
+
             if (!IsExternalWorld)
                 WorldScene.Update(dt);
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
+//using Veldrid.SPIRV;
 
 namespace ImTool.Scene3D
 {
@@ -46,17 +47,28 @@ namespace ImTool.Scene3D
 
             IndexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(sizeof(ushort) * (uint)indices.Length, BufferUsage.IndexBuffer));
             gd.UpdateBuffer(IndexBuffer, 0, indices);
+
+            ShaderSet             = CreateShaderSet();
+            PerItemResourceLayout = CreatePerItemResourceLayout();
+
+            Pipeline = gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
+                BlendStateDescription.SingleAlphaBlend,
+                DepthStencilStateDescription.DepthOnlyLessEqual,
+                RasterizerStateDescription.CullNone,
+                PrimitiveTopology.TriangleList,
+                ShaderSet,
+                new[] { World.ProjViewLayout, PerItemResourceLayout },
+                World.CurrentSceneViewport.GetFramebuffer().OutputDescription));
         }
 
         private ShaderSetDescription CreateShaderSet()
         {
-            var gridVert    = Resources.LoadShader("SPIR-V/Anvil/Grid/GridVert.glsl", ShaderStages.Vertex);
-            var gridFrag    = Resources.LoadShader("SPIR-V/Anvil/Grid/GridFrag.glsl", ShaderStages.Fragment);
-            var gridShaders = World.MainWindow.GetGraphicsDevice().ResourceFactory.CreateFromSpirv(gridVert, gridFrag);
+                                                            //ImTool.Shaders.SPIR_V._3D.Grid.GridFrag.glsl
+            var gridVert    = Resources.LoadEmbeddedShader("ImTool.Shaders.SPIR_V._3D.Grid.GridVert.glsl", ShaderStages.Vertex);
+            var gridFrag    = Resources.LoadEmbeddedShader("ImTool.Shaders.SPIR_V._3D.Grid.GridFrag.glsl", ShaderStages.Fragment);
+            var gridShaders = new Shader[2]; // World.MainWindow.GetGraphicsDevice().ResourceFactory.CreateFromSpirv(gridVert, gridFrag);
 
-            //Veldrid.SPIRV.ResourceFactoryExtensions.CreateFromSpirv(World.MainWindow.GetGraphicsDevice().ResourceFactory, gridVert, gridFrag);
-
-            /*ShaderSetDescription shaderSet = new ShaderSetDescription(
+            ShaderSetDescription shaderSet = new ShaderSetDescription(
                 new[]
                 {
                     new VertexLayoutDescription(
@@ -64,11 +76,9 @@ namespace ImTool.Scene3D
                         new VertexElementDescription("Uv", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2)
                         )
                 },
-                gridShaders);*/
+                gridShaders);
 
-            //return shaderSet;
-
-            return new ShaderSetDescription();
+            return shaderSet;
         }
 
         private ResourceLayout CreatePerItemResourceLayout()
