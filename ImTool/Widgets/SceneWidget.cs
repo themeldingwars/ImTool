@@ -19,7 +19,8 @@ namespace ImTool
 
         private bool NeedsToInit = true;
 
-        public GraphicsDevice GetGfxDevice => GfxDevice;
+        public GraphicsDevice GetGfxDevice() => GfxDevice;
+        public Framebuffer GetFramebuffer()  => FrameBuff;
 
         public SceneWidget(Window win)
         {

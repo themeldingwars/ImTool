@@ -13,10 +13,19 @@ namespace ImTool.Scene3D
     public class World
     {
         public Window MainWindow;
+        public Scene3dWidget CurrentSceneViewport;
+
         protected double LastFrameTime;
         protected double LastDeltaTime;
 
+        private DeviceBuffer ViewBuffer;       // active cameras view matrix
+        private DeviceBuffer ProjectionBuffer; // active camera projection matrix
+        private ResourceSet ProjViewSet;
+        private DeviceBuffer ViewStateBuffer;
+        public ResourceLayout ProjViewLayout { get; private set; }
+
         public CameraActor ActiveCamera;
+        public GridActor Grid;
 
         public List<Actor> UpdateableActors = new();
 
@@ -26,6 +35,19 @@ namespace ImTool.Scene3D
             LastFrameTime = (DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond);
 
             ActiveCamera = CreateActor<CameraActor>();
+            //Grid         = CreateActor<GridActor>();
+
+            var factory = MainWindow.GetGraphicsDevice().ResourceFactory;
+            ProjViewLayout = factory.CreateResourceLayout(
+                new ResourceLayoutDescription(
+                    new ResourceLayoutElementDescription("ViewStateBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+                    )
+                );
+
+            ProjectionBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
+            ViewBuffer       = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
+            ViewStateBuffer  = factory.CreateBuffer(new BufferDescription(ViewData.SIZE, BufferUsage.UniformBuffer));
+            ProjViewSet      = factory.CreateResourceSet(new ResourceSetDescription(ProjViewLayout, ViewStateBuffer));
         }
 
         // Create a new actor in the world
@@ -65,7 +87,10 @@ namespace ImTool.Scene3D
 
         public void Render(double dt, CommandList cmdList)
         {
+            cmdList.UpdateBuffer(ViewStateBuffer, 0, ActiveCamera.ViewData);
+            cmdList.ClearDepthStencil(1f);
 
+            //Grid.Render(cmdList);
         }
     }
 }
