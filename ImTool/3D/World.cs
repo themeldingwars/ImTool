@@ -14,13 +14,14 @@ namespace ImTool.Scene3D
     {
         public Window MainWindow;
         public Scene3dWidget CurrentSceneViewport;
+        private List<Scene3dWidget> Viewports = new();
 
         protected double LastFrameTime;
         protected double LastDeltaTime;
 
         private DeviceBuffer ViewBuffer;       // active cameras view matrix
         private DeviceBuffer ProjectionBuffer; // active camera projection matrix
-        private ResourceSet ProjViewSet;
+        public ResourceSet ProjViewSet;
         private DeviceBuffer ViewStateBuffer;
         public ResourceLayout ProjViewLayout { get; private set; }
 
@@ -33,9 +34,6 @@ namespace ImTool.Scene3D
         {
             MainWindow    = window;
             LastFrameTime = (DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond);
-
-            ActiveCamera = CreateActor<CameraActor>();
-            //Grid         = CreateActor<GridActor>();
 
             var factory = MainWindow.GetGraphicsDevice().ResourceFactory;
             ProjViewLayout = factory.CreateResourceLayout(
@@ -50,13 +48,42 @@ namespace ImTool.Scene3D
             ProjViewSet      = factory.CreateResourceSet(new ResourceSetDescription(ProjViewLayout, ViewStateBuffer));
         }
 
+        // Call after a scene widget widget has been created
+        public virtual void Init(Scene3dWidget sceneWidget)
+        {
+            CurrentSceneViewport = sceneWidget;
+
+            //ActiveCamera = CreateActor<CameraActor>();
+            Grid         = CreateActor<GridActor>();
+        }
+
+        public void RegisterViewport(Scene3dWidget viewport)
+        {
+            Viewports.Add(viewport);
+
+            var cam = CreateActor<CameraActor>();
+            viewport.SetCamera(cam);
+            //CurrentSceneViewport = viewport;
+        }
+
+        public void UnregisterViewport(Scene3dWidget viewport)
+        {
+            Viewports.Remove(viewport);
+            viewport.SetCamera(null);
+
+            if (CurrentSceneViewport == viewport)
+            {
+                //CurrentSceneViewport = Viewports.FirstOrDefault(x => x != null);
+            }
+        }
+
         // Create a new actor in the world
         public T CreateActor<T>() where T : Actor, new()
         {
             var actor = new T();
             actor.Init(this);
 
-            if ((actor.Flags & ActorFlags.CanNeverUpdate) != 0)
+            if ((actor.Flags & ActorFlags.CanNeverUpdate) == 0)
                 UpdateableActors.Add(actor);
 
             return actor;
@@ -85,12 +112,12 @@ namespace ImTool.Scene3D
             }
         }
 
-        public void Render(double dt, CommandList cmdList)
+        public void Render(double dt, CommandList cmdList, CameraActor camera)
         {
-            cmdList.UpdateBuffer(ViewStateBuffer, 0, ActiveCamera.ViewData);
+            cmdList.UpdateBuffer(ViewStateBuffer, 0, camera.ViewData);
             cmdList.ClearDepthStencil(1f);
 
-            //Grid.Render(cmdList);
+            Grid.Render(cmdList);
         }
     }
 }

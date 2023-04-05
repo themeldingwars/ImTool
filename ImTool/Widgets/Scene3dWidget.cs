@@ -7,6 +7,7 @@ namespace ImTool
     {
         protected bool IsExternalWorld;
         protected World WorldScene;
+        protected CameraActor Camera;
 
         public bool ShowDebugInfo = true;
 
@@ -15,6 +16,8 @@ namespace ImTool
         {
             IsExternalWorld = false;
             WorldScene = new World(win);
+            WorldScene.Init(this);
+            WorldScene.RegisterViewport(this);
         }
 
         // Crate a scene for an exteranly managed world, eg a camera view into one
@@ -23,6 +26,13 @@ namespace ImTool
             IsExternalWorld = true;
             WorldScene = world;
         }
+
+        public void SetCamera(CameraActor camera)
+        {
+            Camera = camera;
+        }
+
+        public CameraActor GetCamera() => Camera;
 
         public override void Render(double dt)
         {
@@ -33,7 +43,7 @@ namespace ImTool
             if (!IsExternalWorld)
                 WorldScene.Update(dt);
 
-            WorldScene.Render(dt, CommandList);
+            WorldScene.Render(dt, CommandList, Camera);
         }
 
         public override void DrawOverlays()
