@@ -68,7 +68,7 @@ namespace ImTool.Scene3D
                 PrimitiveTopology.TriangleList,
                 ShaderSet,
                 new[] { World.ProjViewLayout, PerItemResourceLayout },
-                World.CurrentSceneViewport.GetFramebuffer().OutputDescription));
+                World.GetVieewports().First().GetFramebuffer().OutputDescription));
         }
 
         private ShaderSetDescription CreateShaderSet()
@@ -110,8 +110,8 @@ namespace ImTool.Scene3D
             cmdList.SetVertexBuffer(0, VertBuffer);
             cmdList.SetIndexBuffer(IndexBuffer, IndexFormat.UInt16);
 
-            var world = Matrix4x4.CreateTranslation(Vector3.Zero);
-            cmdList.UpdateBuffer(WorldBuffer, 0, ref world);
+            //var world = Matrix4x4.CreateTranslation(Vector3.Zero);
+            //cmdList.UpdateBuffer(WorldBuffer, 0, ref world);
 
             cmdList.SetGraphicsResourceSet(1, ItemResourceSet);
             cmdList.DrawIndexed(6, 1, 0, 0, 0);
