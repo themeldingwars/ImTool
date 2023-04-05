@@ -13,8 +13,8 @@ namespace ImTool.Scene3D
     public class World
     {
         public Window MainWindow;
-        public Scene3dWidget CurrentSceneViewport;
         private List<Scene3dWidget> Viewports = new();
+        public List<Scene3dWidget> GetVieewports() => Viewports;
 
         protected double LastFrameTime;
         protected double LastDeltaTime;
@@ -51,9 +51,6 @@ namespace ImTool.Scene3D
         // Call after a scene widget widget has been created
         public virtual void Init(Scene3dWidget sceneWidget)
         {
-            CurrentSceneViewport = sceneWidget;
-
-            //ActiveCamera = CreateActor<CameraActor>();
             Grid         = CreateActor<GridActor>();
         }
 
@@ -63,18 +60,12 @@ namespace ImTool.Scene3D
 
             var cam = CreateActor<CameraActor>();
             viewport.SetCamera(cam);
-            //CurrentSceneViewport = viewport;
         }
 
         public void UnregisterViewport(Scene3dWidget viewport)
         {
             Viewports.Remove(viewport);
             viewport.SetCamera(null);
-
-            if (CurrentSceneViewport == viewport)
-            {
-                //CurrentSceneViewport = Viewports.FirstOrDefault(x => x != null);
-            }
         }
 
         // Create a new actor in the world

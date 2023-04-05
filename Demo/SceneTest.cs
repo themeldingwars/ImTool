@@ -49,9 +49,9 @@ namespace Demo
             MainSceneView  = new Scene3dWidget(tool.Window, World);
             MainSceneView2 = new Scene3dWidget(tool.Window, World);
 
-            World.Init(MainSceneView);
             World.RegisterViewport(MainSceneView);
             World.RegisterViewport(MainSceneView2);
+            World.Init(MainSceneView);
         }
 
         public override void Unload()

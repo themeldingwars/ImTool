@@ -90,6 +90,8 @@ namespace ImTool.Scene3D
             _nearPlaneDist     = 0.01f;
             _farPlaneDist      = 1000f;
             _orthographicWidth = 35f;
+
+            FovDeg = 75;
         }
 
         public override void Update(double dt)

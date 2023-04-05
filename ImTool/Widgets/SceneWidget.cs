@@ -21,6 +21,7 @@ namespace ImTool
 
         public GraphicsDevice GetGfxDevice() => GfxDevice;
         public Framebuffer GetFramebuffer()  => FrameBuff;
+        public bool IsHovered                = false;
 
         public SceneWidget(Window win)
         {
@@ -50,11 +51,14 @@ namespace ImTool
             if (NeedsToInit || size.X != FrameBuff.Width || size.Y != FrameBuff.Height)
                 Init(size);
 
+            IsHovered = ImGui.IsMouseHoveringRect(ImGui.GetCursorScreenPos(), ImGui.GetCursorScreenPos() + size);
+
             CommandList.Begin();
             CommandList.SetFramebuffer(FrameBuff);
 
-            double dt = (DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond) - LastFrameTime;
+            double dt = (DateTime.UtcNow.Ticks - LastFrameTime) / TimeSpan.TicksPerSecond;
             Render(dt);
+            LastFrameTime = DateTime.UtcNow.Ticks;
 
             CommandList.End();
             GfxDevice.SubmitCommands(CommandList);
@@ -63,7 +67,7 @@ namespace ImTool
             ImGui.Image(SceneTexBinding, size);
 
             ImGui.SetCursorPos(cursorPos);
-            DrawOverlays();
+            DrawOverlays(dt);
         }
 
         private void Init(Vector2 size)
@@ -103,9 +107,9 @@ namespace ImTool
             CommandList.ClearColorTarget(0, new RgbaFloat(0.69f, 0.61f, 0.85f, 1.0f));
         }
 
-        public virtual void DrawOverlays()
+        public virtual void DrawOverlays(double dt)
         {
-
+            ImGui.Text($"Delta Time: {dt:0.#####}");
         }
     }
 }
