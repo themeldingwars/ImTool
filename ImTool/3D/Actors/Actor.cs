@@ -13,7 +13,7 @@ namespace ImTool.Scene3D
         public World World { get; private set; }
         public string Name;
         public ActorFlags Flags;
-        public Transform Transform;
+        public Transform Transform = new();
 
         public List<Component> Components = new();
 

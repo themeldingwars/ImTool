@@ -48,6 +48,10 @@ namespace Demo
 
             MainSceneView  = new Scene3dWidget(tool.Window, World);
             MainSceneView2 = new Scene3dWidget(tool.Window, World);
+
+            World.Init(MainSceneView);
+            World.RegisterViewport(MainSceneView);
+            World.RegisterViewport(MainSceneView2);
         }
 
         public override void Unload()
@@ -58,7 +62,7 @@ namespace Demo
         {
             World.Tick();
 
-            //MainSceneView2.DrawWindow("Main View 2");
+            MainSceneView2.DrawWindow("Main View 2");
 
             DrawTests();
 
@@ -70,7 +74,25 @@ namespace Demo
 
             if (ImGui.Begin("Scene Inspector"))
             {
+                if (World.ActiveCamera != null)
+                {
+                    //World.ActiveCamera.Transform.DrawImguiWidget();
+                }
 
+                if (MainSceneView.GetCamera() != null)
+                {
+                    ImGui.PushID("Scene1Camera");
+                    MainSceneView.GetCamera().Transform.DrawImguiWidget();
+                    ImGui.PopID();
+                    ImGui.Separator();
+                }
+
+                if (MainSceneView2.GetCamera() != null)
+                {
+                    ImGui.PushID("Scene2Camera");
+                    MainSceneView2.GetCamera().Transform.DrawImguiWidget();
+                    ImGui.PopID();
+                }
             }
             ImGui.End();
         }

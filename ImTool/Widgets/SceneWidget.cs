@@ -27,6 +27,8 @@ namespace ImTool
             MainWindow = win;
             GfxDevice = win.GetGraphicsDevice();
             LastFrameTime = (DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond);
+
+            Init(new Vector2(256, 256));
         }
 
         public void DrawWindow(string title)
