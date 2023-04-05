@@ -82,6 +82,22 @@ namespace ImTool.Scene3D
         private float _nearPlaneDist;
         private float _farPlaneDist;
 
+        public CameraActor()
+        {
+            _cameraType        = CameraType.Perspective;
+            _aspectRatio       = 1f;
+            _fov               = 1.5f;
+            _nearPlaneDist     = 0.01f;
+            _farPlaneDist      = 1000f;
+            _orthographicWidth = 35f;
+        }
+
+        public override void Update(double dt)
+        {
+            UpdateProjectionMat();
+            UpdateViewMat();
+        }
+
         public void UpdateProjectionMat()
         {
             if (CamType == CameraType.Perspective)
