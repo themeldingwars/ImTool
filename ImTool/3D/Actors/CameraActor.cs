@@ -21,7 +21,6 @@ namespace ImTool.Scene3D
             set
             {
                 _fov = value * (MathF.PI / 180);
-                UpdateProjectionMat();
             }
         }
 
@@ -31,7 +30,6 @@ namespace ImTool.Scene3D
             set
             {
                 _aspectRatio = value;
-                UpdateProjectionMat();
             }
         }
 
@@ -41,7 +39,6 @@ namespace ImTool.Scene3D
             set
             {
                 _orthographicWidth = value;
-                UpdateProjectionMat();
             }
         }
 
@@ -51,7 +48,6 @@ namespace ImTool.Scene3D
             set
             {
                 _cameraType = value;
-                UpdateProjectionMat();
             }
         }
 
@@ -61,7 +57,6 @@ namespace ImTool.Scene3D
             set
             {
                 _nearPlaneDist = value;
-                UpdateProjectionMat();
             }
         }
 
@@ -71,7 +66,6 @@ namespace ImTool.Scene3D
             set
             {
                 _farPlaneDist = value;
-                UpdateProjectionMat();
             }
         }
 
@@ -96,19 +90,24 @@ namespace ImTool.Scene3D
 
         public override void Update(double dt)
         {
-            UpdateProjectionMat();
-            UpdateViewMat();
+            var backEndType = World.MainWindow.GetGraphicsDevice().ResourceFactory.BackendType;
+            var flipY       = backEndType is Veldrid.GraphicsBackend.Vulkan or Veldrid.GraphicsBackend.OpenGL;
+
+            UpdateProjectionMat(flipY);
+            UpdateViewMat(flipY);
         }
 
-        public void UpdateProjectionMat()
+        public void UpdateProjectionMat(bool flipY)
         {
             if (CamType == CameraType.Perspective)
             {
-                ProjectionMat = Matrix4x4.CreatePerspectiveFieldOfView(_fov, _aspectRatio, _nearPlaneDist, _farPlaneDist);
+                var aspectRatio = flipY ? -_aspectRatio : _aspectRatio;
+                ProjectionMat = Matrix4x4.CreatePerspectiveFieldOfView(_fov, aspectRatio, _nearPlaneDist, _farPlaneDist);
             }
             else if (CamType == CameraType.Orthographic)
             {
-                ProjectionMat = Matrix4x4.CreateOrthographic(_orthographicWidth, _orthographicWidth / _aspectRatio, _nearPlaneDist, _farPlaneDist);
+                var aspectRatio = flipY ? -(_orthographicWidth / _aspectRatio) : (_orthographicWidth / _aspectRatio);
+                ProjectionMat = Matrix4x4.CreateOrthographic(_orthographicWidth, aspectRatio, _nearPlaneDist, _farPlaneDist);
             }
 
             ViewData.Proj        = ProjectionMat;
@@ -116,9 +115,9 @@ namespace ImTool.Scene3D
             ViewData.CamFarDist  = _farPlaneDist;
         }
 
-        public void UpdateViewMat()
+        public void UpdateViewMat(bool flipY)
         {
-            ViewMat = Matrix4x4.CreateLookAt(Transform.Position, Transform.Position + Transform.Forward, Vector3.UnitY);
+            ViewMat         = Matrix4x4.CreateLookAt(Transform.Position, Transform.Position + Transform.Forward, flipY ? -Vector3.UnitY : Vector3.UnitY);
 
             ViewData.View   = ViewMat;
             ViewData.CamPos = Transform.Position;
