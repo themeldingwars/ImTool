@@ -58,6 +58,7 @@ namespace Demo
         {
         }
 
+        ImTool.Scene3D.Components.DebugShapesComp.Cube TestDebugCube = null;
         protected override void SubmitContent()
         {
             World.Tick();
@@ -99,6 +100,16 @@ namespace Demo
                     ImGui.PushID("Debug Shapes");
                     World.DebugShapes.Transform.DrawImguiWidget();
                     ImGui.PopID();
+                }
+
+                if (ImGui.Button("Add Cube"))
+                {
+                    TestDebugCube = World.DebugShapes.AddCube(new Vector3(10, 5, 20), new Vector3(4, 4, 4), new Vector4(0.2f, 0.5f, 0.1f, 1));
+                }
+
+                if (ImGui.Button("Remove Cube"))
+                {
+                    TestDebugCube.Remove();
                 }
             }
             ImGui.End();
