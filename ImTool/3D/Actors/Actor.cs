@@ -59,7 +59,7 @@ namespace ImTool.Scene3D
             foreach (var component in Components)
             {
                 if ((component.Flags & ActorFlags.DontRender) == 0)
-                    component.Render();
+                    component.Render(cmdList);
             }
         }
     }
