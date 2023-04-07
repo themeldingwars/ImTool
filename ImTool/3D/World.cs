@@ -1,7 +1,9 @@
-﻿using System;
+﻿using ImTool.Scene3D.Components;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
@@ -15,6 +17,7 @@ namespace ImTool.Scene3D
         public Window MainWindow;
         private List<Scene3dWidget> Viewports = new();
         public List<Scene3dWidget> GetVieewports() => Viewports;
+        public Framebuffer GetFBDesc() => Viewports.First().GetFramebuffer();
 
         protected double LastFrameTime;
         protected double LastDeltaTime;
@@ -27,6 +30,7 @@ namespace ImTool.Scene3D
 
         public CameraActor ActiveCamera;
         public GridActor Grid;
+        public DebugShapesActor DebugShapes;
 
         public List<Actor> UpdateableActors = new();
 
@@ -52,6 +56,15 @@ namespace ImTool.Scene3D
         public virtual void Init(Scene3dWidget sceneWidget)
         {
             Grid         = CreateActor<GridActor>();
+            DebugShapes  = CreateActor<DebugShapesActor>();
+
+            var rand = new Random();
+            var debugShapes = (DebugShapesComp)DebugShapes.Components[0];
+            debugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(2, 2, 2));
+            debugShapes.AddCube(new Vector3(1, 1, 1), new Vector3(10, 10, 20), new Vector4((float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble(), 1f), 5);
+
+            debugShapes.RecreateBuffers();
+
         }
 
         public void RegisterViewport(Scene3dWidget viewport)
@@ -109,6 +122,7 @@ namespace ImTool.Scene3D
             cmdList.ClearDepthStencil(1f);
 
             Grid.Render(cmdList);
+            DebugShapes.Render(cmdList);
         }
     }
 }

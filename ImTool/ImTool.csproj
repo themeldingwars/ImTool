@@ -124,6 +124,9 @@
     </ItemGroup>
     
     <ItemGroup>
+      <None Remove="Shaders\SPIR-V\3D\DebugShapes\DebugShapesFrag.glsl" />
+      <None Remove="Shaders\SPIR-V\3D\DebugShapes\DebugShapesGeo.glsl" />
+      <None Remove="Shaders\SPIR-V\3D\DebugShapes\DebugShapesVert.glsl" />
       <None Remove="Shaders\SPIR-V\3D\Grid\GridFrag.glsl" />
       <None Remove="Shaders\SPIR-V\3D\Grid\GridVert.glsl" />
     </ItemGroup>
@@ -145,6 +148,9 @@
     </ItemGroup>
     
     <ItemGroup>
+      <EmbeddedResource Include="Shaders\SPIR-V\3D\DebugShapes\DebugShapesFrag.glsl" />
+      <EmbeddedResource Include="Shaders\SPIR-V\3D\DebugShapes\DebugShapesGeo.glsl" />
+      <EmbeddedResource Include="Shaders\SPIR-V\3D\DebugShapes\DebugShapesVert.glsl" />
       <EmbeddedResource Include="Shaders\SPIR-V\3D\Grid\GridFrag.glsl" />
       <EmbeddedResource Include="Shaders\SPIR-V\3D\Grid\GridVert.glsl" />
     </ItemGroup>

@@ -93,6 +93,13 @@ namespace Demo
                     MainSceneView2.GetCamera().Transform.DrawImguiWidget();
                     ImGui.PopID();
                 }
+
+                if (World.DebugShapes != null)
+                {
+                    ImGui.PushID("Debug Shapes");
+                    World.DebugShapes.Transform.DrawImguiWidget();
+                    ImGui.PopID();
+                }
             }
             ImGui.End();
         }
