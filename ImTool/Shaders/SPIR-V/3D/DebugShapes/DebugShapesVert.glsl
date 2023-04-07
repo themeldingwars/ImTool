@@ -23,6 +23,7 @@ layout(location = 2) in float Thickness;
 
 layout(location = 0) out vec4 out_Color;
 layout(location = 1) out float out_Thickness;
+layout(location = 2) out vec3 out_Position;
 
 void main() {
     vec4 worldPosition = World * vec4(Position, 1);
@@ -33,4 +34,5 @@ void main() {
     
     out_Color = Color;
     out_Thickness = Thickness;
+    out_Position = Position;
 }
