@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Veldrid;
 
 namespace ImTool.Scene3D
 {
@@ -23,7 +24,7 @@ namespace ImTool.Scene3D
 
         }
 
-        public virtual void Render()
+        public virtual void Render(CommandList cmdList)
         {
 
         }
