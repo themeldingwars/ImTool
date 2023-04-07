@@ -117,8 +117,8 @@ namespace ImTool.Scene3D
             cmdList.UpdateBuffer(ViewStateBuffer, 0, camera.ViewData);
             cmdList.ClearDepthStencil(1f);
 
-            Grid.Render(cmdList);
             DebugShapes.Render(cmdList);
+            Grid.Render(cmdList);
         }
     }
 }
