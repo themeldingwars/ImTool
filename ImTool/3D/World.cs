@@ -59,12 +59,8 @@ namespace ImTool.Scene3D
             DebugShapes  = CreateActor<DebugShapesActor>();
 
             var rand = new Random();
-            var debugShapes = (DebugShapesComp)DebugShapes.Components[0];
-            debugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(2, 2, 2));
-            debugShapes.AddCube(new Vector3(1, 1, 1), new Vector3(10, 10, 20), new Vector4((float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble(), 1f), 5);
-
-            debugShapes.RecreateBuffers();
-
+            DebugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(2, 2, 2));
+            DebugShapes.AddCube(new Vector3(1, 1, 1), new Vector3(10, 10, 20), new Vector4((float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble(), 1f), 5);
         }
 
         public void RegisterViewport(Scene3dWidget viewport)

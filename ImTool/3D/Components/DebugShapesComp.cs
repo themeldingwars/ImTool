@@ -26,6 +26,8 @@ namespace ImTool.Scene3D.Components
 
         private List<VertexDefinition> Verts                    = new();
         private List<uint> Indices                              = new();
+        private bool ShouldRecreateBuffers                      = false;
+        private bool ShouldReuploadBuffers                      = false;
 
         public override void Init(Actor owner)
         {
@@ -103,6 +105,9 @@ namespace ImTool.Scene3D.Components
         public override void Update(double dt)
         {
             base.Update(dt);
+
+            if (ShouldRecreateBuffers)
+                RecreateBuffers();
         }
 
         public void RecreateBuffers()
@@ -126,6 +131,8 @@ namespace ImTool.Scene3D.Components
             var gd = Owner.World.MainWindow.GetGraphicsDevice();
             gd.UpdateBuffer(VertBuffer, 0, CollectionsMarshal.AsSpan(Verts));
             gd.UpdateBuffer(IndexBuffer, 0, CollectionsMarshal.AsSpan(Indices));
+
+            ShouldRecreateBuffers = false;
         }
 
         private void ResizeBuffers()
@@ -151,42 +158,49 @@ namespace ImTool.Scene3D.Components
 
         public Cube AddCube(Vector3 pos, Vector3? size = null, Vector4? color = null, float thickness = 2f)
         {
-            var shape = new Cube(pos, size, color, thickness);
+            var shape = new Cube(this, pos, size, color, thickness);
             Shapes.Add(shape);
+            ShouldRecreateBuffers = true;
             return shape;
         }
 
-        public void AddRect(Vector3 pos, Vector2 size, Vector4? color = null, float thickness = 2f)
+        public Rect AddRect(Vector3 pos, Vector2 size, Vector4? color = null, float thickness = 2f)
         {
-            var shape = new Rect(pos, new Vector3(size.X, 0, size.Y), color, thickness);
+            var shape = new Rect(this, pos, new Vector3(size.X, 0, size.Y), color, thickness);
             Shapes.Add(shape);
+            ShouldRecreateBuffers = true;
+            return shape;
         }
 
         public Cricle AddCricle(Vector3 pos, float radius = 1f, ushort sides = 16, Vector4? color = null, float thickness = 2f)
         {
-            var shape = new Cricle(pos, radius, sides, color, thickness);
+            var shape = new Cricle(this, pos, radius, sides, color, thickness);
             Shapes.Add(shape);
+            ShouldRecreateBuffers = true;
             return shape;
         }
 
         public Cylnder AddCylnder(Vector3 pos, float radius = 1f, float height = 2f, ushort sides = 16, Vector4? color = null, float thickness = 2f)
         {
-            var shape = new Cylnder(pos, radius, height, sides, color, thickness);
+            var shape = new Cylnder(this, pos, radius, height, sides, color, thickness);
             Shapes.Add(shape);
+            ShouldRecreateBuffers = true;
             return shape;
         }
 
         public Sphere AddSphere(Vector3 pos, float radius = 1f, ushort sides = 16, Vector4? color = null, float thickness = 2f)
         {
-            var shape = new Sphere(pos, radius, sides, color, thickness);
+            var shape = new Sphere(this, pos, radius, sides, color, thickness);
             Shapes.Add(shape);
+            ShouldRecreateBuffers = true;
             return shape;
         }
 
         public Arrow AddArrow(Vector3 pos, Vector3 dir, ushort sides = 16, Vector4? color = null, float thickness = 2f)
         {
-            var shape = new Arrow(pos, dir, color, thickness);
+            var shape = new Arrow(this, pos, dir, color, thickness);
             Shapes.Add(shape);
+            ShouldRecreateBuffers = true;
             return shape;
         }
 
@@ -199,16 +213,24 @@ namespace ImTool.Scene3D.Components
             public Transform Transform = new();
             public Vector4 Color;
             public float Thickness;
+            protected DebugShapesComp Owner;
 
             private readonly Vector4 DefaultColor = new(1f, 0.2f, 0.2f, 1);
 
-            public Shape(Vector3 pos, Vector4? color = null, float thickness = 2f)
+            public Shape(DebugShapesComp owner, Vector3 pos, Vector4? color = null, float thickness = 2f)
             {
+                Owner              = owner;
                 Transform.Position = pos;
                 Transform.Rotation = Quaternion.Identity;
                 Transform.Scale    = Vector3.One;
                 Thickness          = thickness;
                 Color              = color ?? DefaultColor;
+            }
+
+            public void Remove()
+            {
+                Owner.Shapes.Remove(this);
+                Owner.ShouldRecreateBuffers = true;
             }
 
             public virtual VertexDefinition[] GetShapeVerts()
@@ -226,7 +248,7 @@ namespace ImTool.Scene3D.Components
         {
             public Vector3 Extents = new(0.5f, 0f, 0.5f);
 
-            public Rect(Vector3 pos, Vector3? extents, Vector4? color = null, float thickness = 2) : base(pos, color, thickness)
+            public Rect(DebugShapesComp owner, Vector3 pos, Vector3? extents, Vector4? color = null, float thickness = 2) : base(owner, pos, color, thickness)
             {
                 Extents = extents ?? Extents;
             }
@@ -272,7 +294,7 @@ namespace ImTool.Scene3D.Components
         {
             public Vector3 Extents = new(0.5f, 0.5f, 0.5f);
 
-            public Cube(Vector3 pos, Vector3? extents, Vector4? color = null, float thickness = 2f) : base(pos, color, thickness)
+            public Cube(DebugShapesComp owner, Vector3 pos, Vector3? extents, Vector4? color = null, float thickness = 2f) : base(owner, pos, color, thickness)
             {
                 Extents = extents ?? Extents;
             }
@@ -317,7 +339,7 @@ namespace ImTool.Scene3D.Components
             public float Radius = 1f;
             public ushort Sides = 16;
 
-            public Cricle(Vector3 pos, float radius = 1f, ushort sides = 16, Vector4? color = null, float thickness = 2) : base(pos, color, thickness)
+            public Cricle(DebugShapesComp owner, Vector3 pos, float radius = 1f, ushort sides = 16, Vector4? color = null, float thickness = 2) : base(owner, pos, color, thickness)
             {
                 Radius = radius;
                 Sides = sides;
@@ -367,7 +389,7 @@ namespace ImTool.Scene3D.Components
         {
             public float Height = 2f;
 
-            public Cylnder(Vector3 pos, float radius = 1, float height = 2f, ushort sides = 16, Vector4? color = null, float thickness = 2) : base(pos, radius, sides, color, thickness)
+            public Cylnder(DebugShapesComp owner, Vector3 pos, float radius = 1, float height = 2f, ushort sides = 16, Vector4? color = null, float thickness = 2) : base(owner, pos, radius, sides, color, thickness)
             {
                 Height = height;
             }
@@ -413,7 +435,7 @@ namespace ImTool.Scene3D.Components
 
         public class Sphere : Cricle
         {
-            public Sphere(Vector3 pos, float radius = 1, ushort sides = 16, Vector4? color = null, float thickness = 2) : base(pos, radius, sides, color, thickness)
+            public Sphere(DebugShapesComp owner, Vector3 pos, float radius = 1, ushort sides = 16, Vector4? color = null, float thickness = 2) : base(owner, pos, radius, sides, color, thickness)
             {
             }
 
@@ -453,7 +475,7 @@ namespace ImTool.Scene3D.Components
             public Vector3 Dir = Vector3.UnitZ;
             public float Length = 1f;
 
-            public Arrow(Vector3 pos, Vector3 dir, Vector4? color = null, float thickness = 2) : base(pos, color, thickness)
+            public Arrow(DebugShapesComp owner, Vector3 pos, Vector3 dir, Vector4? color = null, float thickness = 2) : base(owner,pos, color, thickness)
             {
                 var pitch = MathF.Asin(-dir.Y);
                 var yaw = MathF.Atan2(dir.X, dir.Z);
