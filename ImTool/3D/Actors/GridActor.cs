@@ -63,7 +63,7 @@ namespace ImTool.Scene3D
 
             Pipeline = gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
                 BlendStateDescription.SingleAlphaBlend,
-                DepthStencilStateDescription.DepthOnlyLessEqual,
+                new DepthStencilStateDescription(true, true, ComparisonKind.LessEqual),
                 RasterizerStateDescription.CullNone,
                 PrimitiveTopology.TriangleList,
                 ShaderSet,
