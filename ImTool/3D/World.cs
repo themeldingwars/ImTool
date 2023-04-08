@@ -31,6 +31,7 @@ namespace ImTool.Scene3D
         public CameraActor ActiveCamera;
         public GridActor Grid;
         public DebugShapesActor DebugShapes;
+        public MeshActor TestMesh;
 
         public List<Actor> UpdateableActors = new();
 
@@ -57,6 +58,9 @@ namespace ImTool.Scene3D
         {
             Grid         = CreateActor<GridActor>();
             DebugShapes  = CreateActor<DebugShapesActor>();
+            TestMesh     =  CreateActor<MeshActor>();
+
+            TestMesh.Mesh.SetData(MeshData.CreateCube());
 
             var rand = new Random();
             DebugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(2, 2, 2));
@@ -118,6 +122,7 @@ namespace ImTool.Scene3D
             cmdList.ClearDepthStencil(1f);
 
             DebugShapes.Render(cmdList);
+            TestMesh.Render(cmdList);
             Grid.Render(cmdList);
         }
     }
