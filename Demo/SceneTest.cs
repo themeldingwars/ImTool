@@ -102,6 +102,13 @@ namespace Demo
                     ImGui.PopID();
                 }
 
+                if (World.DebugShapes != null)
+                {
+                    ImGui.PushID("Debug Mesh");
+                    World.TestMesh.Transform.DrawImguiWidget();
+                    ImGui.PopID();
+                }
+
                 if (ImGui.Button("Add Cube"))
                 {
                     TestDebugCube = World.DebugShapes.AddCube(new Vector3(10, 5, 20), new Vector3(4, 4, 4), new Vector4(0.2f, 0.5f, 0.1f, 1));
