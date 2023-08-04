@@ -19,16 +19,11 @@ layout(set = 1, binding = 0) uniform WorldBuffer
 
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec2 Uvs;
-layout(location = 2) in vec2 NormUvs;
-layout(location = 3) in vec3 Norm;
-layout(location = 4) in vec3 Tang;
+layout(location = 2) in vec3 Norm;
 
 layout(location = 0) out vec2 out_Uvs;
-layout(location = 1) out vec2 out_NormUvs;
-layout(location = 2) out vec3 out_Norm;
-layout(location = 3) out vec3 out_Tang;
-layout(location = 4) out vec3 out_Color;
-layout(location = 5) out vec3 out_FragPos;
+layout(location = 1) out vec3 out_Norm;
+layout(location = 2) out vec3 out_FragPos;
 
 void main() {
     vec4 worldPosition = World * vec4(Position, 1);
@@ -40,8 +35,8 @@ void main() {
     
     out_FragPos = vec3(World * vec4(Position, 1.0));
      
-    out_NormUvs = NormUvs;
+    //out_NormUvs = NormUvs;
     out_Norm = mat3(transpose(inverse(World))) * Norm;
-    //out_Norm = Norm;
-    out_Tang = Tang;
+    out_Norm = Norm;
+    //out_Tang = Tang;
 }

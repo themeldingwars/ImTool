@@ -14,14 +14,14 @@ namespace ImTool.Scene3D
 {
     public class MeshData
     {
-        public List<MeshComponent.VertexDefinition> Vertices;
+        public List<MeshComponent.SimpleVertexDefinition> Vertices;
         public List<uint> Indices;
 
         public static MeshData CreateCube()
         {
             var data = new MeshData
             {
-                Vertices = new List<MeshComponent.VertexDefinition>() {
+                Vertices = new List<MeshComponent.SimpleVertexDefinition>() {
                     // Top
                     new(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
                     new(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
@@ -33,25 +33,25 @@ namespace ImTool.Scene3D
                     new(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
                     new(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
                     // Left                                                               
-                    new MeshComponent.VertexDefinition(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
-                    new MeshComponent.VertexDefinition(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(1, 0)),
-                    new MeshComponent.VertexDefinition(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(1, 1)),
-                    new MeshComponent.VertexDefinition(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(1, 0)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(1, 1)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
                     // Right                                                              
-                    new MeshComponent.VertexDefinition(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(0, 0)),
-                    new MeshComponent.VertexDefinition(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
-                    new MeshComponent.VertexDefinition(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
-                    new MeshComponent.VertexDefinition(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(0, 1)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(0, 0)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(0, 1)),
                     // Back                                                               
-                    new MeshComponent.VertexDefinition(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
-                    new MeshComponent.VertexDefinition(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
-                    new MeshComponent.VertexDefinition(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
-                    new MeshComponent.VertexDefinition(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
                     // Front                                                              
-                    new MeshComponent.VertexDefinition(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(0, 0)),
-                    new MeshComponent.VertexDefinition(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(1, 0)),
-                    new MeshComponent.VertexDefinition(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(1, 1)),
-                    new MeshComponent.VertexDefinition(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(0, 1)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(0, 0)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(1, 0)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(1, 1)),
+                    new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(0, 1)),
                 },
 
                 Indices =
@@ -77,7 +77,7 @@ namespace ImTool.Scene3D
             var mesh = obj.GetFirstMesh();
             data.Indices = new List<uint>(mesh.GetIndices().Select(x => (uint)x));
 
-            var verts = new MeshComponent.VertexDefinition[obj.Positions.Length];
+            var verts = new MeshComponent.SimpleVertexDefinition[obj.Positions.Length];
             for (int i = 0; i < obj.Positions.Length; i++)
             {
                 verts[i].X = obj.Positions[i].X;
@@ -89,7 +89,7 @@ namespace ImTool.Scene3D
                 verts[i].NormZ = obj.Normals[i].Z;
             }
 
-            data.Vertices = new List<MeshComponent.VertexDefinition>(verts);
+            data.Vertices = new List<MeshComponent.SimpleVertexDefinition>(verts);
 
             return data;
         }
@@ -99,14 +99,14 @@ namespace ImTool.Scene3D
             var fileStream = File.OpenRead(path);
             var obj        = new Veldrid.Utilities.ObjParser().Parse(fileStream);
             var data       = new MeshData();
-            data.Vertices  = new List<MeshComponent.VertexDefinition>();
+            data.Vertices  = new List<MeshComponent.SimpleVertexDefinition>();
             data.Indices   = new List<uint>();
 
             uint lastIndice = 0;
             foreach (var group in obj.MeshGroups)
             {
                 var mesh = obj.GetMesh(group);
-                data.Vertices.AddRange(mesh.Vertices.Select(x => new MeshComponent.VertexDefinition()
+                data.Vertices.AddRange(mesh.Vertices.Select(x => new MeshComponent.SimpleVertexDefinition()
                 {
                     X = x.Position.X,
                     Y = x.Position.Y,
@@ -141,7 +141,7 @@ namespace ImTool.Scene3D
             return data;
         }
 
-        public static IEnumerable<MeshSection> LoadObjMtl(string path, GraphicsDevice gd, ResourceFactory rf)
+        public static IEnumerable<MeshSection> LoadObjMtl(string path, GraphicsDevice gd, ResourceFactory rf, ResourceLayout layout)
         {
             var lines      = File.ReadAllLines(path);
             var mats       = new List<MeshSection>();
@@ -164,8 +164,9 @@ namespace ImTool.Scene3D
                         var texPath = Path.Combine(basePath, line.Split(" ")[1]);
                         if (File.Exists(texPath))
                         {
-                            var texImg            = new ImageSharpTexture(texPath);
-                            currentMat.DiffuseTex = texImg.CreateDeviceTexture(gd, rf);
+                            var texImg                = new ImageSharpTexture(texPath);
+                            currentMat.DiffuseTex     = texImg.CreateDeviceTexture(gd, rf);
+                            currentMat.TexResourceSet = MeshComponent.CreateTexResourceSet(gd, layout, currentMat.DiffuseTex);
                         }
                     }
                 }

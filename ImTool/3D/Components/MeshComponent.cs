@@ -51,11 +51,8 @@ namespace ImTool.Scene3D.Components
             var noTex = rf.CreateTexture(new TextureDescription(1, 1, 1, 1, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled, TextureType.Texture2D));
             RgbaByte color = RgbaByte.Pink;
             gd.UpdateTexture(noTex, (IntPtr)(&color), 4, 0, 0, 0, 1, 1, 1, 0, 0);
-            DiffuseTexView   = rf.CreateTextureView(noTex);
-            PerSectionResSet = rf.CreateResourceSet(new ResourceSetDescription(PerSectionResLayout,
-                DiffuseTexView,
-                gd.Aniso4xSampler
-                ));
+            //DiffuseTexView   = rf.CreateTextureView(noTex);
+            PerSectionResSet = CreateTexResourceSet(gd, PerSectionResLayout, noTex);
 
            Pipeline = rf.CreateGraphicsPipeline(new GraphicsPipelineDescription(
                 BlendStateDescription.SingleOverrideBlend,
@@ -67,7 +64,7 @@ namespace ImTool.Scene3D.Components
                 new[] { owner.World.ProjViewLayout, PerItemResourceLayout, PerSectionResLayout },
                 owner.World.GetFBDesc().OutputDescription));
 
-            SetData(new VertexDefinition[0], new uint[0]);
+            SetData(new SimpleVertexDefinition[0], new uint[0]);
         }
 
         private ShaderSetDescription CreateShaderSet(ResourceFactory rf)
@@ -79,13 +76,11 @@ namespace ImTool.Scene3D.Components
             ShaderSetDescription shaderSet = new ShaderSetDescription(
                 new[]
                 {
+                    // SimpleVertexDefinition
                     new VertexLayoutDescription(
                         new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                         new VertexElementDescription("Uvs", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                        new VertexElementDescription("NormUvs", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                        new VertexElementDescription("Norms", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("Tangs", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Int1)
+                        new VertexElementDescription("Norms", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3)
                         )
                 },
                 shaders);
@@ -104,7 +99,18 @@ namespace ImTool.Scene3D.Components
             return worldTextureLayout;
         }
 
-        public void SetData(ReadOnlySpan<VertexDefinition> verts, ReadOnlySpan<uint> indices)
+        public static ResourceSet CreateTexResourceSet(GraphicsDevice gd, ResourceLayout layout, Texture tex)
+        {
+            var rf = gd.ResourceFactory;
+            var resSet = rf.CreateResourceSet(new ResourceSetDescription(layout,
+                tex,
+                gd.Aniso4xSampler
+            ));
+
+            return resSet;
+        }
+
+        public void SetData(ReadOnlySpan<SimpleVertexDefinition> verts, ReadOnlySpan<uint> indices)
         {
             var gd = Owner.World.MainWindow.GetGraphicsDevice();
 
@@ -140,7 +146,9 @@ namespace ImTool.Scene3D.Components
 
             foreach (var meshSection in MeshSections)
             {
-                cmdList.SetGraphicsResourceSet(2, PerSectionResSet);
+                if (meshSection.TexResourceSet != null)
+                    cmdList.SetGraphicsResourceSet(2, meshSection.TexResourceSet);
+
                 cmdList.DrawIndexed(meshSection.IndicesLength, 1, meshSection.IndiceStart, 0, 0);
             }
             //cmdList.DrawIndexed(IndiceCount, 1, 0, 0, 0);
@@ -158,8 +166,8 @@ namespace ImTool.Scene3D.Components
             var fileStream = File.OpenRead(objPath);
             var obj        = new Veldrid.Utilities.ObjParser().Parse(fileStream);
             var mtlPath    = Path.Combine(Path.GetDirectoryName(objPath), obj.MaterialLibName);
-            var mtl        = MeshData.LoadObjMtl(mtlPath, gd, gd.ResourceFactory);
-            var vertices   = new List<VertexDefinition>();
+            var mtl        = MeshData.LoadObjMtl(mtlPath, gd, gd.ResourceFactory, PerSectionResLayout);
+            var vertices   = new List<SimpleVertexDefinition>();
             var indices    = new List<uint>();
 
             MeshSections = new List<MeshSection>();
@@ -168,11 +176,14 @@ namespace ImTool.Scene3D.Components
             foreach (var group in obj.MeshGroups)
             {
                 var mesh = obj.GetMesh(group);
-                vertices.AddRange(mesh.Vertices.Select(x => new VertexDefinition()
+                vertices.AddRange(mesh.Vertices.Select(x => new SimpleVertexDefinition()
                 {
                     X = x.Position.X,
                     Y = x.Position.Y,
                     Z = x.Position.Z,
+
+                    U = x.TextureCoordinates.X,
+                    V = x.TextureCoordinates.Y,
 
                     NormX = x.Normal.X,
                     NormY = x.Normal.Y,
@@ -183,11 +194,14 @@ namespace ImTool.Scene3D.Components
                 var groupIndices = mesh.GetIndices();
                 // try load textures
                 var diffuseTexpath = group.Material;
+                var matData        = mtl.FirstOrDefault(x => x.Name == diffuseTexpath);
                 MeshSections.Add(new MeshSection()
                 {
-                    Name          = group.Name,
-                    IndiceStart   = (uint)indices.Count(),
-                    IndicesLength = (uint)groupIndices.Length
+                    Name           = group.Name,
+                    IndiceStart    = (uint)indices.Count(),
+                    IndicesLength  = (uint)groupIndices.Length,
+                    DiffuseTex     = matData?.DiffuseTex,
+                    TexResourceSet = matData?.TexResourceSet
                 });
 
                 indices.AddRange(new List<uint>(groupIndices.Select(x => (uint)lastIndice + x)));
@@ -195,6 +209,31 @@ namespace ImTool.Scene3D.Components
             }
 
             SetData(CollectionsMarshal.AsSpan(vertices), CollectionsMarshal.AsSpan(indices));
+        }
+
+        public struct SimpleVertexDefinition
+        {
+            public const uint SizeInBytes = 12 + 8 + 12;
+
+            public float X;
+            public float Y;
+            public float Z;
+
+            public float U;
+            public float V;
+
+            public float NormX;
+            public float NormY;
+            public float NormZ;
+
+            public SimpleVertexDefinition(Vector3 pos, Vector2 uv)
+            {
+                X = pos.X;
+                Y = pos.Y;
+                Z = pos.Z;
+                U = uv.X;
+                V = uv.Y;
+            }
         }
 
         public struct VertexDefinition
