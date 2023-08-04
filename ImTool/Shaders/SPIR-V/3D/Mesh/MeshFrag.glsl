@@ -19,5 +19,5 @@ void main() {
     vec3 diffuse = diff * vec3(0.5, 0.1, 0.7);
 
     outColor = vec4(diffuse, 1);
-    outColor = vec4(1, 1, 1, 1);
+    //outColor = vec4(1, 1, 1, 1);
 }

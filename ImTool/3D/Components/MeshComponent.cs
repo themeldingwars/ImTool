@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -16,33 +17,54 @@ namespace ImTool.Scene3D.Components
     {
         public DeviceBuffer WorldBuffer;
         public ResourceSet ItemResourceSet;
-        private DeviceBuffer VertBuffer;
-        private DeviceBuffer IndexBuffer;
+        public DeviceBuffer VertBuffer;
+        public DeviceBuffer IndexBuffer;
+        public List<MeshSection> MeshSections = new List<MeshSection>();
         private Pipeline Pipeline;
         private ShaderSetDescription ShaderSet;
         private ResourceLayout PerItemResourceLayout;
+        private ResourceLayout PerSectionResLayout;
+        private ResourceSet PerSectionResSet;
+        private TextureView DiffuseTexView;
 
         private uint IndiceCount = 0;
 
-        public override void Init(Actor owner)
+        public override unsafe void Init(Actor owner)
         {
             base.Init(owner);
 
-            var rf                = owner.World.MainWindow.GetGraphicsDevice().ResourceFactory;
+            var gd                = owner.World.MainWindow.GetGraphicsDevice();
+            var rf                = gd.ResourceFactory;
             ShaderSet             = CreateShaderSet(rf);
             PerItemResourceLayout = CreatePerItemResourceLayout(rf);
 
             WorldBuffer     = rf.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
             ItemResourceSet = rf.CreateResourceSet(new ResourceSetDescription(PerItemResourceLayout, WorldBuffer));
 
-            Pipeline = rf.CreateGraphicsPipeline(new GraphicsPipelineDescription(
+            PerSectionResLayout = rf.CreateResourceLayout(
+                new ResourceLayoutDescription(
+                    new ResourceLayoutElementDescription("DiffuseTex", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                    new ResourceLayoutElementDescription("DiffuseSampler", ResourceKind.Sampler, ShaderStages.Fragment)
+                )
+            );
+
+            var noTex = rf.CreateTexture(new TextureDescription(1, 1, 1, 1, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled, TextureType.Texture2D));
+            RgbaByte color = RgbaByte.Pink;
+            gd.UpdateTexture(noTex, (IntPtr)(&color), 4, 0, 0, 0, 1, 1, 1, 0, 0);
+            DiffuseTexView   = rf.CreateTextureView(noTex);
+            PerSectionResSet = rf.CreateResourceSet(new ResourceSetDescription(PerSectionResLayout,
+                DiffuseTexView,
+                gd.Aniso4xSampler
+                ));
+
+           Pipeline = rf.CreateGraphicsPipeline(new GraphicsPipelineDescription(
                 BlendStateDescription.SingleOverrideBlend,
                 DepthStencilStateDescription.DepthOnlyLessEqual,
-                //new RasterizerStateDescription(FaceCullMode.Front, PolygonFillMode.Solid, FrontFace.CounterClockwise, true, true),
-                RasterizerStateDescription.Default,
+                new RasterizerStateDescription(FaceCullMode.Front, PolygonFillMode.Solid, FrontFace.CounterClockwise, true, true),
+                //RasterizerStateDescription.Default,
                 PrimitiveTopology.TriangleList,
                 ShaderSet,
-                new[] { owner.World.ProjViewLayout, PerItemResourceLayout },
+                new[] { owner.World.ProjViewLayout, PerItemResourceLayout, PerSectionResLayout },
                 owner.World.GetFBDesc().OutputDescription));
 
             SetData(new VertexDefinition[0], new uint[0]);
@@ -115,12 +137,64 @@ namespace ImTool.Scene3D.Components
 
             //cmdList.UpdateBuffer(WorldBuffer, 0, ref Transform.World);
             cmdList.SetGraphicsResourceSet(1, ItemResourceSet);
-            cmdList.DrawIndexed(IndiceCount, 1, 0, 0, 0);
+
+            foreach (var meshSection in MeshSections)
+            {
+                cmdList.SetGraphicsResourceSet(2, PerSectionResSet);
+                cmdList.DrawIndexed(meshSection.IndicesLength, 1, meshSection.IndiceStart, 0, 0);
+            }
+            //cmdList.DrawIndexed(IndiceCount, 1, 0, 0, 0);
         }
 
         public override void Update(double dt)
         {
             base.Update(dt);
+        }
+
+        public void LoadFromObj(string objPath)
+        {
+            var gd = Owner.World.MainWindow.GetGraphicsDevice();
+
+            var fileStream = File.OpenRead(objPath);
+            var obj        = new Veldrid.Utilities.ObjParser().Parse(fileStream);
+            var mtlPath    = Path.Combine(Path.GetDirectoryName(objPath), obj.MaterialLibName);
+            var mtl        = MeshData.LoadObjMtl(mtlPath, gd, gd.ResourceFactory);
+            var vertices   = new List<VertexDefinition>();
+            var indices    = new List<uint>();
+
+            MeshSections = new List<MeshSection>();
+
+            uint lastIndice = 0;
+            foreach (var group in obj.MeshGroups)
+            {
+                var mesh = obj.GetMesh(group);
+                vertices.AddRange(mesh.Vertices.Select(x => new VertexDefinition()
+                {
+                    X = x.Position.X,
+                    Y = x.Position.Y,
+                    Z = x.Position.Z,
+
+                    NormX = x.Normal.X,
+                    NormY = x.Normal.Y,
+                    NormZ = x.Normal.Z,
+                }).ToList());
+
+
+                var groupIndices = mesh.GetIndices();
+                // try load textures
+                var diffuseTexpath = group.Material;
+                MeshSections.Add(new MeshSection()
+                {
+                    Name          = group.Name,
+                    IndiceStart   = (uint)indices.Count(),
+                    IndicesLength = (uint)groupIndices.Length
+                });
+
+                indices.AddRange(new List<uint>(groupIndices.Select(x => (uint)lastIndice + x)));
+                lastIndice = (uint)vertices.Count();
+            }
+
+            SetData(CollectionsMarshal.AsSpan(vertices), CollectionsMarshal.AsSpan(indices));
         }
 
         public struct VertexDefinition
