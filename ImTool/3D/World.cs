@@ -58,13 +58,16 @@ namespace ImTool.Scene3D
         {
             Grid         = CreateActor<GridActor>();
             DebugShapes  = CreateActor<DebugShapesActor>();
-            TestMesh     =  CreateActor<MeshActor>();
+            TestMesh     = CreateActor<MeshActor>();
 
-            TestMesh.Mesh.SetData(MeshData.CreateCube());
+            //TestMesh.Mesh.SetData(MeshData.CreateCube());
+            //TestMesh.Mesh.SetData(MeshData.LoadFromObjV2("D:\\TestModels\\Test1\\test.obj"));
+
+            TestMesh.Mesh.LoadFromObj("D:\\TestModels\\Test1\\test.obj");
 
             var rand = new Random();
-            DebugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(2, 2, 2));
-            DebugShapes.AddCube(new Vector3(1, 1, 1), new Vector3(10, 10, 20), new Vector4((float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble(), 1f), 5);
+            //DebugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(2, 2, 2));
+            //DebugShapes.AddCube(new Vector3(1, 1, 1), new Vector3(10, 10, 20), new Vector4((float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble(), 1f), 5);
         }
 
         public void RegisterViewport(Scene3dWidget viewport)
