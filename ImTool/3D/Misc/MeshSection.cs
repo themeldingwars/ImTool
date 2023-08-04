@@ -13,5 +13,7 @@ namespace ImTool.Scene3D
         public uint IndiceStart;
         public uint IndicesLength;
         public Texture DiffuseTex;
+
+        public ResourceSet TexResourceSet;
     }
 }
