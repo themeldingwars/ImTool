@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Octokit;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,12 +9,13 @@ using Vortice.Direct3D;
 
 namespace ImTool.Scene3D
 {
-    public class Actor
+    public class Actor : IComparable<Actor>
     {
         public World World { get; private set; }
         public string Name;
         public ActorFlags Flags;
-        public Transform Transform = new();
+        public Transform Transform    = new();
+        public float RenderOrderBoost = 0;
 
         public List<Component> Components = new();
 
@@ -61,6 +63,11 @@ namespace ImTool.Scene3D
                 if ((component.Flags & ActorFlags.DontRender) == 0)
                     component.Render(cmdList);
             }
+        }
+
+        public int CompareTo(Actor other)
+        {
+            return RenderOrderBoost < other.RenderOrderBoost ? 1 : -1;
         }
     }
 }

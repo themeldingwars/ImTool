@@ -161,10 +161,11 @@ namespace ImTool.Scene3D
             };
             var section = new MeshSection()
             {
-                Name          = "Main",
-                IndiceStart   = 0,
-                IndicesLength = (uint)indices.Length,
-                DiffuseTex    = Resources.GetMissingTex()
+                Name           = "Main",
+                IndiceStart    = 0,
+                IndicesLength  = (uint)indices.Length,
+                DiffuseTex     = Resources.GetMissingTex(),
+                TexResourceSet = model.CreateTexResourceSet(Resources.GetMissingTex())
             };
 
             model.MeshSections.Add(section);
