@@ -49,16 +49,20 @@ namespace ImTool.Scene3D
 
                 var groupIndices = mesh.GetIndices();
                 // try load textures
-                var diffuseTexpath = group.Material;
-                var matData = mtl.FirstOrDefault(x => x.Name == diffuseTexpath);
-                model.MeshSections.Add(new MeshSection()
+                var diffuseTexpath    = group.Material;
+                var matData           = mtl.FirstOrDefault(x => x.Name == diffuseTexpath) ?? new MeshSection();
+                matData.IndiceStart   = (uint)indices.Count();
+                matData.IndicesLength = (uint)groupIndices.Length;
+                model.MeshSections.Add(matData);
+
+                /*model.MeshSections.Add(new MeshSection()
                 {
                     Name = group.Name,
                     IndiceStart = (uint)indices.Count(),
                     IndicesLength = (uint)groupIndices.Length,
                     DiffuseTex = matData?.DiffuseTex,
                     TexResourceSet = matData?.TexResourceSet
-                });
+                });*/
 
                 indices.AddRange(new List<uint>(groupIndices.Select(x => (uint)lastIndice + x)));
                 lastIndice = (uint)vertices.Count();
@@ -93,9 +97,8 @@ namespace ImTool.Scene3D
                         var texPath = Path.Combine(basePath, line.Split(" ")[1]);
                         if (File.Exists(texPath))
                         {
-                            var texImg                = new ImageSharpTexture(texPath);
-                            currentMat.DiffuseTex     = texImg.CreateDeviceTexture(Resources.GD, Resources.GD.ResourceFactory);
-                            currentMat.TexResourceSet = CreateTexResourceSet(currentMat.DiffuseTex);
+                            var tex     = Resources.RequestTexture(texPath);
+                            currentMat.TexResourceSet = CreateTexResourceSet(tex);
                         }
                     }
                 }

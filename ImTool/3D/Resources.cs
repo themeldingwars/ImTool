@@ -8,6 +8,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
+using Veldrid.ImageSharp;
 using Vulkan;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -90,6 +91,23 @@ namespace ImTool.Scene3D
             GD.UpdateTexture(MissingTextureTex, (IntPtr)(&color), 4, 0, 0, 0, 1, 1, 1, 0, 0);
 
             return MissingTextureTex;
+        }
+
+        // Request a texture from a path, returns cached if found
+        // otherwise loas and caches
+        public static Texture RequestTexture(string path)
+        {
+            // Todo do the caching :>
+            var texImg = new ImageSharpTexture(path);
+            var tex    = texImg.CreateDeviceTexture(GD, GD.ResourceFactory);
+
+            return tex;
+        }
+
+        public static SimpleModel RequestModelFromObj(string path)
+        {
+            var model = SimpleModel.CreateFromObj(path);
+            return model;
         }
     }
 }
