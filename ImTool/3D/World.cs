@@ -54,10 +54,10 @@ namespace ImTool.Scene3D
             DebugShapes  = CreateActor<DebugShapesActor>();
             TestMesh     = CreateActor<MeshActor>();
 
-            //TestMesh.Mesh.SetData(MeshData.CreateCube());
-            //TestMesh.Mesh.SetData(MeshData.LoadFromObjV2("D:\\TestModels\\Test1\\test.obj"));
+            //TestMesh.SetData(MeshData.CreateCube());
 
-            TestMesh.Mesh.LoadFromObj("D:\\TestModels\\Test1\\test.obj");
+            TestMesh.LoadFromObj("D:\\TestModels\\Test1\\test.obj");
+
             //TestMesh.Mesh.SetModel(SimpleModel.CreateFromCube());
 
             var rand = new Random();
