@@ -46,8 +46,8 @@ namespace ImTool.Scene3D.Components
                 new RasterizerStateDescription(FaceCullMode.None, PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
                 PrimitiveTopology.LineList,
                 ShaderSet,
-                new[] { owner.World.ProjViewLayout, PerItemResourceLayout },
-                owner.World.GetFBDesc().OutputDescription));
+                new[] { Resources.ProjViewLayout, PerItemResourceLayout },
+                Resources.MainFrameBufferOutputDescription));
 
             ResizeBuffers();
         }

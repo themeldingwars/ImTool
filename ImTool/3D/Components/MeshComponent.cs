@@ -17,141 +17,44 @@ namespace ImTool.Scene3D.Components
     {
         public DeviceBuffer WorldBuffer;
         public ResourceSet ItemResourceSet;
-        public DeviceBuffer VertBuffer;
-        public DeviceBuffer IndexBuffer;
-        public List<MeshSection> MeshSections = new List<MeshSection>();
-        private Pipeline Pipeline;
-        private ShaderSetDescription ShaderSet;
-        private ResourceLayout PerItemResourceLayout;
-        private ResourceLayout PerSectionResLayout;
-        private ResourceSet PerSectionResSet;
-        private TextureView DiffuseTexView;
-
-        private uint IndiceCount = 0;
+        public SimpleModel Model;
 
         public override unsafe void Init(Actor owner)
         {
             base.Init(owner);
-
-            var gd                = owner.World.MainWindow.GetGraphicsDevice();
-            var rf                = gd.ResourceFactory;
-            ShaderSet             = CreateShaderSet(rf);
-            PerItemResourceLayout = CreatePerItemResourceLayout(rf);
-
-            WorldBuffer     = rf.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
-            ItemResourceSet = rf.CreateResourceSet(new ResourceSetDescription(PerItemResourceLayout, WorldBuffer));
-
-            PerSectionResLayout = rf.CreateResourceLayout(
-                new ResourceLayoutDescription(
-                    new ResourceLayoutElementDescription("DiffuseTex", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                    new ResourceLayoutElementDescription("DiffuseSampler", ResourceKind.Sampler, ShaderStages.Fragment)
-                )
-            );
-
-            var noTex = rf.CreateTexture(new TextureDescription(1, 1, 1, 1, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled, TextureType.Texture2D));
-            RgbaByte color = RgbaByte.Pink;
-            gd.UpdateTexture(noTex, (IntPtr)(&color), 4, 0, 0, 0, 1, 1, 1, 0, 0);
-            //DiffuseTexView   = rf.CreateTextureView(noTex);
-            PerSectionResSet = CreateTexResourceSet(gd, PerSectionResLayout, noTex);
-
-           Pipeline = rf.CreateGraphicsPipeline(new GraphicsPipelineDescription(
-                BlendStateDescription.SingleOverrideBlend,
-                DepthStencilStateDescription.DepthOnlyLessEqual,
-                new RasterizerStateDescription(FaceCullMode.Front, PolygonFillMode.Solid, FrontFace.CounterClockwise, true, true),
-                //RasterizerStateDescription.Default,
-                PrimitiveTopology.TriangleList,
-                ShaderSet,
-                new[] { owner.World.ProjViewLayout, PerItemResourceLayout, PerSectionResLayout },
-                owner.World.GetFBDesc().OutputDescription));
-
-            SetData(new SimpleVertexDefinition[0], new uint[0]);
         }
 
-        private ShaderSetDescription CreateShaderSet(ResourceFactory rf)
+        public void SetModel(SimpleModel model)
         {
-            var vert    = Resources.LoadEmbeddedShader("ImTool.Shaders.SPIR_V._3D.Mesh.MeshVert.glsl", ShaderStages.Vertex);
-            var frag    = Resources.LoadEmbeddedShader("ImTool.Shaders.SPIR_V._3D.Mesh.MeshFrag.glsl", ShaderStages.Fragment);
-            var shaders = rf.CreateFromSpirv(vert, frag);
+            Model = model;
 
-            ShaderSetDescription shaderSet = new ShaderSetDescription(
-                new[]
-                {
-                    // SimpleVertexDefinition
-                    new VertexLayoutDescription(
-                        new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                        new VertexElementDescription("Uvs", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
-                        new VertexElementDescription("Norms", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3)
-                        )
-                },
-                shaders);
-
-            return shaderSet;
-        }
-
-        private ResourceLayout CreatePerItemResourceLayout(ResourceFactory rf)
-        {
-            ResourceLayout worldTextureLayout = rf.CreateResourceLayout(
-                new ResourceLayoutDescription(
-                    new ResourceLayoutElementDescription("WorldBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-                )
-            );
-
-            return worldTextureLayout;
-        }
-
-        public static ResourceSet CreateTexResourceSet(GraphicsDevice gd, ResourceLayout layout, Texture tex)
-        {
-            var rf = gd.ResourceFactory;
-            var resSet = rf.CreateResourceSet(new ResourceSetDescription(layout,
-                tex,
-                gd.Aniso4xSampler
-            ));
-
-            return resSet;
-        }
-
-        public void SetData(ReadOnlySpan<SimpleVertexDefinition> verts, ReadOnlySpan<uint> indices)
-        {
-            var gd = Owner.World.MainWindow.GetGraphicsDevice();
-
-            if (VertBuffer != null) gd.DisposeWhenIdle(VertBuffer);
-            VertBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)(VertexDefinition.SizeInBytes * verts.Length), BufferUsage.VertexBuffer));
-            gd.UpdateBuffer(VertBuffer, 0, verts);
-
-            if (IndexBuffer != null) gd.DisposeWhenIdle(IndexBuffer);
-            IndexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription((uint)(sizeof(uint) * indices.Length), BufferUsage.IndexBuffer));
-            gd.UpdateBuffer(IndexBuffer, 0, indices);
-
-            IndiceCount = (uint)indices.Length;
-        }
-
-        public void SetData(MeshData data)
-        {
-            SetData(CollectionsMarshal.AsSpan(data.Vertices), CollectionsMarshal.AsSpan(data.Indices));
+            WorldBuffer     = Resources.GD.ResourceFactory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
+            ItemResourceSet = Resources.GD.ResourceFactory.CreateResourceSet(new ResourceSetDescription(Model.PerItemResourceLayout, WorldBuffer));
         }
 
         public override void Render(CommandList cmdList)
         {
-            cmdList.SetPipeline(Pipeline);
+            if (Model == null)
+                return;
+
+            cmdList.SetPipeline(Model.Pipeline);
             cmdList.SetGraphicsResourceSet(0, Owner.World.ProjViewSet);
 
             var world = Owner.Transform;
             cmdList.UpdateBuffer(WorldBuffer, 0, ref world);
 
-            cmdList.SetVertexBuffer(0, VertBuffer);
-            cmdList.SetIndexBuffer(IndexBuffer, IndexFormat.UInt32);
+            cmdList.SetVertexBuffer(0, Model.VertBuffer);
+            cmdList.SetIndexBuffer(Model.IndexBuffer, IndexFormat.UInt32);
 
-            //cmdList.UpdateBuffer(WorldBuffer, 0, ref Transform.World);
             cmdList.SetGraphicsResourceSet(1, ItemResourceSet);
 
-            foreach (var meshSection in MeshSections)
+            foreach (var meshSection in Model.MeshSections)
             {
                 if (meshSection.TexResourceSet != null)
                     cmdList.SetGraphicsResourceSet(2, meshSection.TexResourceSet);
 
                 cmdList.DrawIndexed(meshSection.IndicesLength, 1, meshSection.IndiceStart, 0, 0);
             }
-            //cmdList.DrawIndexed(IndiceCount, 1, 0, 0, 0);
         }
 
         public override void Update(double dt)
@@ -161,54 +64,10 @@ namespace ImTool.Scene3D.Components
 
         public void LoadFromObj(string objPath)
         {
-            var gd = Owner.World.MainWindow.GetGraphicsDevice();
+            var model = SimpleModel.CreateFromObj(objPath);
+            SetModel(model);
 
-            var fileStream = File.OpenRead(objPath);
-            var obj        = new Veldrid.Utilities.ObjParser().Parse(fileStream);
-            var mtlPath    = Path.Combine(Path.GetDirectoryName(objPath), obj.MaterialLibName);
-            var mtl        = MeshData.LoadObjMtl(mtlPath, gd, gd.ResourceFactory, PerSectionResLayout);
-            var vertices   = new List<SimpleVertexDefinition>();
-            var indices    = new List<uint>();
-
-            MeshSections = new List<MeshSection>();
-
-            uint lastIndice = 0;
-            foreach (var group in obj.MeshGroups)
-            {
-                var mesh = obj.GetMesh(group);
-                vertices.AddRange(mesh.Vertices.Select(x => new SimpleVertexDefinition()
-                {
-                    X = x.Position.X,
-                    Y = x.Position.Y,
-                    Z = x.Position.Z,
-
-                    U = x.TextureCoordinates.X,
-                    V = x.TextureCoordinates.Y,
-
-                    NormX = x.Normal.X,
-                    NormY = x.Normal.Y,
-                    NormZ = x.Normal.Z,
-                }).ToList());
-
-
-                var groupIndices = mesh.GetIndices();
-                // try load textures
-                var diffuseTexpath = group.Material;
-                var matData        = mtl.FirstOrDefault(x => x.Name == diffuseTexpath);
-                MeshSections.Add(new MeshSection()
-                {
-                    Name           = group.Name,
-                    IndiceStart    = (uint)indices.Count(),
-                    IndicesLength  = (uint)groupIndices.Length,
-                    DiffuseTex     = matData?.DiffuseTex,
-                    TexResourceSet = matData?.TexResourceSet
-                });
-
-                indices.AddRange(new List<uint>(groupIndices.Select(x => (uint)lastIndice + x)));
-                lastIndice = (uint)vertices.Count();
-            }
-
-            SetData(CollectionsMarshal.AsSpan(vertices), CollectionsMarshal.AsSpan(indices));
+            return;
         }
 
         public struct SimpleVertexDefinition

@@ -62,6 +62,7 @@ namespace ImTool
 
             CommandList.End();
             GfxDevice.SubmitCommands(CommandList);
+            GfxDevice.WaitForIdle();
 
             var cursorPos = ImGui.GetCursorPos();
             ImGui.Image(SceneTexBinding, size);
