@@ -26,7 +26,6 @@ namespace ImTool.Scene3D
         private DeviceBuffer ProjectionBuffer; // active camera projection matrix
         public ResourceSet ProjViewSet;
         private DeviceBuffer ViewStateBuffer;
-        public ResourceLayout ProjViewLayout { get; private set; }
 
         public CameraActor ActiveCamera;
         public GridActor Grid;
@@ -41,16 +40,11 @@ namespace ImTool.Scene3D
             LastFrameTime = (DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond);
 
             var factory = MainWindow.GetGraphicsDevice().ResourceFactory;
-            ProjViewLayout = factory.CreateResourceLayout(
-                new ResourceLayoutDescription(
-                    new ResourceLayoutElementDescription("ViewStateBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
-                    )
-                );
 
             ProjectionBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
             ViewBuffer       = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
             ViewStateBuffer  = factory.CreateBuffer(new BufferDescription(ViewData.SIZE, BufferUsage.UniformBuffer));
-            ProjViewSet      = factory.CreateResourceSet(new ResourceSetDescription(ProjViewLayout, ViewStateBuffer));
+            ProjViewSet      = factory.CreateResourceSet(new ResourceSetDescription(Resources.ProjViewLayout, ViewStateBuffer));
         }
 
         // Call after a scene widget widget has been created
@@ -64,6 +58,7 @@ namespace ImTool.Scene3D
             //TestMesh.Mesh.SetData(MeshData.LoadFromObjV2("D:\\TestModels\\Test1\\test.obj"));
 
             TestMesh.Mesh.LoadFromObj("D:\\TestModels\\Test1\\test.obj");
+            //TestMesh.Mesh.SetModel(SimpleModel.CreateFromCube());
 
             var rand = new Random();
             //DebugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(2, 2, 2));
@@ -126,6 +121,7 @@ namespace ImTool.Scene3D
 
             DebugShapes.Render(cmdList);
             TestMesh.Render(cmdList);
+
             Grid.Render(cmdList);
         }
     }
