@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using ImGuiNET;
+using ImTool.Scene3D;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -83,6 +84,8 @@ namespace ImTool
             graphicsDevice = VeldridStartup.CreateGraphicsDevice(window, new GraphicsDeviceOptions(false, null, config.VSync, ResourceBindingModel.Improved, true, false), config.GraphicsBackend);
             commandList = graphicsDevice.ResourceFactory.CreateCommandList();
             controller = new ImGuiController(graphicsDevice, window, graphicsDevice.MainSwapchain.Framebuffer.OutputDescription, window.Width, window.Height, iniFile, floatersAllowed);
+
+            Resources.SetGD(graphicsDevice);
         }
         
         private void Draw()

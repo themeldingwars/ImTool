@@ -4,15 +4,42 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
+using Vulkan;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace ImTool.Scene3D
 {
-    public class Resources
+    public static class Resources
     {
+        public static GraphicsDevice GD { get; private set; }
+        private static Texture MissingTextureTex = null;
+        public static ResourceLayout ProjViewLayout { get; private set; }
+        public static OutputDescription MainFrameBufferOutputDescription { get; private set; }
+
+        public static void SetGD(GraphicsDevice gd)
+        {
+            GD = gd;
+
+            ProjViewLayout = GD.ResourceFactory.CreateResourceLayout(
+                new ResourceLayoutDescription(
+                    new ResourceLayoutElementDescription("ViewStateBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+                )
+            );
+
+            MainFrameBufferOutputDescription = new OutputDescription()
+            {
+                DepthAttachment  = new OutputAttachmentDescription(PixelFormat.R16_UNorm),
+                ColorAttachments = new OutputAttachmentDescription[]
+                {
+                    new OutputAttachmentDescription(PixelFormat.R8_G8_B8_A8_UNorm)
+                }
+            };
+        }
+
         public static ShaderDescription LoadEmbeddedShader(string resourceName, ShaderStages stage, string entryPoint = "main")
         {
             var txt          = GetEmbeddedResourceString(resourceName);
@@ -49,6 +76,20 @@ namespace ImTool.Scene3D
                 using (var reader = new StreamReader(s))
                     return reader.ReadToEnd();
             }
+        }
+
+        public static unsafe Texture GetMissingTex()
+        {
+            if (MissingTextureTex != null)
+            {
+                return MissingTextureTex;
+            }
+
+            MissingTextureTex = GD.ResourceFactory.CreateTexture(new TextureDescription(1, 1, 1, 1, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled, TextureType.Texture2D));
+            RgbaByte color = RgbaByte.Pink;
+            GD.UpdateTexture(MissingTextureTex, (IntPtr)(&color), 4, 0, 0, 0, 1, 1, 1, 0, 0);
+
+            return MissingTextureTex;
         }
     }
 }

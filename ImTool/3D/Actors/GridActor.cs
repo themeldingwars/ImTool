@@ -67,8 +67,8 @@ namespace ImTool.Scene3D
                 RasterizerStateDescription.CullNone,
                 PrimitiveTopology.TriangleList,
                 ShaderSet,
-                new[] { World.ProjViewLayout, PerItemResourceLayout },
-                World.GetVieewports().First().GetFramebuffer().OutputDescription));
+                new[] { Resources.ProjViewLayout, PerItemResourceLayout },
+                Resources.MainFrameBufferOutputDescription));
         }
 
         private ShaderSetDescription CreateShaderSet()
