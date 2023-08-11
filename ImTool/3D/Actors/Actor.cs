@@ -1,4 +1,5 @@
-﻿using Octokit;
+﻿using ImGuiNET;
+using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace ImTool.Scene3D
     public class Actor : IComparable<Actor>
     {
         public World World { get; private set; }
-        public string Name;
+        public string Name = "";
         public ActorFlags Flags;
         public Transform Transform    = new();
         public float RenderOrderBoost = 0;
@@ -24,6 +25,7 @@ namespace ImTool.Scene3D
         public virtual void Init(World world)
         {
             World = world;
+            Name = GetType().Name;
 
             foreach (var component in Components)
             {
@@ -62,6 +64,40 @@ namespace ImTool.Scene3D
             {
                 if ((component.Flags & ActorFlags.DontRender) == 0)
                     component.Render(cmdList);
+            }
+        }
+
+        public virtual void DrawInspector()
+        {
+            ImGui.Text("Name");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(-150);
+            ImGui.InputText("###Name", ref Name, 128);
+
+            ImGui.SameLine();
+            ImGui.Text("Flags");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(100);
+            if (ImGui.BeginCombo("###Flags", "..."))
+            {
+                int flags = (int)Flags;
+                if (ImGui.CheckboxFlags("Don't Update", ref flags, (int)(ActorFlags.DontUpdate)))
+                    Flags ^= ActorFlags.DontUpdate;
+
+                if (ImGui.CheckboxFlags("Don't Render", ref flags, (int)(ActorFlags.DontRender)))
+                    Flags ^= ActorFlags.DontRender;
+
+                ImGui.EndCombo();
+            }
+
+            Transform.DrawImguiWidget();
+
+            foreach (var component in Components)
+            {
+                if (ImGui.CollapsingHeader($"{component.Name} ({component.GetType().Name})"))
+                {
+                    component.DrawInspector();
+                }
             }
         }
 
