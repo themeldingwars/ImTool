@@ -28,5 +28,10 @@ namespace ImTool.Scene3D
         {
 
         }
+
+        public virtual void DrawInspector()
+        {
+
+        }
     }
 }
