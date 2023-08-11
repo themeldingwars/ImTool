@@ -18,5 +18,13 @@ namespace ImTool.Scene3D
 
             Mesh = AddComponet<MeshComponent>();
         }
+
+        public void LoadFromObj(string objPath)
+        {
+            var model = Resources.RequestModelFromObj(objPath);
+            Mesh.SetModel(model);
+
+            return;
+        }
     }
 }

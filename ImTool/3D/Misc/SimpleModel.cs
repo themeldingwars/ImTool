@@ -103,7 +103,7 @@ namespace ImTool.Scene3D
         public void FullUpdateVertBuffer(ReadOnlySpan<SimpleVertexDefinition> verts)
         {
             if (VertBuffer != null) Resources.GD.DisposeWhenIdle(VertBuffer);
-            VertBuffer = Resources.GD.ResourceFactory.CreateBuffer(new BufferDescription((uint)(VertexDefinition.SizeInBytes * verts.Length), BufferUsage.VertexBuffer));
+            VertBuffer = Resources.GD.ResourceFactory.CreateBuffer(new BufferDescription((uint)(SimpleVertexDefinition.SizeInBytes * verts.Length), BufferUsage.VertexBuffer));
             Resources.GD.UpdateBuffer(VertBuffer, 0, verts);
         }
 
@@ -130,25 +130,25 @@ namespace ImTool.Scene3D
                 new(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
                 new(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
                 // Left                                                               
-                new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(1, 0)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(1, 1)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
+                new SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
+                new SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(1, 0)),
+                new SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(1, 1)),
+                new SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
                 // Right                                                              
-                new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(0, 0)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(0, 1)),
+                new SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(0, 0)),
+                new SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
+                new SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
+                new SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(0, 1)),
                 // Back                                                               
-                new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
+                new SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, -0.5f), new Vector2(0, 0)),
+                new SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, -0.5f), new Vector2(1, 0)),
+                new SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(1, 1)),
+                new SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, -0.5f), new Vector2(0, 1)),
                 // Front                                                              
-                new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(0, 0)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(1, 0)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(1, 1)),
-                new MeshComponent.SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(0, 1)),
+                new SimpleVertexDefinition(new Vector3(-0.5f, +0.5f, +0.5f), new Vector2(0, 0)),
+                new SimpleVertexDefinition(new Vector3(+0.5f, +0.5f, +0.5f), new Vector2(1, 0)),
+                new SimpleVertexDefinition(new Vector3(+0.5f, -0.5f, +0.5f), new Vector2(1, 1)),
+                new SimpleVertexDefinition(new Vector3(-0.5f, -0.5f, +0.5f), new Vector2(0, 1)),
             };
             var indices = new uint[]
             {
@@ -183,6 +183,31 @@ namespace ImTool.Scene3D
             MeshSections.Clear();
             PerSectionResLayout.Dispose();
             DefaultPerSectionResSet.Dispose();
+        }
+
+        public struct SimpleVertexDefinition
+        {
+            public const uint SizeInBytes = 12 + 8 + 12;
+
+            public float X;
+            public float Y;
+            public float Z;
+
+            public float U;
+            public float V;
+
+            public float NormX;
+            public float NormY;
+            public float NormZ;
+
+            public SimpleVertexDefinition(Vector3 pos, Vector2 uv)
+            {
+                X = pos.X;
+                Y = pos.Y;
+                Z = pos.Z;
+                U = uv.X;
+                V = uv.Y;
+            }
         }
     }
 }
