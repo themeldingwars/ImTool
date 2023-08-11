@@ -1,4 +1,6 @@
-﻿using ImTool.Scene3D.Components;
+﻿using ImGuiNET;
+using ImTool.Scene3D.Components;
+using Octokit;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -34,6 +36,8 @@ namespace ImTool.Scene3D
 
         public List<Actor> UpdateableActors = new();
         private List<Actor> RenderList      = new();
+
+        private List<Actor> SelectedActors = new();
 
         public World(Window window)
         {
@@ -141,6 +145,37 @@ namespace ImTool.Scene3D
             }
 
             RenderList.Sort();
+        }
+
+        public void DrawHierarchyExplorer()
+        {
+            foreach (var actor in UpdateableActors)
+            {
+                DrawActorLabelForHierarchy(actor);
+            }
+        }
+
+        public void DrawActorInspector()
+        {
+            if (SelectedActors.Count > 0)
+            {
+                var actor = SelectedActors[0];
+                actor.DrawInspector();
+            }
+        }
+
+        private void DrawActorLabelForHierarchy(Actor actor)
+        {
+            var name       = actor.Name ?? actor.GetType().Name;
+            var isSelected = ImGui.Selectable($"{name}###{actor.GetHashCode()}", SelectedActors.Contains(actor));
+            //ImGui.SameLine();
+            //ImGui.Text(actor.Name ?? actor.GetType().Name);
+
+            if (isSelected)
+            {
+                SelectedActors.Clear();
+                SelectedActors.Add(actor);
+            }
         }
     }
 }

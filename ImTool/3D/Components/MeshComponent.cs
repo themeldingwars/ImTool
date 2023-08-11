@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -60,6 +61,13 @@ namespace ImTool.Scene3D.Components
         public override void Update(double dt)
         {
             base.Update(dt);
+        }
+
+        public override void DrawInspector()
+        {
+            var numVerts = Model != null ? Model.VertBuffer.SizeInBytes / SimpleModel.SimpleVertexDefinition.SizeInBytes : 0;
+            var numTris  = Model != null ? Model.IndexBuffer.SizeInBytes / 8 : 0;
+            ImGui.Text($"Verts: {numVerts:N0}, Tris: {numTris:N0}, Sections: {Model?.MeshSections?.Count : 0}");
         }
     }
 }

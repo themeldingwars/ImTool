@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -108,7 +109,7 @@ namespace ImTool.Scene3D
             }
             else if (CamType == CameraType.Orthographic)
             {
-                var aspectRatio = flipY ? -(_orthographicWidth / _aspectRatio) : (_orthographicWidth / _aspectRatio);
+                var aspectRatio = flipY ? (_orthographicWidth / _aspectRatio) : -(_orthographicWidth / _aspectRatio);
                 ProjectionMat = Matrix4x4.CreateOrthographic(_orthographicWidth, aspectRatio, _nearPlaneDist, _farPlaneDist);
             }
 
@@ -124,6 +125,40 @@ namespace ImTool.Scene3D
             ViewData.View   = ViewMat;
             ViewData.CamPos = Transform.Position;
             ViewData.CamDir = Transform.Forward;
+        }
+
+        public override void DrawInspector()
+        {
+            base.DrawInspector();
+
+            ImGui.Text("FOV");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(-1);
+            ImGui.SliderAngle("FOV", ref _fov, 1, 179);
+
+            ImGui.Text("Near Plane");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(-1);
+            ImGui.SliderFloat("Near Plane", ref _nearPlaneDist, 0.001f, 500f);
+
+            ImGui.Text("Far Plane");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(-1);
+            ImGui.SliderFloat("Far Plane", ref _farPlaneDist, 1f, 1000f);
+
+            ImGui.Text("Camera Type");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(-1);
+            if (ImGui.BeginCombo("###CameraType", CamType.ToString()))
+            {
+                if (ImGui.Selectable("Perspective"))
+                    CamType = CameraType.Perspective;
+
+                if (ImGui.Selectable("Orthographic"))
+                    CamType = CameraType.Orthographic;
+
+                ImGui.EndCombo();
+            }
         }
 
         public enum CameraType : byte

@@ -37,7 +37,7 @@ namespace Demo
             //ImGui.DockBuilderDockWindow("Hex View", topLeftId);
             ImGui.DockBuilderDockWindow("Main View", centerLeftId);
             ImGui.DockBuilderDockWindow("Test Log Window", centerBottomId);
-            ImGui.DockBuilderDockWindow("Scene Hierachy", leftId);
+            ImGui.DockBuilderDockWindow("Scene Hierarchy", leftId);
             ImGui.DockBuilderDockWindow("Scene Inspector", centerRightTopId);
             ImGui.DockBuilderDockWindow("Tests", centerRightBottomId);
 
@@ -67,14 +67,18 @@ namespace Demo
 
             DrawTests();
 
-            if (ImGui.Begin("Scene Hierachy"))
+            if (ImGui.Begin("Scene Hierarchy"))
             {
-
+                World.DrawHierarchyExplorer();
             }
+
             ImGui.End();
 
             if (ImGui.Begin("Scene Inspector"))
             {
+                World.DrawActorInspector();
+
+                /*
                 if (World.ActiveCamera != null)
                 {
                     //World.ActiveCamera.Transform.DrawImguiWidget();
@@ -117,7 +121,7 @@ namespace Demo
                 if (ImGui.Button("Remove Cube"))
                 {
                     TestDebugCube.Remove();
-                }
+                }*/
             }
             ImGui.End();
         }
