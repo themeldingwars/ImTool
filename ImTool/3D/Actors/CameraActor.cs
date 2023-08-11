@@ -86,6 +86,8 @@ namespace ImTool.Scene3D
             _orthographicWidth = 35f;
 
             FovDeg = 75;
+
+            Flags = ActorFlags.DontRender;
         }
 
         public override void Update(double dt)

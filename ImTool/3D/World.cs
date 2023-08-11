@@ -33,6 +33,7 @@ namespace ImTool.Scene3D
         public MeshActor TestMesh;
 
         public List<Actor> UpdateableActors = new();
+        private List<Actor> RenderList      = new();
 
         public World(Window window)
         {
@@ -54,7 +55,7 @@ namespace ImTool.Scene3D
             DebugShapes  = CreateActor<DebugShapesActor>();
             TestMesh     = CreateActor<MeshActor>();
 
-            //TestMesh.SetData(MeshData.CreateCube());
+            //CreateActor<MeshActor>().Mesh.SetModel(SimpleModel.CreateFromCube());
 
             TestMesh.LoadFromObj("D:\\TestModels\\Test1\\test.obj");
 
@@ -116,13 +117,30 @@ namespace ImTool.Scene3D
 
         public void Render(double dt, CommandList cmdList, CameraActor camera)
         {
+            BuildRenderList(camera);
+
             cmdList.UpdateBuffer(ViewStateBuffer, 0, camera.ViewData);
             cmdList.ClearDepthStencil(1f);
 
-            DebugShapes.Render(cmdList);
-            TestMesh.Render(cmdList);
+            foreach (var actor in RenderList)
+            {
+                actor.Render(cmdList);
+            }
+        }
 
-            Grid.Render(cmdList);
+        private void BuildRenderList(CameraActor camera)
+        {
+            RenderList.Clear();
+
+            foreach (var actor in UpdateableActors)
+            {
+                if ((actor.Flags & ActorFlags.DontRender) == 0)
+                {
+                    RenderList.Add(actor);
+                }
+            }
+
+            RenderList.Sort();
         }
     }
 }

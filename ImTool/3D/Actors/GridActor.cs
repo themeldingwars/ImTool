@@ -24,6 +24,7 @@ namespace ImTool.Scene3D
             base.Init(world);
 
             CreateResources();
+            RenderOrderBoost = float.MinValue;
         }
 
         private void CreateResources()
