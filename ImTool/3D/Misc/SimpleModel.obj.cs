@@ -104,6 +104,8 @@ namespace ImTool.Scene3D
                 }
             }
 
+            if (currentMat != null)
+                mats.Add(currentMat);
             return mats;
         }
     }

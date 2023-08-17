@@ -16,6 +16,7 @@ using imnodesNET;
 using ImPlotNET;
 using ImTool;
 using ImTool.SDL;
+using ImGuizmoNET;
 
 namespace ImGuiNET
 {
@@ -95,8 +96,10 @@ namespace ImGuiNET
             var imPlotContext = ImPlotNET.ImPlot.CreateContext();
             ImPlot.SetCurrentContext(imPlotContext);
             ImPlot.SetImGuiContext(context);
-            
-            
+
+            ImGuizmo.SetImGuiContext(context);
+
+
             ImGuiIOPtr io = ImGui.GetIO();
 
             
@@ -171,6 +174,7 @@ namespace ImGuiNET
             UpdateMonitors();
 
             ImGui.NewFrame();
+            ImGuizmo.BeginFrame();
             _frameBegun = true;
             
         }
@@ -601,6 +605,8 @@ namespace ImGuiNET
         {
             _frameBegun = true;
             ImGui.NewFrame();
+            ImGuizmo.SetDrawlist();
+            ImGuizmo.BeginFrame();
         }
 
         private unsafe void UpdateMonitors()

@@ -7,7 +7,7 @@ namespace ImTool
     public static partial class Widgets
     {
         // Draw a button with a font awesome icon
-        public static bool IconButton(string icon, string text = null, Vector4? iconColor = null)
+        public static bool IconButton(string icon, string text = null, Vector4? iconColor = null, Vector4? bgColor = null)
         {
             var result = false;
 
@@ -23,8 +23,15 @@ namespace ImTool
 
             var pos = ImGui.GetCursorScreenPos();
 
+            if (bgColor != null)
+                ImGui.PushStyleColor(ImGuiCol.Button, bgColor.Value);
+
             result = ImGui.Button(text.PadLeft(text.Length + iconWidth));
-            ImGui.SameLine();
+
+            if (bgColor != null)
+                ImGui.PopStyleColor();
+
+                ImGui.SameLine();
             var secondPos = ImGui.GetCursorPosX();
             FontManager.PushFont("FAS");
             ImGui.PushStyleColor(ImGuiCol.Text, iconColor ?? System.Numerics.Vector4.One);

@@ -1,8 +1,10 @@
 ﻿using ImGuiNET;
+using ImGuizmoNET;
 using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
@@ -15,7 +17,7 @@ namespace ImTool.Scene3D
         public World World { get; private set; }
         public string Name = "";
         public ActorFlags Flags;
-        public Transform Transform    = new();
+        public Transform Transform = new();
         public float RenderOrderBoost = 0;
 
         public List<Component> Components = new();
