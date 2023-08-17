@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using ImGuizmoNET;
 using ImTool.Scene3D.Components;
 using Octokit;
 using System;
@@ -33,6 +34,9 @@ namespace ImTool.Scene3D
         public GridActor Grid;
         public DebugShapesActor DebugShapes;
         public MeshActor TestMesh;
+        public MeshActor TestMesh2;
+        public MeshActor TestMesh3;
+        public MeshActor TestMesh4;
 
         public List<Actor> UpdateableActors = new();
         private List<Actor> RenderList      = new();
@@ -58,10 +62,28 @@ namespace ImTool.Scene3D
             Grid         = CreateActor<GridActor>();
             DebugShapes  = CreateActor<DebugShapesActor>();
             TestMesh     = CreateActor<MeshActor>();
+            TestMesh2    = CreateActor<MeshActor>();
+            TestMesh3    = CreateActor<MeshActor>();
+            TestMesh4    = CreateActor<MeshActor>();
 
             //CreateActor<MeshActor>().Mesh.SetModel(SimpleModel.CreateFromCube());
 
             TestMesh.LoadFromObj("D:\\TestModels\\Test1\\test.obj");
+            var loadTask1 = Task.Factory.StartNew(() =>
+            {
+                TestMesh2.LoadFromObj("D:\\TestModels\\neon\\neon.obj");
+                TestMesh2.Transform.Position = new Vector3(3, 0, 0);
+            });
+
+            //TestMesh3.LoadFromObj("D:\\TestModels\\kindred\\kindred.obj");
+            //TestMesh3.Transform.Position = new Vector3(5, 0, 0);
+
+            var loadTask2 = Task.Factory.StartNew(() =>
+            {
+                TestMesh3.LoadFromObj("D:\\TestModels\\Evelynn\\Evelynn.obj");
+                TestMesh3.Transform.Position = new Vector3(8, 0, 0);
+                TestMesh3.Transform.Scale = new Vector3(0.01f, 0.01f, 0.01f);
+            });
 
             //TestMesh.Mesh.SetModel(SimpleModel.CreateFromCube());
 
@@ -121,6 +143,7 @@ namespace ImTool.Scene3D
 
         public void Render(double dt, CommandList cmdList, CameraActor camera)
         {
+            ActiveCamera = camera;
             BuildRenderList(camera);
 
             cmdList.UpdateBuffer(ViewStateBuffer, 0, camera.ViewData);
@@ -129,6 +152,28 @@ namespace ImTool.Scene3D
             foreach (var actor in RenderList)
             {
                 actor.Render(cmdList);
+            }
+        }
+
+        public unsafe void DrawTransform(OPERATION op, MODE mode, ref float[] snap)
+        {
+            var view  = ActiveCamera.ViewMat.ToFloatArrray();
+            var proj  = ActiveCamera.ProjectionMat.ToFloatArrray();
+            proj[5]   = -proj[5];
+            proj[6]   = -proj[6];
+
+            if (SelectedActors.Count > 0)
+            {
+                var transform = SelectedActors[0].Transform.World.ToFloatArrray();
+                var deltaMat  = new float[16];
+                float* snaps = null;
+                if (ImGuizmo.Manipulate(ref view[0], ref proj[0], op, mode, ref transform[0], ref deltaMat[0], ref snap != null ? ref snap[0] : ref snaps[0]))
+                {
+                    if (ImGui.IsWindowFocused())
+                    {
+                        SelectedActors[0].Transform.World.FromFloatArray(transform);
+                    }
+                }
             }
         }
 
