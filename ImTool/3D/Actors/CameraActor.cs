@@ -13,7 +13,7 @@ namespace ImTool.Scene3D
     {
         public ViewData ViewData = new();
         public Matrix4x4 ProjectionMat { get; private set; }
-        public Matrix4x4 ViewMat { get; private set; }
+        public Matrix4x4 ViewMat { get; set; }
         public CameraType CamType;
 
         public float FovDeg
@@ -82,7 +82,7 @@ namespace ImTool.Scene3D
             _cameraType        = CameraType.Perspective;
             _aspectRatio       = 1f;
             _fov               = 1.5f;
-            _nearPlaneDist     = 0.01f;
+            _nearPlaneDist     = 0.1f;
             _farPlaneDist      = 1000f;
             _orthographicWidth = 35f;
 

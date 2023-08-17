@@ -1,4 +1,5 @@
-﻿using ImTool.Scene3D.Components;
+﻿using ImGuizmoNET;
+using ImTool.Scene3D.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,11 @@ namespace ImTool.Scene3D
             Mesh.SetModel(model);
 
             return;
+        }
+
+        public override unsafe void Render(CommandList cmdList)
+        {
+            base.Render(cmdList);
         }
     }
 }
