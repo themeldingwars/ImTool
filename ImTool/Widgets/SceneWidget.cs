@@ -17,6 +17,7 @@ namespace ImTool
         protected IntPtr SceneTexBinding;
         protected CommandList CommandList;
         protected double LastFrameTime;
+        protected double AvgFPS = 0f;
 
         private bool NeedsToInit = true;
 
@@ -58,6 +59,7 @@ namespace ImTool
             CommandList.SetFramebuffer(FrameBuff);
 
             double dt = (DateTime.UtcNow.Ticks - LastFrameTime) / TimeSpan.TicksPerSecond;
+            CalcFPS(dt);
             Render(dt);
             LastFrameTime = DateTime.UtcNow.Ticks;
 
@@ -111,7 +113,13 @@ namespace ImTool
 
         public virtual void DrawOverlays(double dt)
         {
-            ImGui.Text($"Delta Time: {dt:0.#####}");
+            ImGui.Text($"Delta Time: {dt:0.#####}, FPS: {AvgFPS:0}");
+        }
+
+        private void CalcFPS(double dt)
+        {
+            var expSmoothing = 0.9f;
+            AvgFPS = expSmoothing * AvgFPS + (1f - expSmoothing) * 1f / dt;
         }
     }
 }
