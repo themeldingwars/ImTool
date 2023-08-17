@@ -89,7 +89,7 @@ namespace ImTool
 
         public override void Render(double dt)
         {
-            ImGuizmo.SetDrawlist(ImGui.GetForegroundDrawList());
+            ImGuizmo.SetDrawlist();
 
             base.Render(dt);
 
@@ -120,7 +120,8 @@ namespace ImTool
             var pos  = ImGui.GetWindowPos();
             var size = ImGui.GetWindowSize();
             DrawViewCube(new Vector2(pos.X + size.X - 100, pos.Y + 25));
-            DrawTransformSettings(new Vector2(size.X - (150 + 200), 40));
+            DrawTransformSettings(new Vector2(size.X - (150 + 165), 40));
+            DrawFps(new Vector2(size.X - (150), 75));
         }
 
         private void DrawTransform()
@@ -156,8 +157,9 @@ namespace ImTool
         {
             ImGui.PushID("Mode");
             var modeIcon    = TransformMode == MODE.WORLD ? "" : "";
-            var modeTxt     = TransformMode == MODE.WORLD ? "" : "L";
+            var modeTxt     = TransformMode == MODE.WORLD ? "" : " L ";
             var modeToolTip = TransformMode == MODE.WORLD ? "World" : "Local";
+
             if (Widgets.IconButton(modeIcon, modeTxt))
                 TransformMode = TransformMode == MODE.WORLD ? MODE.LOCAL : MODE.WORLD;
 
@@ -228,6 +230,18 @@ namespace ImTool
                 Camera.Transform.World = viewM;
                 Camera.Transform.Position = pos;
             }
+        }
+
+        private void DrawFps(Vector2 pos)
+        {
+            var ogPos = ImGui.GetCursorPos();
+            ImGui.SetCursorPos(pos);
+
+            FontManager.PushFont("Bold");
+            ImGui.Text($"FPS: {AvgFPS:0}");
+            FontManager.PopFont();
+
+            ImGui.SetCursorPos(ogPos);
         }
 
         private void DrawDebugOverlay()
