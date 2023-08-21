@@ -149,7 +149,15 @@ namespace Demo
         {
             if (ImGui.Begin("Tests"))
             {
+                if (ImGui.Button("Show Active Cam Bounds"))
+                {
+                    World.ActiveCamera.ShowBounds(true);
+                }
 
+                if (ImGui.Button("Hide Active Cam Bounds"))
+                {
+                    World.ActiveCamera.ShowBounds(false);
+                }
             }
             ImGui.End();
         }

@@ -165,6 +165,14 @@ namespace ImTool.Scene3D.Components
             return shape;
         }
 
+        public Fustrum AddFustrum(BoundingFrustum fustrum, Vector3? size = null, Vector4? color = null, float thickness = 2f)
+        {
+            var shape = new Fustrum(this, fustrum, color, thickness);
+            Shapes.Add(shape);
+            ShouldRecreateBuffers = true;
+            return shape;
+        }
+
         public Rect AddRect(Vector3 pos, Vector2 size, Vector4? color = null, float thickness = 2f)
         {
             var shape = new Rect(this, pos, new Vector3(size.X, 0, size.Y), color, thickness);
@@ -234,6 +242,11 @@ namespace ImTool.Scene3D.Components
                 Transform.Scale    = Vector3.One;
                 Thickness          = thickness;
                 Color              = color ?? DefaultColor;
+            }
+
+            public void Update()
+            {
+                Owner.ShouldRecreateBuffers = true;
             }
 
             public void Remove()
@@ -389,6 +402,56 @@ namespace ImTool.Scene3D.Components
                 Rect.GenIndices(start).AsSpan().CopyTo(indicesSpan);
                 Rect.GenIndices((uint)(start + 4)).AsSpan().CopyTo(indicesSpan.Slice(8, 8));
                 connectingLines.CopyTo(indicesSpan.Slice(16, 8));
+
+                return indices;
+            }
+        }
+
+        public class Fustrum : Shape
+        {
+            public BoundingFrustum Frustum;
+
+            public Fustrum(DebugShapesComp owner, BoundingFrustum fustrum, Vector4? color = null, float thickness = 2f) : base(owner, fustrum.GetCorners().NearBottomLeft, color, thickness)
+            {
+                Frustum = fustrum;
+            }
+
+            public override VertexDefinition[] GetShapeVerts()
+            {
+                var values  = new VertexDefinition[8];
+                var corners = Frustum.GetCorners();
+                values[0]   = new VertexDefinition(corners.FarTopLeft, Color, Thickness);
+                values[1]   = new VertexDefinition(corners.FarTopRight, Color, Thickness);
+                values[2]   = new VertexDefinition(corners.FarBottomRight, Color, Thickness);
+                values[3]   = new VertexDefinition(corners.FarBottomLeft, Color, Thickness);
+
+                values[4] = new VertexDefinition(corners.NearTopLeft, Color, Thickness);
+                values[5] = new VertexDefinition(corners.NearTopRight, Color, Thickness);
+                values[6] = new VertexDefinition(corners.NearBottomRight, Color, Thickness);
+                values[7] = new VertexDefinition(corners.NearBottomLeft, Color, Thickness);
+
+                return values;
+            }
+
+            public override uint[] GetIndices(uint start)
+            {
+                var indices = new[]
+                {
+                    (uint) (start + 0), (uint) (start + 1),
+                    (uint) (start + 1), (uint) (start + 2),
+                    (uint) (start + 2), (uint) (start + 3),
+                    (uint) (start + 3), (uint) (start + 0),
+
+                    (uint) (start + 4), (uint) (start + 5),
+                    (uint) (start + 5), (uint) (start + 6),
+                    (uint) (start + 6), (uint) (start + 7),
+                    (uint) (start + 7), (uint) (start + 4),
+
+                    (uint) (start + 0), (uint) (start + 4),
+                    (uint) (start + 1), (uint) (start + 5),
+                    (uint) (start + 2), (uint) (start + 6),
+                    (uint) (start + 3), (uint) (start + 7)
+                };
 
                 return indices;
             }
