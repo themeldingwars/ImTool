@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Veldrid.Utilities;
 using static ImTool.Scene3D.CameraActor;
 
 namespace ImTool.Scene3D
@@ -15,6 +16,7 @@ namespace ImTool.Scene3D
         public Matrix4x4 ProjectionMat { get; private set; }
         public Matrix4x4 ViewMat { get; set; }
         public CameraType CamType;
+        public BoundingFrustum Frustum;
 
         public float FovDeg
         {
@@ -121,6 +123,7 @@ namespace ImTool.Scene3D
         public void UpdateViewMat(bool flipY)
         {
             ViewMat         = Matrix4x4.CreateLookAt(Transform.Position, Transform.Position + Transform.Forward, flipY ? -Vector3.UnitY : Vector3.UnitY);
+            Frustum         = new BoundingFrustum(ViewMat);
 
             ViewData.View   = ViewMat;
             ViewData.CamPos = Transform.Position;

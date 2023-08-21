@@ -1,14 +1,18 @@
 ﻿using ImGuiNET;
 using ImGuizmoNET;
+using ImTool.Scene3D.Components;
 using Octokit;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
+using Veldrid.Utilities;
 using Vortice.Direct3D;
+using Vortice.Direct3D11;
 
 namespace ImTool.Scene3D
 {
@@ -18,6 +22,8 @@ namespace ImTool.Scene3D
         public string Name = "";
         public ActorFlags Flags;
         public Transform Transform = new();
+        public BoundingBox BoundingBox;
+        public DebugShapesComp.Cube BoundingBoxDebugHandle;
         public float RenderOrderBoost = 0;
 
         public List<Component> Components = new();
@@ -26,13 +32,17 @@ namespace ImTool.Scene3D
 
         public virtual void Init(World world)
         {
-            World = world;
-            Name = GetType().Name;
+            World              = world;
+            Name               = GetType().Name;
+            BoundingBox        = new BoundingBox(-Vector3.One / 2, Vector3.One / 2);
+            Transform.OnChange = OnTransformChanged;
 
             foreach (var component in Components)
             {
                 component.Init(this);
             }
+
+            OnTransformChanged();
         }
 
         public T AddComponet<T>() where T : Component, new()
@@ -40,6 +50,7 @@ namespace ImTool.Scene3D
             var comp = new T();
             comp.Init(this);
             Components.Add(comp);
+            UpdateBoundingBox();
 
             return comp;
         }
@@ -47,6 +58,41 @@ namespace ImTool.Scene3D
         public void RemoveComponent(Component component)
         {
             Components.Remove(component);
+            UpdateBoundingBox();
+        }
+
+        public void ShowBounds(bool show)
+        {
+            if (show && BoundingBoxDebugHandle == null)
+            {
+                BoundingBoxDebugHandle = World.DebugShapes.AddCube(Transform.Position);
+                BoundingBoxDebugHandle.FromBoundingBox(BoundingBox);
+            }
+            else
+            {
+                BoundingBoxDebugHandle.Remove();
+            }
+        }
+
+        public void UpdateBoundingBox()
+        {
+            var bBox = new BoundingBox();
+            foreach (var component in Components)
+            {
+                var transformedBBox = BoundingBox.Transform(component.BoundingBox, component.Transform.World);
+                bBox = BoundingBox.Combine(transformedBBox, bBox);
+            }
+
+            BoundingBox = BoundingBox.Transform(bBox, Transform.World);
+        }
+
+        protected virtual void OnTransformChanged()
+        {
+            UpdateBoundingBox();
+            foreach (var component in Components)
+            {
+                component.OnTransformChanged();
+            }
         }
 
         // Update logic

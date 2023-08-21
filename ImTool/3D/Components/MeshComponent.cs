@@ -31,6 +31,18 @@ namespace ImTool.Scene3D.Components
 
             WorldBuffer     = Resources.GD.ResourceFactory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
             ItemResourceSet = Resources.GD.ResourceFactory.CreateResourceSet(new ResourceSetDescription(Model.PerItemResourceLayout, WorldBuffer));
+
+            BoundingBox = model.BoundingBox;
+            Owner.UpdateBoundingBox();
+            OnTransformChanged();
+        }
+
+        public override void OnTransformChanged()
+        {
+            base.OnTransformChanged();
+
+            var world = Owner.Transform.World * Transform.World;
+            Resources.GD.UpdateBuffer(WorldBuffer, 0, ref world);
         }
 
         public override void Render(CommandList cmdList)
@@ -40,9 +52,6 @@ namespace ImTool.Scene3D.Components
 
             cmdList.SetPipeline(Model.Pipeline);
             cmdList.SetGraphicsResourceSet(0, Owner.World.ProjViewSet);
-
-            var world = Owner.Transform;
-            cmdList.UpdateBuffer(WorldBuffer, 0, ref world);
 
             cmdList.SetVertexBuffer(0, Model.VertBuffer);
             cmdList.SetIndexBuffer(Model.IndexBuffer, IndexFormat.UInt32);
@@ -65,6 +74,9 @@ namespace ImTool.Scene3D.Components
 
         public override void DrawInspector()
         {
+            ImGui.PushID("MeshComponet");
+            Transform.DrawImguiWidget();
+
             var numVerts = Model != null ? Model.VertBuffer.SizeInBytes / SimpleModel.SimpleVertexDefinition.SizeInBytes : 0;
             var numTris  = Model != null ? Model.IndexBuffer.SizeInBytes / 8 : 0;
             ImGui.Text($"Verts: {numVerts:N0}, Tris: {numTris:N0}, Sections: {Model?.MeshSections?.Count : 0}");

@@ -11,6 +11,7 @@ namespace ImTool.Scene3D
         public Vector3 Forward => Vector3.Transform(Vector3.UnitZ, Rotation);
 
         public Matrix4x4 World;
+        public Action OnChange;
 
         public Vector3 Position
         {
@@ -22,6 +23,7 @@ namespace ImTool.Scene3D
             set
             {
                 World.Translation = value;
+                OnChange?.Invoke();
             }
         }
 
@@ -81,6 +83,7 @@ namespace ImTool.Scene3D
                 var roll  = (float)((Math.PI / 180) * value.Z);
 
                 Rotation = Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll);
+                OnChange?.Invoke();
             }
         }
 
@@ -96,6 +99,7 @@ namespace ImTool.Scene3D
             var rMat = Matrix4x4.CreateFromQuaternion(rot);
 
             World = sMat * rMat * tMat;
+            OnChange?.Invoke();
         }
 
         public void Decompose()
