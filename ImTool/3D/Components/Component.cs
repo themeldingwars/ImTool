@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
+using Veldrid.Utilities;
 
 namespace ImTool.Scene3D
 {
@@ -13,10 +14,18 @@ namespace ImTool.Scene3D
         public Actor Owner;
         public ActorFlags Flags;
         public Transform Transform;
+        public BoundingBox BoundingBox;
 
         public virtual void Init(Actor owner)
         {
-            Owner = owner;
+            Transform          = new Transform();
+            Transform.OnChange = OnTransformChanged;
+            Owner              = owner;
+        }
+
+        public virtual void OnTransformChanged()
+        {
+
         }
 
         public virtual void Update(double dt)
