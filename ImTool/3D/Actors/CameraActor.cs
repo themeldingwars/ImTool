@@ -1,12 +1,15 @@
 ﻿using ImGuiNET;
+using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Veldrid.Utilities;
 using static ImTool.Scene3D.CameraActor;
+using static ImTool.Scene3D.Components.DebugShapesComp;
 
 namespace ImTool.Scene3D
 {
@@ -59,7 +62,7 @@ namespace ImTool.Scene3D
             get => _nearPlaneDist;
             set
             {
-                _nearPlaneDist = value;
+                _nearPlaneDist = Math.Clamp(value, 0, float.MaxValue);
             }
         }
 
@@ -68,7 +71,7 @@ namespace ImTool.Scene3D
             get => _farPlaneDist;
             set
             {
-                _farPlaneDist = value;
+                _farPlaneDist = Math.Clamp(value, 0, float.MaxValue);
             }
         }
 
@@ -100,6 +103,20 @@ namespace ImTool.Scene3D
 
             UpdateProjectionMat(flipY);
             UpdateViewMat(flipY);
+
+            Frustum = new BoundingFrustum(ViewMat * ProjectionMat);
+
+            if (BoundsDebugHandle != null)
+            {
+                ((Fustrum)BoundsDebugHandle).Frustum = Frustum;
+                BoundsDebugHandle.Update();
+            }
+        }
+
+        protected override void SetBoundsShape()
+        {
+            BoundsDebugHandle       = World.DebugShapes.AddFustrum(Frustum);
+            BoundsDebugHandle.Color = new Vector4(0f, 0f, 1f, 1f);
         }
 
         public void UpdateProjectionMat(bool flipY)
@@ -112,7 +129,7 @@ namespace ImTool.Scene3D
             else if (CamType == CameraType.Orthographic)
             {
                 var aspectRatio = flipY ? (_orthographicWidth / _aspectRatio) : -(_orthographicWidth / _aspectRatio);
-                ProjectionMat = Matrix4x4.CreateOrthographic(_orthographicWidth, aspectRatio, _nearPlaneDist, _farPlaneDist);
+                ProjectionMat = Matrix4x4.CreateOrthographic(-_orthographicWidth, aspectRatio, _nearPlaneDist, _farPlaneDist);
             }
 
             ViewData.Proj        = ProjectionMat;
@@ -123,7 +140,7 @@ namespace ImTool.Scene3D
         public void UpdateViewMat(bool flipY)
         {
             ViewMat         = Matrix4x4.CreateLookAt(Transform.Position, Transform.Position + Transform.Forward, flipY ? -Vector3.UnitY : Vector3.UnitY);
-            Frustum         = new BoundingFrustum(ViewMat);
+            //Frustum         = new BoundingFrustum(ViewMat);
 
             ViewData.View   = ViewMat;
             ViewData.CamPos = Transform.Position;
@@ -162,6 +179,10 @@ namespace ImTool.Scene3D
 
                 ImGui.EndCombo();
             }
+
+            bool isFustrumShown = BoundsDebugHandle != null;
+            if (ImGui.Checkbox("Show Fustrum", ref isFustrumShown))
+                ShowBounds(isFustrumShown);
         }
 
         public enum CameraType : byte
