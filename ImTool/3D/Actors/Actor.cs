@@ -23,7 +23,7 @@ namespace ImTool.Scene3D
         public ActorFlags Flags;
         public Transform Transform = new();
         public BoundingBox BoundingBox;
-        public DebugShapesComp.Cube BoundingBoxDebugHandle;
+        public DebugShapesComp.Shape BoundsDebugHandle;
         public float RenderOrderBoost = 0;
 
         public List<Component> Components = new();
@@ -63,15 +63,22 @@ namespace ImTool.Scene3D
 
         public void ShowBounds(bool show)
         {
-            if (show && BoundingBoxDebugHandle == null)
+            if (show && BoundsDebugHandle == null)
             {
-                BoundingBoxDebugHandle = World.DebugShapes.AddCube(Transform.Position);
-                BoundingBoxDebugHandle.FromBoundingBox(BoundingBox);
+                SetBoundsShape();
             }
             else
             {
-                BoundingBoxDebugHandle.Remove();
+                BoundsDebugHandle.Remove();
+                BoundsDebugHandle = null;
             }
+        }
+
+        protected virtual void SetBoundsShape()
+        {
+            var boundsShape = World.DebugShapes.AddCube(Transform.Position);
+            boundsShape.FromBoundingBox(BoundingBox);
+            BoundsDebugHandle = boundsShape;
         }
 
         public void UpdateBoundingBox()

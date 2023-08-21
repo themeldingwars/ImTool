@@ -196,6 +196,8 @@ namespace ImTool.Scene3D
                 //var bBox = BoundingBox.Transform(SelectedActors[0].BoundingBox, SelectedActors[0].Transform.World);
                 SelectionDisplayCube.FromBoundingBox(SelectedActors[0].BoundingBox);
                 DebugShapes.Recreate();
+
+                //DebugShapes.AddFustrum(ActiveCamera.Frustum);
             }
         }
 
@@ -205,6 +207,24 @@ namespace ImTool.Scene3D
 
             foreach (var actor in UpdateableActors)
             {
+                var inFustrumResult = Viewports[0].GetCamera().Frustum.Contains(actor.BoundingBox);
+                actor.ShowBounds(true);
+                if (actor.BoundsDebugHandle != null)
+                {
+                    if (inFustrumResult == ContainmentType.Contains)
+                    {
+                        actor.BoundsDebugHandle.Color = new Vector4(0f, 1f, 0f, 1f);
+                    }
+                    else if (inFustrumResult == ContainmentType.Intersects)
+                    {
+                        actor.BoundsDebugHandle.Color = new Vector4(0.2f, 0.8f, 0f, 1f);
+                    }
+                    else if (inFustrumResult == ContainmentType.Disjoint)
+                    {
+                        actor.BoundsDebugHandle.Color = new Vector4(1f, 0f, 0f, 1f);
+                    }
+                }
+
                 if ((actor.Flags & ActorFlags.DontRender) == 0)
                 {
                     RenderList.Add(actor);
