@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Veldrid;
 using Veldrid.SPIRV;
+using Veldrid.Utilities;
 using Vulkan;
 using static ImTool.Scene3D.Components.MeshComponent;
 
@@ -19,6 +20,7 @@ namespace ImTool.Scene3D
         public DeviceBuffer VertBuffer;
         public DeviceBuffer IndexBuffer;
         public List<MeshSection> MeshSections = new List<MeshSection>();
+        public BoundingBox BoundingBox;
 
         public Pipeline Pipeline;
         private ShaderSetDescription ShaderSet;
@@ -100,11 +102,13 @@ namespace ImTool.Scene3D
             return worldTextureLayout;
         }
 
-        public void FullUpdateVertBuffer(ReadOnlySpan<SimpleVertexDefinition> verts)
+        public unsafe void FullUpdateVertBuffer(ReadOnlySpan<SimpleVertexDefinition> verts)
         {
             if (VertBuffer != null) Resources.GD.DisposeWhenIdle(VertBuffer);
             VertBuffer = Resources.GD.ResourceFactory.CreateBuffer(new BufferDescription((uint)(SimpleVertexDefinition.SizeInBytes * verts.Length), BufferUsage.VertexBuffer));
             Resources.GD.UpdateBuffer(VertBuffer, 0, verts);
+
+            UpdateBoundingBox(verts);
         }
 
         public void FullUpdateIndices(ReadOnlySpan<uint> indices)
@@ -184,6 +188,26 @@ namespace ImTool.Scene3D
             MeshSections.Clear();
             PerSectionResLayout.Dispose();
             DefaultPerSectionResSet.Dispose();
+        }
+
+        private void UpdateBoundingBox(ReadOnlySpan<SimpleVertexDefinition> verts)
+        {
+            Vector3 min = Vector3.Zero;
+            Vector3 max = Vector3.Zero;
+
+            for (int i = 0; i < verts.Length; i++)
+            {
+                if (min.X > verts[i].X) min.X = verts[i].X;
+                if (max.X < verts[i].X) max.X = verts[i].X;
+
+                if (min.Y > verts[i].Y) min.Y = verts[i].Y;
+                if (max.Y < verts[i].Y) max.Y = verts[i].Y;
+
+                if (min.Z > verts[i].Z) min.Z = verts[i].Z;
+                if (max.Z < verts[i].Z) max.Z = verts[i].Z;
+            }
+
+            BoundingBox = new BoundingBox(min, max);
         }
 
         public struct SimpleVertexDefinition

@@ -22,6 +22,11 @@ namespace ImTool.Scene3D
             DebugShapes = AddComponet<DebugShapesComp>();
         }
 
+        public void Recreate()
+        {
+            DebugShapes.RecreateBuffers();
+        }
+
         public Cube AddCube(Vector3 pos, Vector3? size = null, Vector4? color = null, float thickness = 2f) => DebugShapes.AddCube(pos, size, color, thickness);
         public DebugShapesComp.Rect AddRect(Vector3 pos, Vector2 size, Vector4? color = null, float thickness = 2f) => DebugShapes.AddRect(pos, size, color, thickness);
         public Cricle AddCricle(Vector3 pos, float radius = 1f, ushort sides = 16, Vector4? color = null, float thickness = 2f) => DebugShapes.AddCricle(pos, radius, sides, color, thickness);

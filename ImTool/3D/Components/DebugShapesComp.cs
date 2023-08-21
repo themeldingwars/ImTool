@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
 using Veldrid.SPIRV;
+using Veldrid.Utilities;
 using Vulkan;
 using static ImTool.Scene3D.Components.DebugShapesComp;
 
@@ -91,7 +92,7 @@ namespace ImTool.Scene3D.Components
             cmdList.SetPipeline(Pipeline);
             cmdList.SetGraphicsResourceSet(0, Owner.World.ProjViewSet);
 
-            var world = Owner.Transform;
+            var world = Owner.Transform.World;
             cmdList.UpdateBuffer(WorldBuffer, 0, ref world);
 
             cmdList.SetVertexBuffer(0, VertBuffer);
@@ -172,6 +173,14 @@ namespace ImTool.Scene3D.Components
             return shape;
         }
 
+        public Line AddLine(Vector3 start, Vector3 end, Vector4? color = null, float thickness = 2f)
+        {
+            var shape = new Line(this, start, end, color, thickness);
+            Shapes.Add(shape);
+            ShouldRecreateBuffers = true;
+            return shape;
+        }
+
         public Cricle AddCricle(Vector3 pos, float radius = 1f, ushort sides = 16, Vector4? color = null, float thickness = 2f)
         {
             var shape = new Cricle(this, pos, radius, sides, color, thickness);
@@ -244,6 +253,48 @@ namespace ImTool.Scene3D.Components
             }
         }
 
+        public class Line : Shape
+        {
+            public Vector3 End;
+
+            public Line(DebugShapesComp owner,  Vector3 start, Vector3 end, Vector4? color = null, float thickness = 2) : base(owner, start, color, thickness)
+            {
+                End   = end;
+            }
+
+            public static VertexDefinition[] GenVerts(Transform transform, Vector3 start, Vector3 end, Vector4 color, float thickness)
+            {
+                VertexDefinition[] values =
+                {
+                    new(start, color, thickness),
+                    new(end, color, thickness),
+                };
+
+                return values;
+            }
+
+            public static uint[] GenIndices(uint offset)
+            {
+                var indices = new[]
+                {
+                    (uint) (offset + 0), (uint) (offset + 1),
+                    (uint) (offset + 1), (uint) (offset + 2),
+                };
+
+                return indices;
+            }
+
+            public override VertexDefinition[] GetShapeVerts()
+            {
+                return GenVerts(Transform, Transform.Position, End, Color, Thickness);
+            }
+
+            public override uint[] GetIndices(uint offset)
+            {
+                return GenIndices(offset);
+            }
+        }
+
         public class Rect : Shape
         {
             public Vector3 Extents = new(0.5f, 0f, 0.5f);
@@ -297,6 +348,15 @@ namespace ImTool.Scene3D.Components
             public Cube(DebugShapesComp owner, Vector3 pos, Vector3? extents, Vector4? color = null, float thickness = 2f) : base(owner, pos, color, thickness)
             {
                 Extents = extents ?? Extents;
+            }
+
+            public void FromBoundingBox(BoundingBox bbox)
+            {
+                var size           = bbox.GetDimensions();
+                var center         = bbox.GetCenter();
+                Transform          = new Transform();
+                Transform.Position = Transform.Position  + (center);
+                Extents            = size / 2;
             }
 
             public override VertexDefinition[] GetShapeVerts()

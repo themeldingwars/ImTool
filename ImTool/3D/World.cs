@@ -10,6 +10,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
+using Veldrid.Utilities;
 
 namespace ImTool.Scene3D
 {
@@ -43,6 +44,8 @@ namespace ImTool.Scene3D
 
         private List<Actor> SelectedActors = new();
 
+        private DebugShapesComp.Cube SelectionDisplayCube;
+
         public World(Window window)
         {
             MainWindow    = window;
@@ -69,10 +72,14 @@ namespace ImTool.Scene3D
             //CreateActor<MeshActor>().Mesh.SetModel(SimpleModel.CreateFromCube());
 
             TestMesh.LoadFromObj("D:\\TestModels\\Test1\\test.obj");
+            //TestMesh.ShowBounds(true);
             var loadTask1 = Task.Factory.StartNew(() =>
             {
                 TestMesh2.LoadFromObj("D:\\TestModels\\neon\\neon.obj");
                 TestMesh2.Transform.Position = new Vector3(3, 0, 0);
+                //TestMesh2.ShowBounds(true);
+
+                GC.Collect();
             });
 
             //TestMesh3.LoadFromObj("D:\\TestModels\\kindred\\kindred.obj");
@@ -83,11 +90,15 @@ namespace ImTool.Scene3D
                 TestMesh3.LoadFromObj("D:\\TestModels\\Evelynn\\Evelynn.obj");
                 TestMesh3.Transform.Position = new Vector3(8, 0, 0);
                 TestMesh3.Transform.Scale = new Vector3(0.01f, 0.01f, 0.01f);
+                //TestMesh3.ShowBounds(true);
+
+                GC.Collect();
             });
 
             //TestMesh.Mesh.SetModel(SimpleModel.CreateFromCube());
 
             var rand = new Random();
+            SelectionDisplayCube = DebugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(0, 0, 0));
             //DebugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(2, 2, 2));
             //DebugShapes.AddCube(new Vector3(1, 1, 1), new Vector3(10, 10, 20), new Vector4((float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble(), 1f), 5);
         }
@@ -172,8 +183,19 @@ namespace ImTool.Scene3D
                     if (ImGui.IsWindowFocused())
                     {
                         SelectedActors[0].Transform.World.FromFloatArray(transform);
+                        SelectedActors[0].Transform.OnChange();
                     }
                 }
+
+                var size = (SelectedActors[0].BoundingBox.GetDimensions() / 2);
+                SelectionDisplayCube.Transform = SelectedActors[0].Transform;
+                //TestDebugCube.Transform.Position = new Vector3(TestDebugCube.Transform.Position.X, TestDebugCube.Transform.Position.Y + size.Y, TestDebugCube.Transform.Position.Z);
+                //TestDebugCube.Extents = size;
+
+                SelectedActors[0].UpdateBoundingBox();
+                //var bBox = BoundingBox.Transform(SelectedActors[0].BoundingBox, SelectedActors[0].Transform.World);
+                SelectionDisplayCube.FromBoundingBox(SelectedActors[0].BoundingBox);
+                DebugShapes.Recreate();
             }
         }
 
