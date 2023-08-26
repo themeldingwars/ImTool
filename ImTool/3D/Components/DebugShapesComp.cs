@@ -21,7 +21,7 @@ namespace ImTool.Scene3D.Components
         private DeviceBuffer IndexBuffer;
         private Pipeline Pipeline;
         private ShaderSetDescription ShaderSet;
-        private ResourceLayout PerItemResourceLayout;
+        private static ResourceLayout PerItemResourceLayout;
 
         public List<Shape> Shapes = new();
 
@@ -36,12 +36,12 @@ namespace ImTool.Scene3D.Components
 
             var rf                = owner.World.MainWindow.GetGraphicsDevice().ResourceFactory;
             ShaderSet             = CreateShaderSet(rf);
-            PerItemResourceLayout = CreatePerItemResourceLayout(rf);
+            PerItemResourceLayout = PerItemResourceLayout ?? CreatePerItemResourceLayout(rf);
 
             WorldBuffer     = rf.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
             ItemResourceSet = rf.CreateResourceSet(new ResourceSetDescription(PerItemResourceLayout, WorldBuffer));
 
-            Pipeline = rf.CreateGraphicsPipeline(new GraphicsPipelineDescription(
+            Pipeline = Resources.RequestPipeline(new GraphicsPipelineDescription(
                 BlendStateDescription.SingleOverrideBlend,
                 DepthStencilStateDescription.DepthOnlyLessEqual,
                 new RasterizerStateDescription(FaceCullMode.None, PolygonFillMode.Solid, FrontFace.Clockwise, true, true),
@@ -98,7 +98,6 @@ namespace ImTool.Scene3D.Components
             cmdList.SetVertexBuffer(0, VertBuffer);
             cmdList.SetIndexBuffer(IndexBuffer, IndexFormat.UInt32);
 
-            cmdList.UpdateBuffer(WorldBuffer, 0, ref world);
             cmdList.SetGraphicsResourceSet(1, ItemResourceSet);
             cmdList.DrawIndexed((uint)Indices.Count, 1, 0, 0, 0);
         }
