@@ -3,6 +3,7 @@ using ImGuizmoNET;
 using ImTool.Scene3D.Components;
 using Octokit;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -39,8 +40,11 @@ namespace ImTool.Scene3D
         public MeshActor TestMesh3;
         public MeshActor TestMesh4;
 
-        public List<Actor> UpdateableActors = new();
-        private List<Actor> RenderList      = new();
+        public List<Actor> UpdateableActors               = new();
+        public ConcurrentQueue<Actor> PendingAddActors    = new();
+        public ConcurrentQueue<Actor> PendingRemoveActors = new();
+        public Octree<Actor> Octree                       = new Octree<Actor>(new BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue), 50);
+        public List<Actor> RenderList                     = new();
 
         private List<Actor> SelectedActors = new();
 
@@ -73,11 +77,23 @@ namespace ImTool.Scene3D
 
             TestMesh.LoadFromObj("D:\\TestModels\\Test1\\test.obj");
             //TestMesh.ShowBounds(true);
-            var loadTask1 = Task.Factory.StartNew(() =>
+            var loadTask1 = Task.Factory.StartNew(async () =>
             {
                 TestMesh2.LoadFromObj("D:\\TestModels\\neon\\neon.obj");
                 TestMesh2.Transform.Position = new Vector3(3, 0, 0);
                 //TestMesh2.ShowBounds(true);
+
+                for (int x = 0; x < 100; x++)
+                {
+                    for (int y = 0; y < 100; y++)
+                    {
+                        var meshActor = CreateActor<MeshActor>();
+                        meshActor.Transform.Position = new Vector3(x + 10, 0, y + 10);
+                        meshActor.Mesh.SetModel(TestMesh2.Mesh.Model);
+
+                        //await Task.Delay(TimeSpan.FromSeconds(0.01));
+                    }
+                }
 
                 GC.Collect();
             });
@@ -123,8 +139,10 @@ namespace ImTool.Scene3D
             var actor = new T();
             actor.Init(this);
 
-            if ((actor.Flags & ActorFlags.CanNeverUpdate) == 0)
-                UpdateableActors.Add(actor);
+            PendingAddActors.Enqueue(actor);
+
+            //if ((actor.Flags & ActorFlags.CanNeverUpdate) == 0)
+                //UpdateableActors.Add(actor);
 
             return actor;
         }
@@ -132,7 +150,7 @@ namespace ImTool.Scene3D
         // Remove and destroy an actor from the world
         public void DestroyActor(Actor actor)
         {
-            UpdateableActors.Remove(actor);
+            PendingRemoveActors.Enqueue(actor);
         }
 
         public void Tick()
@@ -145,15 +163,52 @@ namespace ImTool.Scene3D
 
         public void Update(double dt)
         {
+            AddPendingAddedActors();
+            RemovePendingRemovedActors();
+
             foreach (var actor in UpdateableActors)
             {
                 if ((actor.Flags & ActorFlags.DontUpdate) == 0)
                     actor.Update(dt);
+
+                //Octree.MoveItem(actor, actor.BoundingBox);
+            }
+
+            Octree.ApplyPendingMoves();
+        }
+
+        public void OnTransformChanged(Actor actor)
+        {
+            if ((actor.Flags & ActorFlags.IsInOctree) != 0)
+            {
+                Octree.MoveItem(actor, actor.BoundingBox);
             }
         }
 
-        public void Render(double dt, CommandList cmdList, CameraActor camera)
+        private void RemovePendingRemovedActors()
         {
+            while (PendingRemoveActors.TryDequeue(out var actor))
+            {
+                UpdateableActors.Remove(actor);
+                Octree.RemoveItem(actor);
+            }
+        }
+
+        private void AddPendingAddedActors()
+        {
+            while(PendingAddActors.TryDequeue(out var actor))
+            {
+                if ((actor.Flags & ActorFlags.CanNeverUpdate) == 0)
+                    UpdateableActors.Add(actor);
+
+                Octree.AddItem(actor.BoundingBox, actor);
+                actor.Flags |= ActorFlags.IsInOctree;
+            }
+        }
+
+        public RenderStats Render(double dt, CommandList cmdList, CameraActor camera)
+        {
+            var stats = new RenderStats();
             ActiveCamera = camera;
             BuildRenderList(camera);
 
@@ -164,6 +219,10 @@ namespace ImTool.Scene3D
             {
                 actor.Render(cmdList);
             }
+
+            stats.NumActors         = UpdateableActors.Count;
+            stats.NumRenderedActors = RenderList.Count;
+            return stats;
         }
 
         public unsafe void DrawTransform(OPERATION op, MODE mode, ref float[] snap)
@@ -205,27 +264,14 @@ namespace ImTool.Scene3D
         {
             RenderList.Clear();
 
-            foreach (var actor in UpdateableActors)
+            var fustrum = Viewports[0].GetCamera().Frustum;
+            List<Actor> actorsInView = new();
+            Octree.GetContainedObjects(fustrum, actorsInView);
+            foreach (var actor in actorsInView)
             {
-                var inFustrumResult = Viewports[0].GetCamera().Frustum.Contains(actor.BoundingBox);
-                actor.ShowBounds(true);
-                if (actor.BoundsDebugHandle != null)
-                {
-                    if (inFustrumResult == ContainmentType.Contains)
-                    {
-                        actor.BoundsDebugHandle.Color = new Vector4(0f, 1f, 0f, 1f);
-                    }
-                    else if (inFustrumResult == ContainmentType.Intersects)
-                    {
-                        actor.BoundsDebugHandle.Color = new Vector4(0.2f, 0.8f, 0f, 1f);
-                    }
-                    else if (inFustrumResult == ContainmentType.Disjoint)
-                    {
-                        actor.BoundsDebugHandle.Color = new Vector4(1f, 0f, 0f, 1f);
-                    }
-                }
+                //var inFustrumResult = fustrum.Contains(actor.BoundingBox);
 
-                if ((actor.Flags & ActorFlags.DontRender) == 0)
+                //if ((actor.Flags & ActorFlags.DontRender) == 0 && inFustrumResult != ContainmentType.Disjoint)
                 {
                     RenderList.Add(actor);
                 }

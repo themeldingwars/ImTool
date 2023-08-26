@@ -41,8 +41,11 @@ namespace ImTool.Scene3D.Components
         {
             base.OnTransformChanged();
 
-            var world = Owner.Transform.World * Transform.World;
-            Resources.GD.UpdateBuffer(WorldBuffer, 0, ref world);
+            if (WorldBuffer != null)
+            {
+                var world = Owner.Transform.World * Transform.World;
+                Resources.GD.UpdateBuffer(WorldBuffer, 0, ref world);
+            }
         }
 
         public override void Render(CommandList cmdList)

@@ -21,6 +21,7 @@ namespace ImTool.Scene3D
             base.Init(world);
 
             DebugShapes = AddComponet<DebugShapesComp>();
+            BoundingBox = new Veldrid.Utilities.BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue);
         }
 
         public void Recreate()
