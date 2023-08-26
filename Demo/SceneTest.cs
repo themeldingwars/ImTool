@@ -24,6 +24,11 @@ namespace Demo
         public Scene3dWidget MainSceneView;
         public Scene3dWidget MainSceneView2;
 
+        public MeshActor TestMesh;
+        public MeshActor TestMesh2;
+        public MeshActor TestMesh3;
+        public MeshActor TestMesh4;
+
         // if you want a custom default docking layout, this is the place to do that
         protected override void CreateDockSpace(Vector2 size)
         {
@@ -52,6 +57,49 @@ namespace Demo
             World.RegisterViewport(MainSceneView);
             World.RegisterViewport(MainSceneView2);
             World.Init(MainSceneView);
+
+            TestMesh  = World.CreateActor<MeshActor>();
+            TestMesh2 = World.CreateActor<MeshActor>();
+            TestMesh3 = World.CreateActor<MeshActor>();
+            TestMesh4 = World.CreateActor<MeshActor>();
+
+            //CreateActor<MeshActor>().Mesh.SetModel(SimpleModel.CreateFromCube());
+
+            TestMesh.LoadFromObj("D:\\TestModels\\Test1\\test.obj");
+            //TestMesh.ShowBounds(true);
+            var loadTask1 = Task.Factory.StartNew(async () =>
+            {
+                TestMesh2.LoadFromObj("D:\\TestModels\\neon\\neon.obj");
+                TestMesh2.Transform.Position = new Vector3(3, 0, 0);
+                //TestMesh2.ShowBounds(true);
+
+                for (int x = 0; x < 100; x++)
+                {
+                    for (int y = 0; y < 100; y++)
+                    {
+                        var meshActor = World.CreateActor<MeshActor>();
+                        meshActor.Transform.Position = new Vector3(x + 10, 0, y + 10);
+                        meshActor.Mesh.SetModel(TestMesh2.Mesh.Model);
+
+                        //await Task.Delay(TimeSpan.FromSeconds(0.01));
+                    }
+                }
+
+                GC.Collect();
+            });
+
+            //TestMesh3.LoadFromObj("D:\\TestModels\\kindred\\kindred.obj");
+            //TestMesh3.Transform.Position = new Vector3(5, 0, 0);
+
+            var loadTask2 = Task.Factory.StartNew(() =>
+            {
+                TestMesh3.LoadFromObj("D:\\TestModels\\Evelynn\\Evelynn.obj");
+                TestMesh3.Transform.Position = new Vector3(8, 0, 0);
+                TestMesh3.Transform.Scale = new Vector3(0.01f, 0.01f, 0.01f);
+                //TestMesh3.ShowBounds(true);
+
+                GC.Collect();
+            });
         }
 
         public override void Unload()
