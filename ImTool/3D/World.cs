@@ -35,10 +35,6 @@ namespace ImTool.Scene3D
         public CameraActor ActiveCamera;
         public GridActor Grid;
         public DebugShapesActor DebugShapes;
-        public MeshActor TestMesh;
-        public MeshActor TestMesh2;
-        public MeshActor TestMesh3;
-        public MeshActor TestMesh4;
 
         public List<Actor> UpdateableActors               = new();
         public ConcurrentQueue<Actor> PendingAddActors    = new();
@@ -68,55 +64,8 @@ namespace ImTool.Scene3D
         {
             Grid         = CreateActor<GridActor>();
             DebugShapes  = CreateActor<DebugShapesActor>();
-            TestMesh     = CreateActor<MeshActor>();
-            TestMesh2    = CreateActor<MeshActor>();
-            TestMesh3    = CreateActor<MeshActor>();
-            TestMesh4    = CreateActor<MeshActor>();
 
-            //CreateActor<MeshActor>().Mesh.SetModel(SimpleModel.CreateFromCube());
-
-            TestMesh.LoadFromObj("D:\\TestModels\\Test1\\test.obj");
-            //TestMesh.ShowBounds(true);
-            var loadTask1 = Task.Factory.StartNew(async () =>
-            {
-                TestMesh2.LoadFromObj("D:\\TestModels\\neon\\neon.obj");
-                TestMesh2.Transform.Position = new Vector3(3, 0, 0);
-                //TestMesh2.ShowBounds(true);
-
-                for (int x = 0; x < 100; x++)
-                {
-                    for (int y = 0; y < 100; y++)
-                    {
-                        var meshActor = CreateActor<MeshActor>();
-                        meshActor.Transform.Position = new Vector3(x + 10, 0, y + 10);
-                        meshActor.Mesh.SetModel(TestMesh2.Mesh.Model);
-
-                        //await Task.Delay(TimeSpan.FromSeconds(0.01));
-                    }
-                }
-
-                GC.Collect();
-            });
-
-            //TestMesh3.LoadFromObj("D:\\TestModels\\kindred\\kindred.obj");
-            //TestMesh3.Transform.Position = new Vector3(5, 0, 0);
-
-            var loadTask2 = Task.Factory.StartNew(() =>
-            {
-                TestMesh3.LoadFromObj("D:\\TestModels\\Evelynn\\Evelynn.obj");
-                TestMesh3.Transform.Position = new Vector3(8, 0, 0);
-                TestMesh3.Transform.Scale = new Vector3(0.01f, 0.01f, 0.01f);
-                //TestMesh3.ShowBounds(true);
-
-                GC.Collect();
-            });
-
-            //TestMesh.Mesh.SetModel(SimpleModel.CreateFromCube());
-
-            var rand = new Random();
             SelectionDisplayCube = DebugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(0, 0, 0));
-            //DebugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(2, 2, 2));
-            //DebugShapes.AddCube(new Vector3(1, 1, 1), new Vector3(10, 10, 20), new Vector4((float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble(), 1f), 5);
         }
 
         public void RegisterViewport(Scene3dWidget viewport)
@@ -140,9 +89,6 @@ namespace ImTool.Scene3D
             actor.Init(this);
 
             PendingAddActors.Enqueue(actor);
-
-            //if ((actor.Flags & ActorFlags.CanNeverUpdate) == 0)
-                //UpdateableActors.Add(actor);
 
             return actor;
         }
@@ -246,17 +192,8 @@ namespace ImTool.Scene3D
                     }
                 }
 
-                var size = (SelectedActors[0].BoundingBox.GetDimensions() / 2);
-                SelectionDisplayCube.Transform = SelectedActors[0].Transform;
-                //TestDebugCube.Transform.Position = new Vector3(TestDebugCube.Transform.Position.X, TestDebugCube.Transform.Position.Y + size.Y, TestDebugCube.Transform.Position.Z);
-                //TestDebugCube.Extents = size;
-
-                SelectedActors[0].UpdateBoundingBox();
-                //var bBox = BoundingBox.Transform(SelectedActors[0].BoundingBox, SelectedActors[0].Transform.World);
                 SelectionDisplayCube.FromBoundingBox(SelectedActors[0].BoundingBox);
                 DebugShapes.Recreate();
-
-                //DebugShapes.AddFustrum(ActiveCamera.Frustum);
             }
         }
 
@@ -264,17 +201,13 @@ namespace ImTool.Scene3D
         {
             RenderList.Clear();
 
-            var fustrum = Viewports[0].GetCamera().Frustum;
+            var fustrum = camera.Frustum;
             List<Actor> actorsInView = new();
             Octree.GetContainedObjects(fustrum, actorsInView);
             foreach (var actor in actorsInView)
             {
-                //var inFustrumResult = fustrum.Contains(actor.BoundingBox);
-
-                //if ((actor.Flags & ActorFlags.DontRender) == 0 && inFustrumResult != ContainmentType.Disjoint)
-                {
-                    RenderList.Add(actor);
-                }
+                // TODO: Distance based culling
+                RenderList.Add(actor);
             }
 
             RenderList.Sort();
