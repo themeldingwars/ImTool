@@ -24,8 +24,8 @@ namespace ImTool.Scene3D
 
         public Pipeline Pipeline;
         private ShaderSetDescription ShaderSet;
-        public ResourceLayout PerItemResourceLayout;
-        public ResourceLayout PerSectionResLayout;
+        public static ResourceLayout PerItemResourceLayout = null;
+        public static ResourceLayout PerSectionResLayout   = null;
         private ResourceSet DefaultPerSectionResSet;
 
         public SimpleModel()
@@ -37,9 +37,9 @@ namespace ImTool.Scene3D
         {
             var rf                = Resources.GD.ResourceFactory;
             ShaderSet             = CreateShaderSet(rf);
-            PerItemResourceLayout = CreatePerItemResourceLayout(rf);
+            PerItemResourceLayout = PerItemResourceLayout ?? CreatePerItemResourceLayout(rf);
 
-            PerSectionResLayout = rf.CreateResourceLayout(
+            PerSectionResLayout = PerSectionResLayout ?? rf.CreateResourceLayout(
                 new ResourceLayoutDescription(
                     new ResourceLayoutElementDescription("DiffuseTex", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                     new ResourceLayoutElementDescription("DiffuseSampler", ResourceKind.Sampler, ShaderStages.Fragment)
@@ -48,7 +48,7 @@ namespace ImTool.Scene3D
 
             DefaultPerSectionResSet = CreateTexResourceSet(Resources.GetMissingTex());
 
-            Pipeline = rf.CreateGraphicsPipeline(new GraphicsPipelineDescription(
+            var pipelineDesc = new GraphicsPipelineDescription(
                 BlendStateDescription.SingleOverrideBlend,
                 DepthStencilStateDescription.DepthOnlyLessEqual,
                 new RasterizerStateDescription(FaceCullMode.Front, PolygonFillMode.Solid, FrontFace.CounterClockwise, true, true),
@@ -56,7 +56,9 @@ namespace ImTool.Scene3D
                 PrimitiveTopology.TriangleList,
                 ShaderSet,
                 new[] { Resources.ProjViewLayout, PerItemResourceLayout, PerSectionResLayout },
-                Resources.MainFrameBufferOutputDescription));
+                Resources.MainFrameBufferOutputDescription);
+
+            Pipeline = Resources.RequestPipeline(pipelineDesc);
         }
 
         private ShaderSetDescription CreateShaderSet(ResourceFactory rf)

@@ -30,7 +30,7 @@ namespace ImTool.Scene3D.Components
             Model = model;
 
             WorldBuffer     = Resources.GD.ResourceFactory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
-            ItemResourceSet = Resources.GD.ResourceFactory.CreateResourceSet(new ResourceSetDescription(Model.PerItemResourceLayout, WorldBuffer));
+            ItemResourceSet = Resources.GD.ResourceFactory.CreateResourceSet(new ResourceSetDescription(SimpleModel.PerItemResourceLayout, WorldBuffer));
 
             BoundingBox = model.BoundingBox;
             Owner.UpdateBoundingBox();

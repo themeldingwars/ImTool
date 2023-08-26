@@ -20,6 +20,7 @@ namespace ImTool.Scene3D
         private static Texture MissingTextureTex = null;
         public static ResourceLayout ProjViewLayout { get; private set; }
         public static OutputDescription MainFrameBufferOutputDescription { get; private set; }
+        private static Dictionary<int, Pipeline> Pipelines = new Dictionary<int, Pipeline>();
 
         public static void SetGD(GraphicsDevice gd)
         {
@@ -108,6 +109,20 @@ namespace ImTool.Scene3D
         {
             var model = SimpleModel.CreateFromObj(path);
             return model;
+        }
+
+        public static Pipeline RequestPipeline(GraphicsPipelineDescription desc)
+        {
+            var id = desc.GetHashCode();
+            if (Pipelines.TryGetValue(id, out var pipeline))
+            {
+                return pipeline;
+            }
+
+            var pl = GD.ResourceFactory.CreateGraphicsPipeline(desc);
+            Pipelines.Add(id, pl);
+
+            return pl;
         }
     }
 }
