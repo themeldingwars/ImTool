@@ -29,6 +29,7 @@ namespace ImTool
         protected int TransformSelectedSnapIdx = 3;
 
         public bool ShowDebugInfo = true;
+        private RenderStats RenderStats;
 
         // Create a scene to render a world and manage the world itself
         public Scene3dWidget(Window win) : base(win)
@@ -57,7 +58,7 @@ namespace ImTool
 
         public void HandleInput(double dt)
         {
-            if (IsHovered && ImGui.IsMouseDown(ImGuiMouseButton.Middle))
+            if (ImGui.IsWindowFocused() && ImGui.IsMouseDown(ImGuiMouseButton.Middle))
             {
                 var cammoveSpeed = (float)(CamMoveSpeed * dt);
 
@@ -104,7 +105,7 @@ namespace ImTool
             var pos = ImGui.GetWindowPos();
             ImGuizmo.SetRect(pos.X + 4, pos.Y + 30, SceneTex.Width, SceneTex.Height);
             ImGuizmo.Enable(true);
-            WorldScene.Render(dt, CommandList, Camera);
+            RenderStats = WorldScene.Render(dt, CommandList, Camera);
             //WorldScene.DrawTransform();
         }
 
@@ -122,6 +123,8 @@ namespace ImTool
             DrawViewCube(new Vector2(pos.X + size.X - 100, pos.Y + 25));
             DrawTransformSettings(new Vector2(size.X - (150 + 165), 40));
             DrawFps(new Vector2(size.X - (150), 75));
+
+            ImGui.Text($"Actors: {RenderStats.NumActors}, Rendered: {RenderStats.NumRenderedActors}");
         }
 
         private void DrawTransform()

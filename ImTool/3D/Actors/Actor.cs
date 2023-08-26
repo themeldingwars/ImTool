@@ -35,14 +35,14 @@ namespace ImTool.Scene3D
             World              = world;
             Name               = GetType().Name;
             BoundingBox        = new BoundingBox(-Vector3.One / 2, Vector3.One / 2);
-            Transform.OnChange = OnTransformChanged;
+            Transform.OnChange = () => OnTransformChanged(true);
 
             foreach (var component in Components)
             {
                 component.Init(this);
             }
 
-            OnTransformChanged();
+            OnTransformChanged(true);
         }
 
         public T AddComponet<T>() where T : Component, new()
@@ -93,13 +93,18 @@ namespace ImTool.Scene3D
             BoundingBox = BoundingBox.Transform(bBox, Transform.World);
         }
 
-        protected virtual void OnTransformChanged()
+        public virtual void OnTransformChanged(bool updateComponets)
         {
             UpdateBoundingBox();
-            foreach (var component in Components)
+            if (updateComponets)
             {
-                component.OnTransformChanged();
+                foreach (var component in Components)
+                {
+                    component.OnTransformChanged();
+                }
             }
+
+            World.OnTransformChanged(this);
         }
 
         // Update logic

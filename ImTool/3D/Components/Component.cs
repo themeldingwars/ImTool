@@ -25,7 +25,7 @@ namespace ImTool.Scene3D
 
         public virtual void OnTransformChanged()
         {
-
+            Owner.OnTransformChanged(false);
         }
 
         public virtual void Update(double dt)

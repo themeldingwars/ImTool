@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace ImTool.Scene3D
 {
-    [Flags]
-    public enum ActorFlags : int
+    public struct RenderStats
     {
-        CanNeverUpdate = 1,
-        DontUpdate     = 2,
-        DontRender     = 4,
-        IsInOctree     = 8,
+        public int NumActors;
+        public int NumRenderedActors;
     }
 }
