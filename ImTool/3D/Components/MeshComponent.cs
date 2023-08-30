@@ -29,7 +29,7 @@ namespace ImTool.Scene3D.Components
         {
             Model = model;
 
-            WorldBuffer     = Resources.GD.ResourceFactory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
+            WorldBuffer     = Resources.GD.ResourceFactory.CreateBuffer(new BufferDescription(PerItemData.SIZE, BufferUsage.UniformBuffer));
             ItemResourceSet = Resources.GD.ResourceFactory.CreateResourceSet(new ResourceSetDescription(SimpleModel.PerItemResourceLayout, WorldBuffer));
 
             BoundingBox = model.BoundingBox;
@@ -43,8 +43,12 @@ namespace ImTool.Scene3D.Components
 
             if (WorldBuffer != null)
             {
-                var world = Owner.Transform.World * Transform.World;
-                Resources.GD.UpdateBuffer(WorldBuffer, 0, ref world);
+                var data = new PerItemData()
+                {
+                    Mat         = Transform.World * Owner.Transform.World,
+                    SelectionId = new SelectableID(Owner.ID, 0)
+                };
+                Resources.GD.UpdateBuffer(WorldBuffer, 0, ref data);
             }
         }
 

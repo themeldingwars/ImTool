@@ -36,10 +36,12 @@ namespace ImTool.Scene3D
         public GridActor Grid;
         public DebugShapesActor DebugShapes;
 
+        private uint LastActorIdx                         = 0;
         public List<Actor> UpdateableActors               = new();
         public ConcurrentQueue<Actor> PendingAddActors    = new();
         public ConcurrentQueue<Actor> PendingRemoveActors = new();
         public Octree<Actor> Octree                       = new Octree<Actor>(new BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue), 50);
+        public List<ISelectable> Selectables              = new List<ISelectable>();
         public List<Actor> RenderList                     = new();
 
         private List<Actor> SelectedActors = new();
@@ -87,6 +89,7 @@ namespace ImTool.Scene3D
         {
             var actor = new T();
             actor.Init(this);
+            actor.ID = LastActorIdx++;
 
             PendingAddActors.Enqueue(actor);
 
@@ -97,6 +100,24 @@ namespace ImTool.Scene3D
         public void DestroyActor(Actor actor)
         {
             PendingRemoveActors.Enqueue(actor);
+        }
+
+        public void SelectItem(SelectableID id)
+        {
+            if (id.Id != SelectableID.NO_ID_VALUE)
+            {
+                SelectedActors.Clear();
+                var selectedActor = UpdateableActors.FirstOrDefault(x => x.ID == id.Id);
+                if (selectedActor != default)
+                {
+                    SelectedActors.Add(selectedActor);
+                }
+            }
+        }
+
+        public void ClearSelected()
+        {
+            SelectedActors.Clear();
         }
 
         public void Tick()
@@ -159,7 +180,7 @@ namespace ImTool.Scene3D
             BuildRenderList(camera);
 
             cmdList.UpdateBuffer(ViewStateBuffer, 0, camera.ViewData);
-            cmdList.ClearDepthStencil(1f);
+            cmdList.ClearDepthStencil(1f, 0);
 
             foreach (var actor in RenderList)
             {
@@ -207,7 +228,10 @@ namespace ImTool.Scene3D
             foreach (var actor in actorsInView)
             {
                 // TODO: Distance based culling
-                RenderList.Add(actor);
+                if ((actor.Flags & ActorFlags.DontRender) == 0)
+                {
+                    RenderList.Add(actor);
+                }
             }
 
             RenderList.Sort();

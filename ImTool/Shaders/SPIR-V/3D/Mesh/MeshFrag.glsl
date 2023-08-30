@@ -4,10 +4,17 @@ layout(location = 0) in vec2 Uvs;
 layout(location = 1) in vec3 Norm;
 layout(location = 2) in vec3 FragPos;
 
+layout(set = 1, binding = 0) uniform WorldBuffer
+{
+    mat4 World;
+    uint SelectionId;
+};
+
 layout(set = 2, binding = 0) uniform texture2D SurfaceTexture;
 layout(set = 2, binding = 2) uniform sampler SurfaceSampler;
 
 layout(location = 0) out vec4 outColor;
+layout(location = 1) out uint outId;
 
 void main() {
     //outColor = vec4(1, 1, 1, 1);
@@ -24,7 +31,9 @@ void main() {
 
     vec4 IAmbient = vec4(0.2f, 0.2f, 0.2f, 1.0f);
     vec4 texCol = texture(sampler2D(SurfaceTexture, SurfaceSampler), Uvs);
-    //outColor = (IAmbient + IDiffuse) * vec4(texCol.rgb, 1.0f);
-    outColor = texture(sampler2D(SurfaceTexture, SurfaceSampler), Uvs);
+    outColor = (IAmbient + IDiffuse) * vec4(texCol.rgb, 1.0f);
+    //outColor = texture(sampler2D(SurfaceTexture, SurfaceSampler), Uvs);
     //outColor = vec4(1, 1, 1, 1);
+
+    outId = SelectionId;
 }
