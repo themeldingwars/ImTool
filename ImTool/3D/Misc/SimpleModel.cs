@@ -48,10 +48,19 @@ namespace ImTool.Scene3D
 
             DefaultPerSectionResSet = CreateTexResourceSet(Resources.GetMissingTex());
 
+            var blendState = new BlendStateDescription()
+            {
+                AttachmentStates = new[]
+                {
+                    BlendAttachmentDescription.AlphaBlend,  // color
+                    BlendAttachmentDescription.OverrideBlend,    // id
+                }
+            };
+
             var pipelineDesc = new GraphicsPipelineDescription(
-                BlendStateDescription.SingleOverrideBlend,
+                blendState,
                 DepthStencilStateDescription.DepthOnlyLessEqual,
-                new RasterizerStateDescription(FaceCullMode.Front, PolygonFillMode.Solid, FrontFace.CounterClockwise, true, true),
+                new RasterizerStateDescription(FaceCullMode.Front, PolygonFillMode.Solid, FrontFace.CounterClockwise, true, false),
                 //RasterizerStateDescription.Default,
                 PrimitiveTopology.TriangleList,
                 ShaderSet,
@@ -97,7 +106,7 @@ namespace ImTool.Scene3D
         {
             ResourceLayout worldTextureLayout = rf.CreateResourceLayout(
                 new ResourceLayoutDescription(
-                    new ResourceLayoutElementDescription("WorldBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+                    new ResourceLayoutElementDescription("WorldBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)
                 )
             );
 

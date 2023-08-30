@@ -34,10 +34,11 @@ namespace ImTool.Scene3D
 
             MainFrameBufferOutputDescription = new OutputDescription()
             {
-                DepthAttachment  = new OutputAttachmentDescription(PixelFormat.R16_UNorm),
+                DepthAttachment  = new OutputAttachmentDescription(PixelFormat.R32_Float),
                 ColorAttachments = new OutputAttachmentDescription[]
                 {
-                    new OutputAttachmentDescription(PixelFormat.R8_G8_B8_A8_UNorm)
+                    new OutputAttachmentDescription(PixelFormat.R8_G8_B8_A8_UNorm),
+                    new OutputAttachmentDescription(PixelFormat.R32_Float)
                 }
             };
         }

@@ -47,7 +47,7 @@ void main() {
     outColor = (grid(fragPos3D, 10, true) + grid(fragPos3D, 1, true))* float(t > 0); // adding multiple resolution for the grid
     outColor.a *= fading;
 
-    if (outColor.a > 0)
+    //if (outColor.a > 0)
         gl_FragDepth = computeDepth(fragPos3D);
 }
 

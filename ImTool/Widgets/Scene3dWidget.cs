@@ -9,6 +9,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
+using Veldrid;
 
 namespace ImTool
 {
@@ -58,31 +59,47 @@ namespace ImTool
 
         public void HandleInput(double dt)
         {
-            if (ImGui.IsWindowFocused() && ImGui.IsMouseDown(ImGuiMouseButton.Middle))
+            if (ImGui.IsWindowFocused())
             {
-                var cammoveSpeed = (float)(CamMoveSpeed * dt);
+                if (ImGui.IsMouseDown(ImGuiMouseButton.Middle))
+                {
+                    var cammoveSpeed = (float)(CamMoveSpeed * dt);
 
-                if (ImGui.IsKeyDown((int)Veldrid.Key.W))
-                    Camera.Transform.Position += Camera.Transform.Forward * cammoveSpeed;
-                else if (ImGui.IsKeyDown((int)Veldrid.Key.S))
-                    Camera.Transform.Position += Camera.Transform.Forward * -cammoveSpeed;
+                    if (ImGui.IsKeyDown((int)Veldrid.Key.W))
+                        Camera.Transform.Position += Camera.Transform.Forward * cammoveSpeed;
+                    else if (ImGui.IsKeyDown((int)Veldrid.Key.S))
+                        Camera.Transform.Position += Camera.Transform.Forward * -cammoveSpeed;
 
-                if (ImGui.IsKeyDown((int)Veldrid.Key.A))
-                    Camera.Transform.Position += Camera.Transform.Left * cammoveSpeed;
-                else if (ImGui.IsKeyDown((int)Veldrid.Key.D))
-                    Camera.Transform.Position += Camera.Transform.Left * -cammoveSpeed;
+                    if (ImGui.IsKeyDown((int)Veldrid.Key.A))
+                        Camera.Transform.Position += Camera.Transform.Left * cammoveSpeed;
+                    else if (ImGui.IsKeyDown((int)Veldrid.Key.D))
+                        Camera.Transform.Position += Camera.Transform.Left * -cammoveSpeed;
 
-                if (ImGui.IsKeyDown((int)Veldrid.Key.Q))
-                    Camera.Transform.Position += Camera.Transform.Up * cammoveSpeed;
-                else if (ImGui.IsKeyDown((int)Veldrid.Key.E))
-                    Camera.Transform.Position += Camera.Transform.Up * -cammoveSpeed;
+                    if (ImGui.IsKeyDown((int)Veldrid.Key.Q))
+                        Camera.Transform.Position += Camera.Transform.Up * cammoveSpeed;
+                    else if (ImGui.IsKeyDown((int)Veldrid.Key.E))
+                        Camera.Transform.Position += Camera.Transform.Up * -cammoveSpeed;
 
-                var mouseDelta = LastMousePos - ImGui.GetMousePos();
-                LastMousePos = ImGui.GetMousePos();
-                var angles = Camera.Transform.RotationEuler;
-                angles.Y += (float)(-mouseDelta.Y * (MouseSenstivity * dt));
-                angles.X += (float)(mouseDelta.X * (MouseSenstivity * dt));
-                Camera.Transform.RotationEuler = angles;
+                    var mouseDelta = LastMousePos - ImGui.GetMousePos();
+                    LastMousePos = ImGui.GetMousePos();
+                    var angles = Camera.Transform.RotationEuler;
+                    angles.Y += (float)(-mouseDelta.Y * (MouseSenstivity * dt));
+                    angles.X += (float)(mouseDelta.X * (MouseSenstivity * dt));
+                    Camera.Transform.RotationEuler = angles;
+                }
+
+                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                {
+                    var selectionId = GetScreenSelectedId();
+                    WorldScene.SelectItem(selectionId);
+                    Console.WriteLine($"SelectionId: {selectionId.Id}, {selectionId.SubId} ({selectionId.B0}, {selectionId.B1}, {selectionId.B2}, {selectionId.B3})");
+                }
+
+                if (ImGui.IsKeyDown((int)Veldrid.Key.Escape))
+                {
+                    //WorldScene.SelectItem(new SelectableID(0xFFFFFFFF, 0xFF));
+                    WorldScene.ClearSelected();
+                }
             }
 
             LastMousePos = ImGui.GetMousePos();

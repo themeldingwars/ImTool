@@ -13,5 +13,6 @@ namespace ImTool.Scene3D
         DontUpdate     = 2,
         DontRender     = 4,
         IsInOctree     = 8,
+        ShowOutline    = 16,
     }
 }
