@@ -5,21 +5,18 @@ using System;
 using System.Numerics;
 using System.Reflection.Metadata.Ecma335;
 using Veldrid;
+using Veldrid.OpenGLBinding;
 
 namespace ImTool
 {
     // A scene widget to render a commandlist to a framebuffer in ImGUI
-    public class SceneWidget
+    public class SceneWidget<T> where T : FrameBufferResourceBase, new()
     {
         protected Window MainWindow;
         protected GraphicsDevice GfxDevice;
-        protected Framebuffer FrameBuff;
-        protected Texture SceneTex;
-        protected Texture DepthTex;
-        protected Texture ActorIdTex;
-        protected Texture StagingTex;
+        protected T FrameBufferResource;
+
         protected IntPtr SceneTexBinding;
-        protected IntPtr SceneTexBindingTest;
         protected CommandList CommandList;
         protected double LastFrameTime;
         protected double AvgFPS = 0f;
@@ -27,14 +24,15 @@ namespace ImTool
         private bool NeedsToInit = true;
 
         public GraphicsDevice GetGfxDevice() => GfxDevice;
-        public Framebuffer GetFramebuffer()  => FrameBuff;
+        public Framebuffer GetFramebuffer()  => FrameBufferResource.FrameBuffer;
         public bool IsHovered                = false;
 
         public SceneWidget(Window win)
         {
-            MainWindow = win;
-            GfxDevice = win.GetGraphicsDevice();
-            LastFrameTime = (DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond);
+            MainWindow          = win;
+            GfxDevice           = win.GetGraphicsDevice();
+            LastFrameTime       = (DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond);
+            FrameBufferResource = new ();
 
             Init(new Vector2(256, 256));
         }
@@ -55,13 +53,13 @@ namespace ImTool
 
         public virtual void Draw(Vector2 size)
         {
-            if (NeedsToInit || size.X != FrameBuff.Width || size.Y != FrameBuff.Height)
+            if (NeedsToInit || size.X != FrameBufferResource.FrameBuffer.Width || size.Y != FrameBufferResource.FrameBuffer.Height)
                 Init(size);
 
             IsHovered = ImGui.IsMouseHoveringRect(ImGui.GetCursorScreenPos(), ImGui.GetCursorScreenPos() + size);
 
             CommandList.Begin();
-            CommandList.SetFramebuffer(FrameBuff);
+            CommandList.SetFramebuffer(FrameBufferResource.FrameBuffer);
 
             double dt = (DateTime.UtcNow.Ticks - LastFrameTime) / TimeSpan.TicksPerSecond;
             CalcFPS(dt);
@@ -77,48 +75,21 @@ namespace ImTool
             ImGui.Image(SceneTexBinding, size);
 
             ImGui.SetCursorPos(cursorPos);
-            ImGui.Image(SceneTexBindingTest, size / 4);
-            ImGui.SetCursorPos(cursorPos);
 
             DrawOverlays(dt);
         }
 
         private void Init(Vector2 size)
         {
-            if (SceneTex != null)
+            if (FrameBufferResource.SceneTex != null)
             {
-                MainWindow.GetImGuiController().RemoveImGuiBinding(SceneTex);
-                MainWindow.GetImGuiController().RemoveImGuiBinding(ActorIdTex);
+                MainWindow.GetImGuiController().RemoveImGuiBinding(FrameBufferResource.SceneTex);
             }
-
-            SceneTex?.Dispose();
-            DepthTex?.Dispose();
-            ActorIdTex?.Dispose();
-            StagingTex?.Dispose();
-            FrameBuff?.Dispose();
 
             CommandList ??= GfxDevice.ResourceFactory.CreateCommandList();
 
-            GfxDevice.WaitForIdle();
-
-            SceneTex   = GfxDevice.ResourceFactory.CreateTexture(TextureDescription.Texture2D((uint)size.X, (uint)size.Y, 1, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.RenderTarget | TextureUsage.Sampled));
-            DepthTex   = GfxDevice.ResourceFactory.CreateTexture(TextureDescription.Texture2D((uint)size.X, (uint)size.Y, 1, 1, PixelFormat.R32_Float, TextureUsage.DepthStencil));
-            ActorIdTex = GfxDevice.ResourceFactory.CreateTexture(TextureDescription.Texture2D((uint)size.X, (uint)size.Y, 1, 1, PixelFormat.R32_Float, TextureUsage.RenderTarget | TextureUsage.Sampled));
-            StagingTex = GfxDevice.ResourceFactory.CreateTexture(TextureDescription.Texture2D((uint)size.X, (uint)size.Y, 1, 1, PixelFormat.R32_Float, TextureUsage.Staging));
-
-            FrameBuff = GfxDevice.ResourceFactory.CreateFramebuffer(new FramebufferDescription()
-            {
-                DepthTarget = new FramebufferAttachmentDescription(DepthTex, 0),
-                ColorTargets = new FramebufferAttachmentDescription[]
-                {
-                    new FramebufferAttachmentDescription(SceneTex, 0),
-                    new FramebufferAttachmentDescription(ActorIdTex, 0)
-                }
-            });
-
-
-            SceneTexBinding     = MainWindow.GetImGuiController().GetOrCreateImGuiBinding(GfxDevice.ResourceFactory, SceneTex);
-            SceneTexBindingTest = MainWindow.GetImGuiController().GetOrCreateImGuiBinding(GfxDevice.ResourceFactory, ActorIdTex);
+            FrameBufferResource.InitFramebuffer((uint)size.X, (uint)size.Y);
+            SceneTexBinding     = MainWindow.GetImGuiController().GetOrCreateImGuiBinding(GfxDevice.ResourceFactory, FrameBufferResource.SceneTex);
 
             NeedsToInit = false;
         }
@@ -127,27 +98,6 @@ namespace ImTool
         public virtual void Render(double dt)
         {
             CommandList.ClearColorTarget(0, new RgbaFloat(0.69f, 0.61f, 0.85f, 1.0f));
-            CommandList.ClearColorTarget(1, new RgbaFloat(-float.MaxValue, -float.NaN, -float.NaN, -float.NaN));
-        }
-
-        public SelectableID GetScreenSelectedId(Vector2? pos = null)
-        {
-            pos           = pos ?? ImGui.GetMousePos() - ImGui.GetWindowPos();
-
-            var cmdList = GfxDevice.ResourceFactory.CreateCommandList();
-            cmdList.Begin();
-            cmdList.CopyTexture(ActorIdTex, StagingTex);
-            cmdList.End();
-            GfxDevice.SubmitCommands(cmdList);
-            GfxDevice.WaitForIdle();
-            cmdList.Dispose();
-
-            var mappedTex = GfxDevice.Map(StagingTex, MapMode.Read);
-            var texData   = new MappedResourceView<SelectableID>(mappedTex);
-            var selId     = texData[(int)pos.Value.X, (int)pos.Value.Y];
-            GfxDevice.Unmap(ActorIdTex);
-
-            return selId;
         }
 
         public virtual void DrawOverlays(double dt)

@@ -57,11 +57,15 @@ namespace ImTool.Scene3D
                 }
             };
 
+            var depthStencil = new DepthStencilStateDescription(true, true, ComparisonKind.LessEqual)
+            {
+                StencilWriteMask = 0xFF
+            };
+
             var pipelineDesc = new GraphicsPipelineDescription(
                 blendState,
-                DepthStencilStateDescription.DepthOnlyLessEqual,
+                depthStencil,
                 new RasterizerStateDescription(FaceCullMode.Front, PolygonFillMode.Solid, FrontFace.CounterClockwise, true, false),
-                //RasterizerStateDescription.Default,
                 PrimitiveTopology.TriangleList,
                 ShaderSet,
                 new[] { Resources.ProjViewLayout, PerItemResourceLayout, PerSectionResLayout },

@@ -73,9 +73,9 @@ namespace Demo
                 TestMesh2.Transform.Position = new Vector3(3, 0, 0);
                 //TestMesh2.ShowBounds(true);
 
-                for (int x = 0; x < 100; x++)
+                for (int x = 0; x < 20; x++)
                 {
-                    for (int y = 0; y < 100; y++)
+                    for (int y = 0; y < 20; y++)
                     {
                         var meshActor = World.CreateActor<MeshActor>();
                         meshActor.Transform.Position = new Vector3(x + 10, 0, y + 10);
@@ -185,12 +185,6 @@ namespace Demo
 
         protected override void SubmitSettings(bool active)
         {
-        }
-
-        // submit your file menu etc from here :)
-        protected override void SubmitMainMenu()
-        {
-
         }
 
         public void DrawTests()
