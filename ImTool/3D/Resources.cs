@@ -38,7 +38,8 @@ namespace ImTool.Scene3D
                 ColorAttachments = new OutputAttachmentDescription[]
                 {
                     new OutputAttachmentDescription(PixelFormat.R8_G8_B8_A8_UNorm),
-                    new OutputAttachmentDescription(PixelFormat.R32_UInt)
+                    new OutputAttachmentDescription(PixelFormat.R32_UInt),
+                    new OutputAttachmentDescription(PixelFormat.R8_UInt)
                 }
             };
         }

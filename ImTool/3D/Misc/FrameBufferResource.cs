@@ -47,19 +47,22 @@ namespace ImTool.Scene3D
     public class MainFrameBufferResource : FrameBufferResourceBase
     {
         public Texture ActorIdTex { get; protected set; }
+        public Texture SelectedMaskTex { get; protected set; }
 
         public override void InitFramebuffer(uint width, uint height)
         {
             SceneTex?.Dispose();
             DepthTex?.Dispose();
             ActorIdTex?.Dispose();
+            SelectedMaskTex?.Dispose();
             FrameBuffer?.Dispose();
 
             Resources.GD.WaitForIdle();
 
-            SceneTex   = Resources.GD.ResourceFactory.CreateTexture(TextureDescription.Texture2D(width, height, 1, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.RenderTarget | TextureUsage.Sampled));
-            DepthTex   = Resources.GD.ResourceFactory.CreateTexture(TextureDescription.Texture2D(width, height, 1, 1, PixelFormat.D24_UNorm_S8_UInt, TextureUsage.DepthStencil));
-            ActorIdTex = Resources.GD.ResourceFactory.CreateTexture(TextureDescription.Texture2D(width, height, 1, 1, PixelFormat.R32_UInt, TextureUsage.RenderTarget | TextureUsage.Sampled));
+            SceneTex        = Resources.GD.ResourceFactory.CreateTexture(TextureDescription.Texture2D(width, height, 1, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.RenderTarget | TextureUsage.Sampled));
+            DepthTex        = Resources.GD.ResourceFactory.CreateTexture(TextureDescription.Texture2D(width, height, 1, 1, PixelFormat.D24_UNorm_S8_UInt, TextureUsage.DepthStencil));
+            ActorIdTex      = Resources.GD.ResourceFactory.CreateTexture(TextureDescription.Texture2D(width, height, 1, 1, PixelFormat.R32_UInt, TextureUsage.RenderTarget | TextureUsage.Sampled));
+            SelectedMaskTex = Resources.GD.ResourceFactory.CreateTexture(TextureDescription.Texture2D(width, height, 1, 1, PixelFormat.R8_UInt, TextureUsage.RenderTarget | TextureUsage.Sampled));
 
             FrameBuffer = Resources.GD.ResourceFactory.CreateFramebuffer(new FramebufferDescription()
             {
@@ -67,7 +70,8 @@ namespace ImTool.Scene3D
                 ColorTargets = new FramebufferAttachmentDescription[]
                 {
                     new FramebufferAttachmentDescription(SceneTex, 0),
-                    new FramebufferAttachmentDescription(ActorIdTex, 0)
+                    new FramebufferAttachmentDescription(ActorIdTex, 0),
+                    new FramebufferAttachmentDescription(SelectedMaskTex, 0),
                 }
             });
         }
