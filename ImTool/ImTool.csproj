@@ -127,6 +127,8 @@
       <None Remove="Shaders\SPIR-V\3D\DebugShapes\DebugShapesFrag.glsl" />
       <None Remove="Shaders\SPIR-V\3D\DebugShapes\DebugShapesGeo.glsl" />
       <None Remove="Shaders\SPIR-V\3D\DebugShapes\DebugShapesVert.glsl" />
+      <None Remove="Shaders\SPIR-V\3D\Fullscreen\Outline.frag" />
+      <None Remove="Shaders\SPIR-V\3D\Fullscreen\Outline.vert" />
       <None Remove="Shaders\SPIR-V\3D\Grid\GridFrag.glsl" />
       <None Remove="Shaders\SPIR-V\3D\Grid\GridVert.glsl" />
       <None Remove="Shaders\SPIR-V\3D\Mesh\MeshFrag.glsl" />
@@ -154,6 +156,8 @@
       <EmbeddedResource Include="Shaders\SPIR-V\3D\DebugShapes\DebugShapesFrag.glsl" />
       <EmbeddedResource Include="Shaders\SPIR-V\3D\DebugShapes\DebugShapesGeo.glsl" />
       <EmbeddedResource Include="Shaders\SPIR-V\3D\DebugShapes\DebugShapesVert.glsl" />
+      <EmbeddedResource Include="Shaders\SPIR-V\3D\Fullscreen\Outline.frag" />
+      <EmbeddedResource Include="Shaders\SPIR-V\3D\Fullscreen\Outline.vert" />
       <EmbeddedResource Include="Shaders\SPIR-V\3D\Grid\GridFrag.glsl" />
       <EmbeddedResource Include="Shaders\SPIR-V\3D\Grid\GridVert.glsl" />
       <EmbeddedResource Include="Shaders\SPIR-V\3D\Mesh\MeshFrag.glsl" />

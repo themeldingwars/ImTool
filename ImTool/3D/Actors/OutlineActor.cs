@@ -9,7 +9,7 @@ using Veldrid.SPIRV;
 
 namespace ImTool.Scene3D
 {
-    public class GridActor : Actor
+    public class OutlineActor : Actor
     {
         public DeviceBuffer WorldBuffer;
         public ResourceSet ItemResourceSet;
@@ -24,21 +24,21 @@ namespace ImTool.Scene3D
             base.Init(world);
 
             CreateResources();
-            RenderOrderBoost = float.MinValue - 100;
-            BoundingBox = new Veldrid.Utilities.BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue);
+            RenderOrderBoost = float.MinValue;
+            BoundingBox      = new Veldrid.Utilities.BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue);
         }
 
         private void CreateResources()
         {
-            var halfSize = 10f;
+            var halfSize = 1f;
             var verts = new VertexDefinition[]
             {
-                new (-halfSize, 0f, +halfSize, 0f, 0f),
-                new (+halfSize, 0f, +halfSize, 1f, 0f),
-                new (+halfSize, 0f, -halfSize, 1f, 1f),
-                new (-halfSize, 0f, -halfSize, 0f, 1f),
-                new (-halfSize, 0f, -halfSize, 0f, 1f),
-                new (-halfSize, 0f, -halfSize, 0f, 1f)
+                new (1f, 1f, 0, 1f, 1f),
+                new (-1f, -1f, 0f, 0f, 0f),
+                new (-1, 1f, 0, 0f, 1f),
+                new (-1, -1, 0, 0f, 0f),
+                new (1, 1, 0, 1f, 1f),
+                new (1, -1, 0, 1f, 0f)
             };
 
             var indices = new ushort[]
@@ -53,31 +53,40 @@ namespace ImTool.Scene3D
             IndexBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(sizeof(ushort) * (uint)indices.Length, BufferUsage.IndexBuffer));
             gd.UpdateBuffer(IndexBuffer, 0, indices);
 
-            WorldBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
+            WorldBuffer = gd.ResourceFactory.CreateBuffer(new BufferDescription(80, BufferUsage.UniformBuffer));
 
-            ShaderSet             = CreateShaderSet();
+            ShaderSet = CreateShaderSet();
             PerItemResourceLayout = CreatePerItemResourceLayout();
 
-            ItemResourceSet = gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(PerItemResourceLayout, WorldBuffer));
+            var sampler = Resources.GD.ResourceFactory.CreateSampler(SamplerDescription.Point);
+            //ItemResourceSet = Resources.GD.ResourceFactory.CreateResourceSet(new ResourceSetDescription(PerItemResourceLayout, WorldBuffer,
+                //World.GetVieewports()[0].ActorIdTex, sampler));
 
             var world = Matrix4x4.CreateTranslation(Vector3.Zero);
             gd.UpdateBuffer(WorldBuffer, 0, ref world);
 
             Pipeline = gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
-                BlendStateDescription.SingleAlphaBlend,
-                new DepthStencilStateDescription(true, true, ComparisonKind.LessEqual),
+                BlendStateDescription.SingleOverrideBlend,
+                new DepthStencilStateDescription(false, false, ComparisonKind.Never),
                 RasterizerStateDescription.CullNone,
                 PrimitiveTopology.TriangleList,
                 ShaderSet,
                 new[] { Resources.ProjViewLayout, PerItemResourceLayout },
                 Resources.MainFrameBufferOutputDescription));
+
+            var data = new PerItemData()
+            {
+                Mat = Transform.World,
+                SelectionId = new SelectableID(100, 0)
+            };
+            Resources.GD.UpdateBuffer(WorldBuffer, 0, ref data);
         }
 
         private ShaderSetDescription CreateShaderSet()
         {
-                                                            //ImTool.Shaders.SPIR_V._3D.Grid.GridFrag.glsl
-            var gridVert    = Resources.LoadEmbeddedShader("ImTool.Shaders.SPIR_V._3D.Grid.GridVert.glsl", ShaderStages.Vertex);
-            var gridFrag    = Resources.LoadEmbeddedShader("ImTool.Shaders.SPIR_V._3D.Grid.GridFrag.glsl", ShaderStages.Fragment);
+            //ImTool.Shaders.SPIR_V._3D.Grid.GridFrag.glsl
+            var gridVert = Resources.LoadEmbeddedShader("ImTool.Shaders.SPIR_V._3D.Fullscreen.Outline.vert", ShaderStages.Vertex);
+            var gridFrag = Resources.LoadEmbeddedShader("ImTool.Shaders.SPIR_V._3D.Fullscreen.Outline.frag", ShaderStages.Fragment);
             var gridShaders = World.MainWindow.GetGraphicsDevice().ResourceFactory.CreateFromSpirv(gridVert, gridFrag);
 
             ShaderSetDescription shaderSet = new ShaderSetDescription(
@@ -97,7 +106,9 @@ namespace ImTool.Scene3D
         {
             ResourceLayout worldTextureLayout = World.MainWindow.GetGraphicsDevice().ResourceFactory.CreateResourceLayout(
                 new ResourceLayoutDescription(
-                    new ResourceLayoutElementDescription("WorldBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex)
+                    new ResourceLayoutElementDescription("WorldBuffer", ResourceKind.UniformBuffer, ShaderStages.Vertex),
+                    new ResourceLayoutElementDescription("IdBuffer", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                    new ResourceLayoutElementDescription("DiffusIdBufferSampler", ResourceKind.Sampler, ShaderStages.Fragment)
                     )
                 );
 
@@ -112,11 +123,12 @@ namespace ImTool.Scene3D
             cmdList.SetVertexBuffer(0, VertBuffer);
             cmdList.SetIndexBuffer(IndexBuffer, IndexFormat.UInt16);
 
-            //var world = Matrix4x4.CreateTranslation(Vector3.Zero);
-            //cmdList.UpdateBuffer(WorldBuffer, 0, ref world);
+            var sampler = Resources.GD.ResourceFactory.CreateSampler(SamplerDescription.Point);
+            //ItemResourceSet = Resources.GD.ResourceFactory.CreateResourceSet(new ResourceSetDescription(PerItemResourceLayout, WorldBuffer,
+                //World.GetVieewports()[0].ActorIdTex, sampler));
 
-            cmdList.SetGraphicsResourceSet(1, ItemResourceSet);
-            cmdList.DrawIndexed(6, 1, 0, 0, 0);
+            //cmdList.SetGraphicsResourceSet(1, ItemResourceSet);
+            //cmdList.DrawIndexed(6, 1, 0, 0, 0);
         }
 
         public struct VertexDefinition

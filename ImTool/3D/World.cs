@@ -35,13 +35,13 @@ namespace ImTool.Scene3D
         public CameraActor ActiveCamera;
         public GridActor Grid;
         public DebugShapesActor DebugShapes;
+        public OutlineActor Outlines;
 
         private uint LastActorIdx                         = 0;
         public List<Actor> UpdateableActors               = new();
         public ConcurrentQueue<Actor> PendingAddActors    = new();
         public ConcurrentQueue<Actor> PendingRemoveActors = new();
         public Octree<Actor> Octree                       = new Octree<Actor>(new BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue), 50);
-        public List<ISelectable> Selectables              = new List<ISelectable>();
         public List<Actor> RenderList                     = new();
 
         private List<Actor> SelectedActors = new();
@@ -66,6 +66,7 @@ namespace ImTool.Scene3D
         {
             Grid         = CreateActor<GridActor>();
             DebugShapes  = CreateActor<DebugShapesActor>();
+            Outlines     = CreateActor<OutlineActor>();
 
             SelectionDisplayCube = DebugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(0, 0, 0));
         }
