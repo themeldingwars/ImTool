@@ -13,7 +13,7 @@ using Veldrid;
 
 namespace ImTool
 {
-    public class Scene3dWidget : SceneWidget
+    public class Scene3dWidget : SceneWidget<MainFrameBufferResource>
     {
         protected bool IsExternalWorld;
         protected World WorldScene;
@@ -35,6 +35,8 @@ namespace ImTool
         // Create a scene to render a world and manage the world itself
         public Scene3dWidget(Window win) : base(win)
         {
+            //FrameBufferResource = new MainFrameBufferResource();
+
             IsExternalWorld = false;
             WorldScene = new World(win);
             WorldScene.RegisterViewport(this);
@@ -90,7 +92,7 @@ namespace ImTool
 
                 if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                 {
-                    var selectionId = GetScreenSelectedId();
+                    var selectionId = FrameBufferResource.GetScreenSelectedId();
                     WorldScene.SelectItem(selectionId);
                     Console.WriteLine($"SelectionId: {selectionId.Id}, {selectionId.SubId} ({selectionId.B0}, {selectionId.B1}, {selectionId.B2}, {selectionId.B3})");
                 }
@@ -110,9 +112,10 @@ namespace ImTool
             ImGuizmo.SetDrawlist();
 
             base.Render(dt);
+            CommandList.ClearColorTarget(1, new RgbaFloat(-float.MaxValue, -float.NaN, -float.NaN, -float.NaN));
 
             // Update camera aspect
-            Camera.AspectRatio = (float)FrameBuff.Width / (float)FrameBuff.Height;
+            Camera.AspectRatio = (float)FrameBufferResource.FrameBuffer.Width / (float)FrameBufferResource.FrameBuffer.Height;
 
             HandleInput(dt);
 
@@ -120,7 +123,7 @@ namespace ImTool
                 WorldScene.Update(dt);
 
             var pos = ImGui.GetWindowPos();
-            ImGuizmo.SetRect(pos.X + 4, pos.Y + 30, SceneTex.Width, SceneTex.Height);
+            ImGuizmo.SetRect(pos.X + 4, pos.Y + 30, FrameBufferResource.SceneTex.Width, FrameBufferResource.SceneTex.Height);
             ImGuizmo.Enable(true);
             RenderStats = WorldScene.Render(dt, CommandList, Camera);
             //WorldScene.DrawTransform();
