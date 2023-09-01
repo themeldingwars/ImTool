@@ -52,8 +52,9 @@ namespace ImTool.Scene3D
             {
                 AttachmentStates = new[]
                 {
-                    BlendAttachmentDescription.AlphaBlend,  // color
-                    BlendAttachmentDescription.OverrideBlend,    // id
+                    BlendAttachmentDescription.AlphaBlend,      // color
+                    BlendAttachmentDescription.OverrideBlend,   // id
+                    BlendAttachmentDescription.OverrideBlend    // Selected mask
                 }
             };
 

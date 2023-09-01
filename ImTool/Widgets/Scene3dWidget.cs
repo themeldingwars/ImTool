@@ -32,6 +32,8 @@ namespace ImTool
         public bool ShowDebugInfo = true;
         private RenderStats RenderStats;
 
+        private SelectedOutlinePostProcess OutlinePostProc;
+
         // Create a scene to render a world and manage the world itself
         public Scene3dWidget(Window win) : base(win)
         {
@@ -42,6 +44,9 @@ namespace ImTool
             WorldScene.RegisterViewport(this);
             WorldScene.Init(this);
 
+            OutlinePostProc = new();
+            OutlinePostProc.Init();
+
             ImGuizmo.Enable(true);
         }
 
@@ -50,6 +55,16 @@ namespace ImTool
         {
             IsExternalWorld = true;
             WorldScene = world;
+
+            OutlinePostProc = new();
+            OutlinePostProc.Init();
+            OutlinePostProc.UdpateFBResources(FrameBufferResource);
+        }
+
+        protected override void Init(Vector2 size)
+        {
+            base.Init(size);
+            OutlinePostProc?.UdpateFBResources(FrameBufferResource);
         }
 
         public void SetCamera(CameraActor camera)
@@ -113,6 +128,7 @@ namespace ImTool
 
             base.Render(dt);
             CommandList.ClearColorTarget(1, new RgbaFloat(-float.MaxValue, -float.NaN, -float.NaN, -float.NaN));
+            CommandList.ClearColorTarget(2, new RgbaFloat(0, 0, 0, 0));
 
             // Update camera aspect
             Camera.AspectRatio = (float)FrameBufferResource.FrameBuffer.Width / (float)FrameBufferResource.FrameBuffer.Height;
@@ -126,6 +142,8 @@ namespace ImTool
             ImGuizmo.SetRect(pos.X + 4, pos.Y + 30, FrameBufferResource.SceneTex.Width, FrameBufferResource.SceneTex.Height);
             ImGuizmo.Enable(true);
             RenderStats = WorldScene.Render(dt, CommandList, Camera);
+
+            OutlinePostProc?.Render(CommandList, FrameBufferResource);
             //WorldScene.DrawTransform();
         }
 
