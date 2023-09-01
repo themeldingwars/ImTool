@@ -13,7 +13,7 @@ namespace ImTool.Scene3D
 
         public Matrix4x4 Mat;
         public SelectableID SelectionId;
-        public float _padding1;
+        public uint Flags;
         public float _padding2;
         public float _padding3;
     }

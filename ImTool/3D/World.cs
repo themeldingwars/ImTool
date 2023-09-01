@@ -35,7 +35,6 @@ namespace ImTool.Scene3D
         public CameraActor ActiveCamera;
         public GridActor Grid;
         public DebugShapesActor DebugShapes;
-        public OutlineActor Outlines;
 
         private uint LastActorIdx                         = 0;
         public List<Actor> UpdateableActors               = new();
@@ -66,7 +65,6 @@ namespace ImTool.Scene3D
         {
             Grid         = CreateActor<GridActor>();
             DebugShapes  = CreateActor<DebugShapesActor>();
-            Outlines     = CreateActor<OutlineActor>();
 
             SelectionDisplayCube = DebugShapes.AddCube(new Vector3(0, 0, 0), new Vector3(0, 0, 0));
         }
@@ -107,17 +105,25 @@ namespace ImTool.Scene3D
         {
             if (id.Id != SelectableID.NO_ID_VALUE)
             {
-                SelectedActors.Clear();
+                ClearSelected();
                 var selectedActor = UpdateableActors.FirstOrDefault(x => x.ID == id.Id);
                 if (selectedActor != default)
                 {
                     SelectedActors.Add(selectedActor);
+                    selectedActor.Flags |= ActorFlags.ShowOutline;
+                    selectedActor.OnTransformChanged(true);
                 }
             }
         }
 
         public void ClearSelected()
         {
+            foreach (var actor in SelectedActors)
+            {
+                actor.Flags ^= ActorFlags.ShowOutline;
+                actor.OnTransformChanged(true);
+            }
+
             SelectedActors.Clear();
         }
 
@@ -214,8 +220,8 @@ namespace ImTool.Scene3D
                     }
                 }
 
-                SelectionDisplayCube.FromBoundingBox(SelectedActors[0].BoundingBox);
-                DebugShapes.Recreate();
+                //SelectionDisplayCube.FromBoundingBox(SelectedActors[0].BoundingBox);
+                //DebugShapes.Recreate();
             }
         }
 
@@ -264,8 +270,7 @@ namespace ImTool.Scene3D
 
             if (isSelected)
             {
-                SelectedActors.Clear();
-                SelectedActors.Add(actor);
+                SelectItem(new SelectableID(actor.ID, 0));
             }
         }
     }

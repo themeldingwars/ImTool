@@ -8,6 +8,7 @@ layout(set = 1, binding = 0) uniform WorldBuffer
 {
     mat4 World;
     uint SelectionId;
+    uint Flags;
 };
 
 layout(set = 2, binding = 0) uniform texture2D SurfaceTexture;
@@ -15,6 +16,7 @@ layout(set = 2, binding = 2) uniform sampler SurfaceSampler;
 
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out uint outId;
+layout(location = 2) out uint selectedMask;
 
 void main() {
     //outColor = vec4(1, 1, 1, 1);
@@ -36,4 +38,10 @@ void main() {
     //outColor = vec4(1, 1, 1, 1);
 
     outId = SelectionId;
+    selectedMask = 0;
+
+    if (Flags == 1)
+    {
+        selectedMask = 0xFF;
+    }
 }

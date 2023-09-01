@@ -79,7 +79,7 @@ namespace ImTool
             DrawOverlays(dt);
         }
 
-        private void Init(Vector2 size)
+        protected virtual void Init(Vector2 size)
         {
             if (FrameBufferResource.SceneTex != null)
             {

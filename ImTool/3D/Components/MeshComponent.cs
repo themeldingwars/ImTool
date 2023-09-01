@@ -46,7 +46,8 @@ namespace ImTool.Scene3D.Components
                 var data = new PerItemData()
                 {
                     Mat         = Transform.World * Owner.Transform.World,
-                    SelectionId = new SelectableID(Owner.ID, 0)
+                    SelectionId = new SelectableID(Owner.ID, 0),
+                    Flags       = (uint)((Owner.Flags & ActorFlags.ShowOutline) != 0 ? 1 : 0)
                 };
                 Resources.GD.UpdateBuffer(WorldBuffer, 0, ref data);
             }
