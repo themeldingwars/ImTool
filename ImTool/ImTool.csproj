@@ -132,6 +132,7 @@
       <None Remove="Shaders\SPIR-V\3D\Grid\GridFrag.glsl" />
       <None Remove="Shaders\SPIR-V\3D\Grid\GridVert.glsl" />
       <None Remove="Shaders\SPIR-V\3D\Mesh\MeshFrag.glsl" />
+      <None Remove="Shaders\SPIR-V\3D\Mesh\MeshSolidFrag.glsl" />
       <None Remove="Shaders\SPIR-V\3D\Mesh\MeshVert.glsl" />
     </ItemGroup>
     
@@ -161,6 +162,7 @@
       <EmbeddedResource Include="Shaders\SPIR-V\3D\Grid\GridFrag.glsl" />
       <EmbeddedResource Include="Shaders\SPIR-V\3D\Grid\GridVert.glsl" />
       <EmbeddedResource Include="Shaders\SPIR-V\3D\Mesh\MeshFrag.glsl" />
+      <EmbeddedResource Include="Shaders\SPIR-V\3D\Mesh\MeshSolidFrag.glsl" />
       <EmbeddedResource Include="Shaders\SPIR-V\3D\Mesh\MeshVert.glsl" />
     </ItemGroup>
 </Project>
