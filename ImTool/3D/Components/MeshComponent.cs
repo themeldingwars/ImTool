@@ -58,7 +58,31 @@ namespace ImTool.Scene3D.Components
             if (Model == null)
                 return;
 
+            if (((Owner.Flags & ActorFlags.ShowOutline) != 0))
+            {
+                RenderSoildForOutline(cmdList);
+            }
+
             cmdList.SetPipeline(Model.Pipeline);
+            cmdList.SetGraphicsResourceSet(0, Owner.World.ProjViewSet);
+
+            cmdList.SetVertexBuffer(0, Model.VertBuffer);
+            cmdList.SetIndexBuffer(Model.IndexBuffer, IndexFormat.UInt32);
+
+            cmdList.SetGraphicsResourceSet(1, ItemResourceSet);
+
+            foreach (var meshSection in Model.MeshSections)
+            {
+                if (meshSection.TexResourceSet != null)
+                    cmdList.SetGraphicsResourceSet(2, meshSection.TexResourceSet);
+
+                cmdList.DrawIndexed(meshSection.IndicesLength, 1, meshSection.IndiceStart, 0, 0);
+            }
+        }
+
+        private void RenderSoildForOutline(CommandList cmdList)
+        {
+            cmdList.SetPipeline(Model.OutlinePipeline);
             cmdList.SetGraphicsResourceSet(0, Owner.World.ProjViewSet);
 
             cmdList.SetVertexBuffer(0, Model.VertBuffer);
