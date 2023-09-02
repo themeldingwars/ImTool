@@ -23,6 +23,7 @@ namespace ImTool.Scene3D
         public BoundingBox BoundingBox;
 
         public Pipeline Pipeline;
+        public Pipeline OutlinePipeline;
         private ShaderSetDescription ShaderSet;
         public static ResourceLayout PerItemResourceLayout = null;
         public static ResourceLayout PerSectionResLayout   = null;
@@ -73,6 +74,53 @@ namespace ImTool.Scene3D
                 Resources.MainFrameBufferOutputDescription);
 
             Pipeline = Resources.RequestPipeline(pipelineDesc);
+
+            CreateOutlinePipeline();
+        }
+
+        private void CreateOutlinePipeline()
+        {
+            var vert    = Resources.LoadEmbeddedShader("ImTool.Shaders.SPIR_V._3D.Mesh.MeshVert.glsl", ShaderStages.Vertex);
+            var frag    = Resources.LoadEmbeddedShader("ImTool.Shaders.SPIR_V._3D.Mesh.MeshSolidFrag.glsl", ShaderStages.Fragment);
+            var shaders = Resources.GD.ResourceFactory.CreateFromSpirv(vert, frag);
+
+            ShaderSetDescription shaderSet = new ShaderSetDescription(
+                new[]
+                {
+                    // SimpleVertexDefinition
+                    new VertexLayoutDescription(
+                        new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
+                        new VertexElementDescription("Uvs", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                        new VertexElementDescription("Norms", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3)
+                        )
+                },
+                shaders);
+
+            var blendState = new BlendStateDescription()
+            {
+                AttachmentStates = new[]
+                {
+                    BlendAttachmentDescription.AlphaBlend,      // color
+                    BlendAttachmentDescription.OverrideBlend,   // id
+                    BlendAttachmentDescription.OverrideBlend    // Selected mask
+                }
+            };
+
+            var depthStencil = new DepthStencilStateDescription(true, false, ComparisonKind.Always)
+            {
+                StencilWriteMask = 0xFF
+            };
+
+            var pipelineDesc = new GraphicsPipelineDescription(
+                blendState,
+                depthStencil,
+                new RasterizerStateDescription(FaceCullMode.Front, PolygonFillMode.Solid, FrontFace.CounterClockwise, false, false),
+                PrimitiveTopology.TriangleList,
+                shaderSet,
+                new[] { Resources.ProjViewLayout, PerItemResourceLayout, PerSectionResLayout },
+                Resources.MainFrameBufferOutputDescription);
+
+            OutlinePipeline = Resources.RequestPipeline(pipelineDesc);
         }
 
         private ShaderSetDescription CreateShaderSet(ResourceFactory rf)

@@ -24,7 +24,7 @@ namespace ImTool.Scene3D
             base.Init(world);
 
             CreateResources();
-            RenderOrderBoost = float.MinValue - 100;
+            RenderOrderBoost = float.MaxValue - 100;
             BoundingBox = new Veldrid.Utilities.BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue);
         }
 

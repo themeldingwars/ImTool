@@ -42,6 +42,7 @@ namespace ImTool.Scene3D
         public ConcurrentQueue<Actor> PendingRemoveActors = new();
         public Octree<Actor> Octree                       = new Octree<Actor>(new BoundingBox(Vector3.One * float.MinValue, Vector3.One * float.MaxValue), 50);
         public List<Actor> RenderList                     = new();
+        private ActorSortComparer ActorSorterComper       = new ActorSortComparer();
 
         private List<Actor> SelectedActors = new();
 
@@ -241,7 +242,8 @@ namespace ImTool.Scene3D
                 }
             }
 
-            RenderList.Sort();
+            ActorSorterComper.CameraPosition = camera.Transform.Position;
+            RenderList.Sort(ActorSorterComper);
         }
 
         public void DrawHierarchyExplorer()

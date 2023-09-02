@@ -24,7 +24,7 @@ namespace ImTool.Scene3D
         public Transform Transform = new();
         public BoundingBox BoundingBox;
         public DebugShapesComp.Shape BoundsDebugHandle;
-        public float RenderOrderBoost = 0;
+        public float RenderOrderBoost = 1;
         public uint ID;
 
         public List<Component> Components = new();
