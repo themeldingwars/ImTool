@@ -23,6 +23,7 @@ namespace ImTool
         private Updater updater;
         public delegate void ExitDelegate();
         public delegate void GlobalMenuBarOverrideDelegate();
+        public delegate void SubmitUIExtensionDelegate();
 
         public GlobalMenuBarOverrideDelegate OnSubmitGlobalMenuBarOverride;
 
@@ -62,6 +63,7 @@ namespace ImTool
         private Rect.Edge dockingEdge;
         
         public ExitDelegate OnExit;
+        public SubmitUIExtensionDelegate OnSubmitUIExtension;
 
         public string Title;
 
@@ -257,6 +259,8 @@ namespace ImTool
                     // here
                 }
             }
+
+            OnSubmitUIExtension?.Invoke();
         }
 
         private void BeginMainMenuBar()
