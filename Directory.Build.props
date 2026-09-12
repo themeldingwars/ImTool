@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <Company>The Melding Wars</Company>
+    <Product>ImTool</Product>
+    <Copyright>Copyright © 2021-2026 The Melding Wars</Copyright>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <RepositoryUrl>https://github.com/themeldingwars/ImTool</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+</Project>

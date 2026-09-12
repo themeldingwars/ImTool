@@ -7,11 +7,9 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
         <Title>ImTool Demo</Title>
-        <Company>The Melding Wars</Company>
         <Authors>freakbyte</Authors>
         <Version>1.0.0</Version>
         <AssemblyVersion>1.0.1.8</AssemblyVersion>
-        <RepositoryUrl>https://github.com/themeldingwars/ImTool</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>

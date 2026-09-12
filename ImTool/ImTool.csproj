@@ -6,21 +6,28 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
         <Title>ImTool</Title>
-        <Company>The Melding Wars</Company>
         <Authors>freakbyte</Authors>
         <RuntimeIdentifiers>win-x86;win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
-        <RepositoryUrl>https://github.com/themeldingwars/ImTool</RepositoryUrl>
 
         <PackageId>ImTool</PackageId>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Description>Tool UI based on ImGui.NET</Description>
         <PackageProjectUrl>https://github.com/themeldingwars/ImTool</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/themeldingwars/ImTool/blob/master/LICENSE</PackageLicenseUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>imgui;tool;ui;dear-imgui;veldrid</PackageTags>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <DefineConstants>$(DefineConstants);VALIDATE_USAGE</DefineConstants>
     </PropertyGroup>
     
     <ItemGroup>
         <Folder Include="Shaders" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
     <ItemGroup>
