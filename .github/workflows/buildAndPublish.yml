@@ -2,35 +2,74 @@ name: Build and publish
 
 on:
   push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUGET_DIRECTORY: ${{ github.workspace }}/nuget
 
 jobs:
   build:
+    name: ${{ matrix.platform.name }} ${{ matrix.dotnet.name }}
+    runs-on: ${{ matrix.platform.os }}
 
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+        - { name: Linux, os: ubuntu-24.04 }
+        - { name: Windows, os: windows-2025-vs2026 }
+        dotnet:
+        - { name: .NET 7, version: '7.0.x' }
 
     steps:
-    - name: Checkout repository and submodules
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-        submodules: recursive
-        
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 7.0.x
-        
-    - name: Restore dependencies
-      run: dotnet restore
-      
-    - name: Build ImTool
-      run: dotnet build -c Release ImTool/ImTool.csproj
-      
-    - name: Pack ImTool
-      run: dotnet pack -c Release ImTool/ImTool.csproj -o nupkgs
-          
-    - name: Push ImTool to nuget.org
-      run: dotnet nuget push nupkgs/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.TMW_NUGET }} --skip-duplicate
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup ${{ matrix.dotnet.name }} SDK
+        id: setup-dotnet
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ matrix.dotnet.version }}
+      - name: Enforce SDK Version
+        env:
+          DOTNET_VERSION: ${{ steps.setup-dotnet.outputs.dotnet-version }}
+        run: dotnet new globaljson --sdk-version "$DOTNET_VERSION" --force
+      - name: Verify SDK Installation
+        run: dotnet --info
+
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build ImTool
+        run: dotnet build --no-restore -c Release ImTool/ImTool.csproj
+
+      - name: Pack ImTool
+        run: dotnet pack --no-build -c Release ImTool/ImTool.csproj --output "$NUGET_DIRECTORY"
+
+      - name: NuGet Login
+        if: matrix.platform.name == 'Linux' && github.ref == 'refs/heads/master'
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: TMW
+      - name: Publish ImTool NuGet
+        if: matrix.platform.name == 'Linux' && github.ref == 'refs/heads/master'
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "$NUGET_DIRECTORY"/*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
