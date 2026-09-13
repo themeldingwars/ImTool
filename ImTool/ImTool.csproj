@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <LangVersion>11</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
@@ -80,7 +80,7 @@
     
     <ItemGroup>
         <Content Include="..\ImTool.targets">
-            <PackagePath>build\net7.0\ImTool.targets</PackagePath>
+            <PackagePath>build\net8.0\ImTool.targets</PackagePath>
             <Pack>true</Pack>
         </Content>
     </ItemGroup>
