@@ -137,7 +137,7 @@
       <PackageReference Include="Vk" Version="1.0.25" />
       <PackageReference Include="Vortice.D3DCompiler" Version="2.1.0" />
       <PackageReference Include="Vortice.Direct3D11" Version="2.1.0" />
-      <PackageReference Include="Nerdbank.GitVersioning" Version="3.6.146">
+      <PackageReference Include="Nerdbank.GitVersioning" Version="3.10.94">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
