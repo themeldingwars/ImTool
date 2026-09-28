@@ -3,5 +3,10 @@
   "version": "1.4",
   "publicReleaseRefSpec": [
     "^refs/heads/master$"
+  ],
+  "pathFilters": [
+    "./ImTool",
+    "./ImTool.targets",
+    "./Directory.Build.props"
   ]
 }
