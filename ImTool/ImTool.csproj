@@ -132,7 +132,7 @@
       <PackageReference Include="NativeLibraryLoader" Version="1.0.13" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
       <PackageReference Include="Octokit" Version="5.0.0" />
-      <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="2.1.11" />
       <PackageReference Include="System.IO.Hashing" Version="10.0.12" />
       <PackageReference Include="Vk" Version="1.0.25" />
       <PackageReference Include="Vortice.D3DCompiler" Version="2.1.0" />
