@@ -135,7 +135,7 @@
       <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
       <PackageReference Include="System.IO.Hashing" Version="10.0.12" />
       <PackageReference Include="Vk" Version="1.0.25" />
-      <PackageReference Include="Vortice.D3DCompiler" Version="2.1.0" />
+      <PackageReference Include="Vortice.D3DCompiler" Version="3.8.3" />
       <PackageReference Include="Vortice.Direct3D11" Version="2.1.0" />
       <PackageReference Include="Nerdbank.GitVersioning" Version="3.10.94">
         <PrivateAssets>all</PrivateAssets>
