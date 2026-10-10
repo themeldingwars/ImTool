@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Veldrid.ImageSharp;
 using Veldrid;
 using static ImTool.Scene3D.Components.MeshComponent;
 using System.Runtime.InteropServices;
