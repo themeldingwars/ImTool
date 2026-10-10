@@ -5,7 +5,6 @@ using System.Reflection;
 using ImGuiNET;
 using ImTool;
 using ImTool.SDL;
-using Veldrid.ImageSharp;
 
 namespace Demo
 {
@@ -121,12 +120,12 @@ namespace Demo
         // load gets called when the tab gets added to the window
         // this is a good time to load resources, images etc needed by the tab
 
-        private ImageSharpTexture testImage;
+        private ImageTexture testImage;
         public override void Load()
         {
             // image test
             Stream resFilestream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"Demo.Images.Merch.png");
-            testImage = new ImageSharpTexture(resFilestream);
+            testImage = new ImageTexture(resFilestream);
         }
 
         // unload gets called when the tab is removed from the window

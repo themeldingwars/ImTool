@@ -98,45 +98,16 @@
         <Compile Include="Lib\ImGui.Net\src\ImPlot.NET\**\*.cs">
             <Link>Lib\ImGui\ImPlot.NET\%(RecursiveDir)/%(FileName)%(Extension)</Link>
         </Compile>
-
-        <Compile Include="Lib\Veldrid\src\Veldrid.MetalBindings\**\*.cs">
-            <Link>Lib\Veldrid\Veldrid.MetalBindings\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        </Compile>
-        <Compile Include="Lib\Veldrid\src\Veldrid.OpenGLBindings\**\*.cs">
-            <Link>Lib\Veldrid\Veldrid.OpenGLBindings\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        </Compile>
-        <Compile Include="Lib\Veldrid\src\Veldrid\**\*.cs">
-            <Link>Lib\Veldrid\Veldrid\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        </Compile>
-        <Compile Include="Lib\Veldrid\src\Veldrid.ImageSharp\**\*.cs">
-            <Link>Lib\Veldrid\Veldrid.ImageSharp\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        </Compile>
-        <Compile Include="Lib\Veldrid\src\Veldrid.ImGui\**\*.cs">
-            <Link>Lib\Veldrid\Veldrid.ImGui\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        </Compile>
-        <Compile Include="Lib\Veldrid\src\Veldrid.RenderDoc\**\*.cs">
-            <Link>Lib\Veldrid\Veldrid.RenderDoc\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        </Compile>
-        <Compile Include="Lib\Veldrid\src\Veldrid.SDL2\**\*.cs" Exclude="Lib\Veldrid\src\Veldrid.SDL2\**\HashHelper.cs">
-            <Link>Lib\Veldrid\Veldrid.SDL2\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        </Compile>
-        <Compile Include="Lib\Veldrid\src\Veldrid.StartupUtilities\**\*.cs">
-            <Link>Lib\Veldrid\Veldrid.StartupUtilities\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        </Compile>
-        <Compile Include="Lib\Veldrid\src\Veldrid.Utilities\**\*.cs">
-            <Link>Lib\Veldrid\Veldrid.Utilities\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        </Compile>
     </ItemGroup>
     
     <ItemGroup>
-      <PackageReference Include="NativeLibraryLoader" Version="1.0.13" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
       <PackageReference Include="Octokit" Version="5.0.0" />
-      <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+      <PackageReference Include="StbImageSharp" Version="2.30.16" />
       <PackageReference Include="System.IO.Hashing" Version="10.0.12" />
-      <PackageReference Include="Vk" Version="1.0.25" />
-      <PackageReference Include="Vortice.D3DCompiler" Version="2.1.0" />
-      <PackageReference Include="Vortice.Direct3D11" Version="2.1.0" />
+      <PackageReference Include="Veldrid" Version="4.9.0" />
+      <PackageReference Include="Veldrid.SDL2" Version="4.9.0" />
+      <PackageReference Include="Veldrid.StartupUtilities" Version="4.9.0" />
       <PackageReference Include="Nerdbank.GitVersioning" Version="3.10.94">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

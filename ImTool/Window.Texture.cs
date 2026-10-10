@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using Veldrid;
-using Veldrid.ImageSharp;
 
 namespace ImTool
 {
     public partial class Window
     {
-        private Dictionary<ImageSharpTexture, Texture> textures = new();
+        private Dictionary<ImageTexture, Texture> textures = new();
 
-        public IntPtr GetOrCreateTextureBinding(ImageSharpTexture texture)
+        public IntPtr GetOrCreateTextureBinding(ImageTexture texture)
         {
             Texture tex;
             if (!textures.TryGetValue(texture, out tex))
@@ -20,7 +19,7 @@ namespace ImTool
             return controller.GetOrCreateImGuiBinding(graphicsDevice.ResourceFactory, tex);
         }
 
-        public void DisposeTextureBinding(ImageSharpTexture texture)
+        public void DisposeTextureBinding(ImageTexture texture)
         {
             if (textures.TryGetValue(texture, out Texture tex))
             {

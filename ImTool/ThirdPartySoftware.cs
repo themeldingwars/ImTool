@@ -80,10 +80,10 @@ public static class ThirdPartySoftware
         
         new ThirdPartySoftwareInfo
         {
-            Name = "ImageSharp",
-            ProjectUrl = "https://github.com/SixLabors/ImageSharp",
-            License = "Apache 2.0",
-            LicenseUrl = "https://github.com/SixLabors/ImageSharp/blob/main/LICENSE"
+            Name = "StbImageSharp",
+            ProjectUrl = "https://github.com/StbSharp/StbImageSharp",
+            License = "Public Domain or MIT",
+            LicenseUrl = "https://github.com/StbSharp/StbImageSharp#license"
         },
         
         new ThirdPartySoftwareInfo
